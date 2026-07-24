@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resume Mirror｜職務経歴書をきれいに</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- ==========================================================
+     Resume Mirror (BYOAI版)
+     ブロック一覧 ※修正時は「BLOCK n」で検索
+       BLOCK 1 : 設定・定数（モデル名など）
+       BLOCK 2 : スタイル
+       BLOCK 3 : APIキー設定画面（STEP 0）＋取得手順の文言
+       BLOCK 4 : AI呼び出し（Anthropic直接／プロンプト）
+       BLOCK 5 : 入力ステップの画面
+       BLOCK 6 : 職務経歴書の組み立て
+       BLOCK 7 : 画面制御・共通処理
+     ========================================================== -->
+
+<style>
+/* ============ BLOCK 2: スタイル ============ */
+  :root{
+    --navy:#1E2761; --ink:#141A3C; --ice:#CADCFC; --ice-soft:#E9F0FD;
+    --paper:#FBFBFD; --line:#DDE3F0; --muted:#6B7280; --accent:#2E8B57; --warn:#B23A48;
+    --shadow:0 6px 24px rgba(20,26,60,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans JP",system-ui,sans-serif;background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.75}
+  .app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+  header{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:14px 20px 12px}
+  .brand{display:flex;align-items:center;gap:9px;font-family:"Zen Kaku Gothic New";font-weight:900;font-size:17px}
+  .brand .mk{width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#fff 0 48%,var(--ice) 52% 100%)}
+  .steplabel{font-size:12px;color:var(--ice);margin-top:9px;display:flex;justify-content:space-between;align-items:baseline}
+  .steplabel b{font-family:"Zen Kaku Gothic New";font-weight:700;color:#fff;font-size:13px}
+  .bar{height:4px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:7px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--ice),#fff);transition:width .35s}
+
+  main{flex:1;padding:22px 20px 130px}
+  .h2{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:22px;line-height:1.35;margin-bottom:4px}
+  .lede{font-size:13px;color:var(--muted);margin-bottom:20px}
+
+  label.f{display:block;margin-bottom:15px}
+  label.f>span{display:block;font-size:12.5px;font-weight:700;color:var(--navy);margin-bottom:6px}
+  .req{color:var(--warn);font-size:11px;margin-left:3px}
+  input,textarea,select{width:100%;font-family:inherit;font-size:16px;color:var(--ink);background:#fff;
+    border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px var(--ice-soft)}
+  textarea{resize:vertical;min-height:96px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+  .card{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .cardhead b{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;color:var(--navy)}
+  .del{background:none;border:none;color:var(--warn);font-size:12px;font-weight:700;cursor:pointer}
+  .addbtn{width:100%;background:var(--ice-soft);color:var(--navy);border:1.5px dashed var(--navy);
+    border-radius:12px;padding:13px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;cursor:pointer}
+
+  .ai{display:inline-flex;align-items:center;gap:6px;margin-top:8px;background:var(--navy);color:#fff;border:none;
+    border-radius:10px;padding:10px 15px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;cursor:pointer}
+  .ai:disabled{opacity:.5}
+  .sp{width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .ok{font-size:12px;color:var(--accent);margin-top:7px;font-weight:700}
+  .ng{font-size:12px;color:var(--warn);margin-top:7px;font-weight:500;line-height:1.6}
+
+  .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;max-width:560px;margin:0 auto;display:flex;gap:10px;
+    padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:rgba(251,251,253,.94);
+    backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+  .nav button{flex:1;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15px;border-radius:13px;padding:14px;border:none;cursor:pointer}
+  .back{background:#fff;color:var(--navy);border:1.5px solid var(--line)!important;flex:0 0 34%}
+  .next{background:var(--navy);color:#fff}
+  .next:disabled{opacity:.45}
+
+  /* --- 手順（アコーディオン） --- */
+  details.guide{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:0;margin-bottom:16px;overflow:hidden;box-shadow:var(--shadow)}
+  details.guide>summary{list-style:none;cursor:pointer;padding:15px 17px;font-family:"Zen Kaku Gothic New";
+    font-weight:700;font-size:14.5px;color:var(--navy);background:var(--ice-soft);display:flex;justify-content:space-between;align-items:center}
+  details.guide>summary::-webkit-details-marker{display:none}
+  details.guide>summary::after{content:"＋";font-size:17px;color:var(--navy)}
+  details.guide[open]>summary::after{content:"−"}
+  .gbody{padding:16px 17px 18px;font-size:13.5px}
+  .gstep{display:flex;gap:11px;margin-bottom:15px}
+  .gnum{flex:0 0 25px;height:25px;border-radius:50%;background:var(--navy);color:#fff;font-family:"Zen Kaku Gothic New";
+    font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .gtxt b{display:block;font-family:"Zen Kaku Gothic New";font-size:14px;color:var(--navy);margin-bottom:2px}
+  .gtxt small{display:block;font-size:12.5px;color:#444;line-height:1.75}
+  .gtxt a{color:var(--navy);font-weight:700;word-break:break-all}
+  .note{background:var(--ice-soft);border-radius:11px;padding:12px 14px;font-size:12.5px;margin-top:6px;line-height:1.75}
+  .note b{font-family:"Zen Kaku Gothic New";color:var(--navy)}
+  .safe{border:1.5px solid var(--accent);border-radius:12px;padding:13px 15px;font-size:12.5px;line-height:1.75;background:#F1F8F3;margin-bottom:16px}
+  .safe b{font-family:"Zen Kaku Gothic New";color:var(--accent);display:block;margin-bottom:3px}
+  .faq{border-top:1px solid var(--line);padding-top:12px;margin-top:6px}
+  .faq dt{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;color:var(--navy);margin-top:11px}
+  .faq dd{font-size:12.5px;color:#444;margin-top:2px;line-height:1.7}
+
+  .doc{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:26px 22px;font-size:13px;line-height:1.85}
+  .doc h1{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:20px;color:var(--navy);letter-spacing:.04em;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:6px}
+  .doc .meta{font-size:11.5px;color:var(--muted);text-align:right;margin-bottom:16px}
+  .doc h2{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;color:var(--navy);margin:18px 0 7px;padding-left:9px;border-left:4px solid var(--ice)}
+  .doc .exp{margin-bottom:14px}
+  .doc .exp .co{font-weight:700;font-size:13.5px}
+  .doc .exp .rl{font-size:12px;color:var(--muted);margin-bottom:3px}
+  .doc .skill{display:flex;justify-content:space-between;border-bottom:1px dotted var(--line);padding:4px 0}
+  .doc p,.doc .ac{white-space:pre-wrap}
+
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  .toolbar button{flex:1;min-width:135px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;
+    border-radius:11px;padding:12px;cursor:pointer;border:1.5px solid var(--navy);background:#fff;color:var(--navy)}
+  .toolbar button.primary{background:var(--navy);color:#fff}
+
+  @media print{header,.nav,.toolbar,.safe,details.guide,.hint{display:none!important}
+    main{padding:0}.doc{border:none;box-shadow:none;padding:0}body{background:#fff}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><span class="mk"></span>Resume Mirror</div>
+    <div class="steplabel"><b id="stepName">はじめの設定</b><span id="stepCount">STEP 0 / 6</span></div>
+    <div class="bar"><i id="barFill" style="width:8%"></i></div>
+  </header>
+  <main id="main"></main>
+  <nav class="nav">
+    <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
+    <button class="next" id="nextBtn" onclick="go(1)">次へ</button>
+  </nav>
+</div>
+
+<script>
+/* ============ BLOCK 1: 設定・定数 ============ */
+const MODELS = {
+  balanced: { id:"claude-sonnet-5",            label:"標準（おすすめ）" },
+  cheap:    { id:"claude-haiku-4-5-20251001",  label:"軽量（費用を抑える）" }
+};
+const API_URL = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_VERSION = "2023-06-01";
+
+/* 入力データ（この画面を閉じると消えます。保存しません） */
+const S = {
+  apiKey:"", model:"balanced", keyVerified:false,
+  profile:{ lastName:"", firstName:"", kana:"", email:"", tel:"" },
+  skills:[{name:"",years:"",level:""}],
+  jobs:[{company:"",role:"",from:"",to:"",achv:""}],
+  summaryValues:"", summary:"", pr:"",
+  date:new Date().toISOString().slice(0,10)
+};
+let step = 0;
+const STEPS = ["はじめの設定","プロフィール","スキル・経験","職務経歴","職務要約","自己PR","確認・出力"];
+const TOTAL = STEPS.length;
+
+/* ============ BLOCK 4: AI呼び出し（Anthropic直接） ============ */
+async function callAI(prompt, maxTokens=1200){
+  if(!S.apiKey) throw new Error("NOKEY");
+  const res = await fetch(API_URL,{
+    method:"POST",
+    headers:{
+      "content-type":"application/json",
+      "x-api-key":S.apiKey,
+      "anthropic-version":ANTHROPIC_VERSION,
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
+    body:JSON.stringify({
+      model:MODELS[S.model].id,
+      max_tokens:maxTokens,
+      messages:[{role:"user",content:prompt}]
+    })
+  });
+  if(!res.ok){
+    const e = new Error("APIERR"); e.status = res.status;
+    try{ const j = await res.json(); e.detail = j?.error?.message || ""; }catch(_){}
+    throw e;
+  }
+  const data = await res.json();
+  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+}
+
+/* エラーを、利用者にわかる日本語へ */
+function humanError(err){
+  if(err.message==="NOKEY") return "APIキーが設定されていません。STEP 0 に戻って設定してください。";
+  const s = err.status;
+  if(s===401) return "APIキーが正しくないようです。キーの文字列に余分な空白が入っていないか確認し、STEP 0 で入れ直してください。";
+  if(s===400 && /credit|balance/i.test(err.detail||"")) return "Anthropic側の残高が不足しているようです。Console の Billing で残高を追加してください。";
+  if(s===429) return "短時間に呼び出しすぎたか、利用上限に達しました。1分ほど待ってから、もう一度お試しください。";
+  if(s===529 || s===503) return "Anthropic側が混雑しています。少し時間をおいて再度お試しください。";
+  if(s>=500) return "AI側で一時的な問題が起きています。少し待って再度お試しください。";
+  return "AIの呼び出しに失敗しました。通信環境を確認して、もう一度お試しください。";
+}
+
+/* ============ BLOCK 3: APIキー設定画面（STEP 0） ============ */
+function viewKey(){ return `
+  <div class="h2">はじめに、AIの設定をします</div>
+  <div class="lede">このツールは、あなた自身のAIアカウント（Anthropic）を使って動きます。5分ほどで準備できます。</div>
+
+  <div class="safe">
+    <b>あなたのキーは、どこにも送られません</b>
+    入力したAPIキーは、あなたのスマホ・PCのブラウザの中だけで使われ、Anthropic以外には送信されません。当サービスにサーバーはなく、キーも入力内容も一切保存しません。画面を閉じれば消えます。
+  </div>
+
+  <details class="guide" ${S.keyVerified?"":"open"}>
+    <summary>APIキーの取り方（初めての方はこちら）</summary>
+    <div class="gbody">
+
+      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
+        <b>Anthropic Console を開く</b>
+        <small><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> を開き、アカウントを作ります。Googleアカウントでもサインアップできます。<br>
+        ※ふだん使っているClaudeアプリとは別に、開発者用の登録が必要です。</small>
+      </div></div>
+
+      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
+        <b>残高（クレジット）を追加する</b>
+        <small>左メニューの「Billing（お支払い）」を開き、クレジットカードを登録して残高を追加します。最低金額（数ドル程度）で十分です。<br>
+        ※残高がないとAIは動きません。ここが一番つまずきやすい箇所です。</small>
+      </div></div>
+
+      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
+        <b>APIキーを作る</b>
+        <small>左メニューの「API Keys」→「Create Key」。名前は何でも構いません（例：resume）。</small>
+      </div></div>
+
+      <div class="gstep"><div class="gnum">4</div><div class="gtxt">
+        <b>キーをコピーする</b>
+        <small><code>sk-ant-</code> で始まる長い文字列が表示されます。<b>この画面を閉じると二度と表示されません。</b>必ずその場でコピーしてください。（閉じてしまったら、作り直せば大丈夫です）</small>
+      </div></div>
+
+      <div class="gstep"><div class="gnum">5</div><div class="gtxt">
+        <b>下の欄に貼り付けて、接続テスト</b>
+        <small>貼り付けたら「接続テスト」を押してください。成功すれば準備完了です。</small>
+      </div></div>
+
+      <div class="note">
+        <b>費用の目安</b><br>
+        文章の生成1回につき、おおよそ数円程度です（選ぶモデルと文量によります）。職務経歴書を1通仕上げても、数十円に収まるのが一般的です。正確な料金は Anthropic Console の料金ページでご確認ください。残高を使い切ればそれ以上は課金されません。
+      </div>
+
+      <dl class="faq">
+        <dt>Claudeの月額プランに入っていれば使えますか？</dt>
+        <dd>いいえ。月額プラン（Claude Pro等）とAPIの残高は別会計です。APIを使うには、Console側で残高の追加が必要です。</dd>
+        <dt>キーを他人に見られませんか？</dt>
+        <dd>キーはあなたのブラウザ内にのみ置かれ、Anthropic以外へは送信されません。共用端末を使う場合は、終わったらタブを閉じてください（保存はされません）。</dd>
+        <dt>使い終わったキーはどうすれば？</dt>
+        <dd>気になる場合は、Console の API Keys からいつでも削除（Revoke）できます。</dd>
+      </dl>
+    </div>
+  </details>
+
+  <label class="f"><span>APIキー<i class="req">必須</i></span>
+    <input id="keyInput" type="password" autocomplete="off" spellcheck="false"
+      value="${esc(S.apiKey)}" oninput="S.apiKey=this.value.trim();S.keyVerified=false;clearMsg('keyMsg')"
+      placeholder="sk-ant-... で始まる文字列を貼り付け">
+    <div class="hint">入力は保存されません。画面を閉じると消えます。</div>
+  </label>
+
+  <label class="f"><span>使用するモデル</span>
+    <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
+      ${Object.entries(MODELS).map(([k,v])=>`<option value="${k}" ${S.model===k?"selected":""}>${v.label}</option>`).join("")}
+    </select>
+    <div class="hint">迷ったら「標準」のままで大丈夫です。費用を抑えたい場合は「軽量」を選んでください。</div>
+  </label>
+
+  <button class="ai" onclick="testKey(this)">接続テスト</button>
+  <div id="keyMsg">${S.keyVerified?'<div class="ok">✓ 接続できました。「次へ」に進んでください。</div>':""}</div>
+`;}
+
+async function testKey(btn){
+  const zone=document.getElementById("keyMsg");
+  if(!S.apiKey){ zone.innerHTML=`<div class="ng">APIキーを貼り付けてください。</div>`; return; }
+  setLoading(btn,true,"確認中…");
+  try{
+    await callAI("「準備完了」とだけ返してください。", 20);
+    S.keyVerified=true;
+    zone.innerHTML=`<div class="ok">✓ 接続できました。「次へ」に進んでください。</div>`;
+  }catch(err){
+    S.keyVerified=false;
+    zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`;
+  }
+  setLoading(btn,false);
+  updateNav();
+}
+
+/* ============ BLOCK 5: 入力ステップの画面 ============ */
+const VIEWS = [
+  viewKey,
+
+  /* 1 プロフィール */ ()=>`
+    <div class="h2">プロフィール</div>
+    <div class="lede">基本の連絡先だけ。住所や生年月日は必要ありません。</div>
+    <div class="row2">
+      <label class="f"><span>姓<i class="req">必須</i></span>
+        <input value="${esc(S.profile.lastName)}" oninput="S.profile.lastName=this.value" placeholder="履歴書"></label>
+      <label class="f"><span>名<i class="req">必須</i></span>
+        <input value="${esc(S.profile.firstName)}" oninput="S.profile.firstName=this.value" placeholder="書太郎"></label>
+    </div>
+    <label class="f"><span>ふりがな</span>
+      <input value="${esc(S.profile.kana)}" oninput="S.profile.kana=this.value" placeholder="りれきしょ かくたろう"></label>
+    <label class="f"><span>メールアドレス</span>
+      <input type="email" inputmode="email" value="${esc(S.profile.email)}" oninput="S.profile.email=this.value" placeholder="you@example.com"></label>
+    <label class="f"><span>電話番号</span>
+      <input type="tel" inputmode="tel" value="${esc(S.profile.tel)}" oninput="S.profile.tel=this.value" placeholder="090-1234-5678"></label>`,
+
+  /* 2 スキル */ ()=>`
+    <div class="h2">スキル・経験</div>
+    <div class="lede">応募先にアピールできるスキル・資格・経験を。あとから追加できます。</div>
+    ${S.skills.map((s,i)=>`
+      <div class="card">
+        <div class="cardhead"><b>スキル ${i+1}</b>${S.skills.length>1?`<button class="del" onclick="delItem('skills',${i})">削除</button>`:""}</div>
+        <label class="f"><span>名称</span>
+          <input value="${esc(s.name)}" oninput="S.skills[${i}].name=this.value" placeholder="例：ServiceNow 運用"></label>
+        <div class="row2">
+          <label class="f"><span>経験年数</span>
+            <input value="${esc(s.years)}" oninput="S.skills[${i}].years=this.value" placeholder="3年"></label>
+          <label class="f"><span>習熟度</span>
+            <input value="${esc(s.level)}" oninput="S.skills[${i}].level=this.value" placeholder="実務主導レベル"></label>
+        </div>
+      </div>`).join("")}
+    <button class="addbtn" onclick="addItem('skills',{name:'',years:'',level:''})">＋ スキルを追加</button>`,
+
+  /* 3 職務経歴 */ ()=>`
+    <div class="h2">職務経歴</div>
+    <div class="lede">会社ごとに、担当と実績を。実績は「AIで整える」で読みやすく直せます。</div>
+    ${S.jobs.map((j,i)=>`
+      <div class="card">
+        <div class="cardhead"><b>職歴 ${i+1}</b>${S.jobs.length>1?`<button class="del" onclick="delItem('jobs',${i})">削除</button>`:""}</div>
+        <label class="f"><span>会社名</span>
+          <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
+        <label class="f"><span>ロール（職務名／部署／担当範囲）</span>
+          <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="ITサポート リード / 情報システム部"></label>
+        <div class="row2">
+          <label class="f"><span>開始</span>
+            <input value="${esc(j.from)}" oninput="S.jobs[${i}].from=this.value" placeholder="2022年4月"></label>
+          <label class="f"><span>終了</span>
+            <input value="${esc(j.to)}" oninput="S.jobs[${i}].to=this.value" placeholder="現在"></label>
+        </div>
+        <label class="f"><span>主な実績</span>
+          <textarea id="achv${i}" oninput="S.jobs[${i}].achv=this.value"
+            placeholder="担当した業務や成果を、思い出せる範囲で。箇条書きでも文章でも構いません。">${esc(j.achv)}</textarea></label>
+        <button class="ai" onclick="brushAchv(${i},this)">✦ この実績をAIで整える</button>
+        <div id="aiz${i}"></div>
+      </div>`).join("")}
+    <button class="addbtn" onclick="addItem('jobs',{company:'',role:'',from:'',to:'',achv:''})">＋ 職歴を追加</button>`,
+
+  /* 4 職務要約 */ ()=>`
+    <div class="h2">職務要約</div>
+    <div class="lede">これまでの職務を100〜150字で。まず「大切にしてきたこと」を3つの言葉で。</div>
+    <label class="f"><span>大切にしてきたこと（3つ、読点で区切る）</span>
+      <input value="${esc(S.summaryValues)}" oninput="S.summaryValues=this.value" placeholder="例：仕組み化、可視化、継続的改善"></label>
+    <button class="ai" onclick="genSummary(this)">✦ 職務要約をAIで作成</button>
+    <div id="aizSum"></div>
+    <label class="f" style="margin-top:14px"><span>職務要約（編集できます）</span>
+      <textarea id="summaryBox" oninput="S.summary=this.value" placeholder="AIで作成すると、ここに下書きが入ります。">${esc(S.summary)}</textarea></label>
+    <div class="note"><b>ここが大事です。</b>AIが作るのはあくまで下書きです。必ず読み返し、<b>あなた自身の言葉に直してください。</b>面接では、自分の言葉で語れることが何より効きます。</div>`,
+
+  /* 5 自己PR */ ()=>`
+    <div class="h2">自己PR</div>
+    <div class="lede">スキル・職歴・要約から、AIが下書きします。</div>
+    <button class="ai" onclick="genPR(this)">✦ 自己PRをAIで作成</button>
+    <div id="aizPR"></div>
+    <label class="f" style="margin-top:14px"><span>自己PR（編集できます）</span>
+      <textarea id="prBox" style="min-height:180px" oninput="S.pr=this.value" placeholder="AIで作成すると、ここに下書きが入ります。">${esc(S.pr)}</textarea></label>
+    <div class="note"><b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。</div>`,
+
+  /* 6 確認・出力 */ ()=>`
+    <div class="h2">確認・出力</div>
+    <div class="lede">仕上がりを確認して、PDFで保存できます。</div>
+    <div class="toolbar">
+      <button onclick="brushAll(this)">✦ 全体をAIで整える</button>
+      <button class="primary" onclick="window.print()">PDFで保存・印刷</button>
+    </div>
+    <div id="allMsg"></div>
+    <div id="docWrap">${docHTML()}</div>`
+];
+
+/* ============ BLOCK 6: 職務経歴書の組み立て ============ */
+function docHTML(){
+  const p=S.profile;
+  const name=[p.lastName,p.firstName].filter(Boolean).join(" ")||"氏名未入力";
+  const skills=S.skills.filter(s=>s.name.trim());
+  const jobs=S.jobs.filter(j=>j.company.trim()||j.achv.trim());
+  return `<div class="doc">
+    <h1>職務経歴書</h1>
+    <div class="meta">${fmtDate(S.date)} 現在<br>${esc(name)}${p.kana?`（${esc(p.kana)}）`:""}</div>
+    ${p.email||p.tel?`<div>${[p.email,p.tel].filter(Boolean).map(esc).join(" ／ ")}</div>`:""}
+    ${S.summary.trim()?`<h2>職務要約</h2><p>${esc(S.summary)}</p>`:""}
+    ${skills.length?`<h2>活かせるスキル・経験</h2>${skills.map(s=>
+      `<div class="skill"><span>${esc(s.name)}</span><span style="color:#6B7280">${[s.years,s.level].filter(Boolean).map(esc).join(" / ")}</span></div>`).join("")}`:""}
+    ${jobs.length?`<h2>職務経歴</h2>${jobs.map(j=>`<div class="exp">
+      <div class="co">${esc(j.company||"（会社名）")}</div>
+      <div class="rl">${[j.role,[j.from,j.to].filter(Boolean).join("〜")].filter(Boolean).map(esc).join("　|　")}</div>
+      <div class="ac">${esc(j.achv)}</div></div>`).join("")}`:""}
+    ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
+  </div>`;
+}
+
+/* --- AI機能（プロンプトは「盛らない」思想を厳守） --- */
+const RULE = `・記載された事実だけを使い、新しい数字や成果を勝手に足さない。
+・誇張・美化をしない。事実を変えない。
+・誤字脱字と冗長さを直し、採用担当者が読みやすい自然な日本語にする。
+・出力は本文のみ。前置き・解説・見出しは不要。`;
+
+async function brushAchv(i,btn){
+  const zone=document.getElementById("aiz"+i);
+  const raw=S.jobs[i].achv.trim();
+  if(!raw){ zone.innerHTML=`<div class="ng">先に実績を入力してください。</div>`; return; }
+  setLoading(btn,true);
+  try{
+    const out=await callAI(`あなたは日本語の職務経歴書の編集者です。次の「実績」を整えてください。\n${RULE}\n・箇条書きが適切なら箇条書きに。\n\n【実績】\n${raw}`);
+    S.jobs[i].achv=out;
+    const ta=document.getElementById("achv"+i); if(ta) ta.value=out;
+    zone.innerHTML=`<div class="ok">✓ 整えました（内容は自由に編集できます）</div>`;
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
+  setLoading(btn,false);
+}
+
+async function genSummary(btn){
+  const zone=document.getElementById("aizSum");
+  const skills=S.skills.filter(s=>s.name.trim()).map(s=>`${s.name}（${s.years} ${s.level}）`).join("、");
+  const jobs=S.jobs.filter(j=>j.company.trim()).map(j=>`${j.company}／${j.role}：${j.achv}`).join("\n");
+  setLoading(btn,true);
+  try{
+    const out=await callAI(`次の情報から、日本語の職務経歴書の「職務要約」を100〜150字で作成してください。\n${RULE}\n・「大切にしてきたこと」を自然に織り込む。\n・実測値はそのまま使い、加工した割合（○○%削減など）は要約では避ける。\n\n大切にしてきたこと：${S.summaryValues||"（未記入）"}\nスキル：${skills||"（未記入）"}\n職歴：\n${jobs||"（未記入）"}`, 600);
+    S.summary=out;
+    const box=document.getElementById("summaryBox"); if(box) box.value=out;
+    zone.innerHTML=`<div class="ok">✓ 下書きを作成しました</div>`;
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
+  setLoading(btn,false);
+}
+
+async function genPR(btn){
+  const zone=document.getElementById("aizPR");
+  const skills=S.skills.filter(s=>s.name.trim()).map(s=>s.name).join("、");
+  const jobs=S.jobs.filter(j=>j.company.trim()).map(j=>`${j.company}／${j.role}：${j.achv}`).join("\n");
+  setLoading(btn,true);
+  try{
+    const out=await callAI(`次の情報から、日本語の職務経歴書の「自己PR」を250〜350字で作成してください。\n${RULE}\n・強み→根拠となる経験→今後どう貢献したいか、の流れ。\n\n職務要約：${S.summary||"（未記入）"}\n大切にしてきたこと：${S.summaryValues||"（未記入）"}\nスキル：${skills||"（未記入）"}\n職歴：\n${jobs||"（未記入）"}`, 900);
+    S.pr=out;
+    const box=document.getElementById("prBox"); if(box) box.value=out;
+    zone.innerHTML=`<div class="ok">✓ 下書きを作成しました</div>`;
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
+  setLoading(btn,false);
+}
+
+async function brushAll(btn){
+  const zone=document.getElementById("allMsg");
+  setLoading(btn,true);
+  try{
+    for(let i=0;i<S.jobs.length;i++){
+      if(S.jobs[i].achv.trim()){
+        S.jobs[i].achv = await callAI(`次の職務経歴書の実績を整えてください。\n${RULE}\n\n${S.jobs[i].achv}`);
+      }
+    }
+    document.getElementById("docWrap").innerHTML=docHTML();
+    zone.innerHTML=`<div class="ok">✓ 全体を整えました</div>`;
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
+  setLoading(btn,false);
+}
+
+/* ============ BLOCK 7: 画面制御・共通処理 ============ */
+const main=document.getElementById("main");
+function render(){
+  document.getElementById("stepName").textContent=STEPS[step];
+  document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
+  document.getElementById("barFill").style.width=`${((step+1)/TOTAL)*100}%`;
+  main.innerHTML=VIEWS[step]();
+  updateNav();
+  window.scrollTo(0,0);
+}
+function updateNav(){
+  const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
+  back.style.visibility = step===0 ? "hidden":"visible";
+  next.textContent = step===TOTAL-1 ? "印刷・PDF" : "次へ";
+  next.disabled = (step===0 && !S.keyVerified);
+}
+function go(dir){
+  if(dir>0 && step===TOTAL-1){ window.print(); return; }
+  if(dir>0 && step<TOTAL-1) step++;
+  else if(dir<0 && step>0) step--;
+  render();
+}
+function setLoading(btn,on,label){
+  btn.disabled=on;
+  if(!btn.dataset.label) btn.dataset.label=btn.innerHTML;
+  btn.innerHTML = on ? `<span class="sp"></span>${label||"作成中…"}` : btn.dataset.label;
+}
+function clearMsg(id){ const el=document.getElementById(id); if(el) el.innerHTML=""; updateNav(); }
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmtDate(iso){const d=new Date(iso);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;}
+function addItem(k,o){S[k].push(o);render();}
+function delItem(k,i){S[k].splice(i,1);render();}
+render();
+</script>
+</body>
+</html>
