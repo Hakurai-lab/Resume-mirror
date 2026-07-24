@@ -127,7 +127,9 @@
 
   .doc{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:26px 22px;font-size:13px;line-height:1.85}
   .doc h1{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:20px;color:var(--navy);letter-spacing:.04em;border-bottom:2px solid var(--navy);padding-bottom:8px;margin-bottom:6px}
-  .doc .meta{font-size:11.5px;color:var(--muted);text-align:right;margin-bottom:16px}
+  .doc .meta{font-size:11.5px;color:var(--muted);text-align:right;margin-bottom:4px}
+  .doc .who{text-align:right;font-size:12.5px;line-height:1.8;margin-bottom:18px}
+  .doc .who .nm{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15px;color:var(--ink);margin-bottom:2px}
   .doc h2{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;color:var(--navy);margin:18px 0 7px;padding-left:9px;border-left:4px solid var(--ice)}
   .doc .exp{margin-bottom:15px}
   .doc .exp .co{font-weight:700;font-size:13.5px}
@@ -144,7 +146,40 @@
     border-radius:11px;padding:12px;cursor:pointer;border:1.5px solid var(--navy);background:#fff;color:var(--navy)}
   .toolbar button.primary{background:var(--navy);color:#fff}
 
-  @media print{header,.nav,.toolbar,.safe,details,.hint,.count,.note{display:none!important}
+  /* BLOCK 2-c: 保存バー・利用規約モーダル */
+  .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:19;
+    max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:7px 20px;
+    background:rgba(233,240,253,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted)}
+  .savebar .st{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .savebar button{background:none;border:none;color:var(--navy);font-family:"Zen Kaku Gothic New";
+    font-weight:700;font-size:11.5px;cursor:pointer;padding:3px 2px;white-space:nowrap;text-decoration:underline}
+  .savebar button.danger{color:var(--warn)}
+
+  .modal{position:fixed;inset:0;z-index:60;background:rgba(20,26,60,.55);display:none;align-items:flex-end}
+  .modal.on{display:flex}
+  .modal .sheet{background:#fff;width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;
+    max-height:88vh;display:flex;flex-direction:column}
+  .modal .mh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+  .modal .mh b{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:16px;color:var(--navy)}
+  .modal .mh button{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:8px 15px;
+    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;cursor:pointer}
+  .modal .mb{overflow:auto;padding:18px 20px 30px;font-size:13px;line-height:1.85}
+  .modal .mb h3{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:15px;color:var(--navy);margin:22px 0 7px}
+  .modal .mb h3:first-child{margin-top:0}
+  .modal .mb h4{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13.5px;margin:14px 0 3px}
+  .modal .mb p{margin-bottom:9px}
+  .modal .mb ul{margin:0 0 9px 20px}
+  .modal .mb li{margin-bottom:4px}
+  .modal .mb .em{background:var(--ice-soft);border-radius:10px;padding:12px 14px;margin:10px 0}
+  .modal .mb .dt{font-size:11.5px;color:var(--muted);margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+
+  .agree{display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--line);
+    border-radius:13px;padding:13px 15px;margin-top:6px;font-size:13px;line-height:1.7}
+  .agree input{width:auto;flex:0 0 auto;margin-top:4px}
+  .agree a{color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline}
+
+  @media print{header,.nav,.savebar,.modal,.toolbar,.safe,details,.hint,.count,.note{display:none!important}
     main{padding:0}.doc{border:none;box-shadow:none;padding:0}body{background:#fff}}
 </style>
 </head>
@@ -156,10 +191,72 @@
     <div class="bar"><i id="barFill" style="width:8%"></i></div>
   </header>
   <main id="main"></main>
+  <div class="savebar">
+    <span class="st" id="savedAt">この端末に自動保存されます</span>
+    <button onclick="openTerms()">利用規約・プライバシー</button>
+    <button class="danger" onclick="clearAll()">保存を消去</button>
+  </div>
   <nav class="nav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
     <button class="next" id="nextBtn" onclick="go(1)">次へ</button>
   </nav>
+</div>
+
+<!-- ============ 利用規約・プライバシーポリシー ============ -->
+<div class="modal" id="termsModal" onclick="if(event.target===this)closeTerms()">
+  <div class="sheet">
+    <div class="mh"><b>利用規約・プライバシーポリシー</b><button onclick="closeTerms()">閉じる</button></div>
+    <div class="mb">
+      <div class="em"><b>先に、いちばん大事なことを。</b><br>
+      このツールにはサーバーがありません。あなたが入力した氏名・連絡先・職務経歴は、<b>運営者に一切送信されず、見ることもできません。</b>すべてあなたの端末の中で処理されます。</div>
+
+      <h3>利用規約</h3>
+
+      <h4>1. 本サービスについて</h4>
+      <p>Resume Mirror（以下「本サービス」）は、職務経歴書の作成を補助する個人開発のツールです。利用者は本規約に同意のうえ、ご利用ください。</p>
+
+      <h4>2. 利用者自身のAI契約が必要です</h4>
+      <p>本サービスのAI機能は、利用者ご自身が取得したAnthropic社のAPIキーを用いて動作します。AIの利用料金は利用者のご負担となります。ご利用にあたっては、Anthropic社の利用規約にも従うものとします。</p>
+
+      <h4>3. 生成された文章の取り扱い</h4>
+      <p>AIが生成する文章は<b>下書き</b>です。事実と異なる記載や、意図しない表現が含まれる可能性があります。<b>内容の確認と最終的な責任は、利用者ご自身が負うもの</b>とします。応募書類として提出する前に、必ずご自身で読み返してください。</p>
+
+      <h4>4. 禁止事項</h4>
+      <ul>
+        <li>虚偽の経歴・実績を作成する目的での利用</li>
+        <li>他者の個人情報を、本人の同意なく入力すること</li>
+        <li>法令または公序良俗に反する利用</li>
+      </ul>
+
+      <h4>5. 免責</h4>
+      <p>本サービスは現状有姿で提供され、動作や生成結果について何ら保証するものではありません。本サービスの利用または利用不能によって生じたいかなる損害についても、運営者は責任を負いません。予告なく内容の変更・提供の停止を行う場合があります。</p>
+
+      <h4>6. 準拠法</h4>
+      <p>本規約は日本法に準拠します。</p>
+
+      <h3>プライバシーポリシー</h3>
+
+      <h4>1. 運営者は、あなたの情報を収集しません</h4>
+      <p>本サービスはサーバーを持たず、利用者の入力内容を送信・収集・保存する仕組みを一切持ちません。氏名、連絡先、職務経歴、その他入力されたすべての情報は、運営者に届きません。</p>
+
+      <h4>2. 入力内容の保存場所</h4>
+      <p>入力内容は、利用者ご自身の端末のブラウザ内（ローカルストレージ）に保存されます。これにより、画面を閉じても作業を再開できます。<b>他の人と共有する端末をお使いの場合は、作業後に画面下の「保存を消去」を押してください。</b></p>
+
+      <h4>3. APIキーの取り扱い</h4>
+      <p>入力されたAPIキーは、Anthropic社へのAI呼び出しにのみ使用され、それ以外のいかなる送信先にも送られません。APIキーは初期設定では保存されません。「この端末に保存する」を選択した場合に限り、端末のブラウザ内にのみ保存されます。共用端末では選択しないことを推奨します。</p>
+
+      <h4>4. AIへの送信について</h4>
+      <p>「AIで整える」「AIで作成」などの機能を使用した際、その処理に必要な入力内容（職務経歴やスキルの記述など）が、利用者ご自身のAPIキーを用いてAnthropic社に送信されます。送信された情報の取り扱いは、Anthropic社のプライバシーポリシーに従います。AIに送信したくない内容は、入力しないでください。</p>
+
+      <h4>5. アクセス解析・Cookie</h4>
+      <p>本サービスは、アクセス解析ツールや広告目的のCookieを使用していません。ただし、本サービスはGitHub Pages上で公開されているため、ホスティング事業者側でアクセスに関する記録（IPアドレス等）が保持される可能性があります。</p>
+
+      <h4>6. お問い合わせ</h4>
+      <p>本サービスに関するお問い合わせは、提供元までご連絡ください。</p>
+
+      <div class="dt">制定日：2026年7月<br>Resume Mirror（KUURAI LAB）</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -173,13 +270,14 @@ const ANTHROPIC_VERSION = "2023-06-01";
 const NOW_Y = new Date().getFullYear();
 const YEARS = Array.from({length:51},(_,i)=>NOW_Y-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
+const EMPLOYMENTS = ["正社員","契約社員","派遣社員","業務委託・個人事業主","パート・アルバイト","出向","その他"];
 
 const S = {
-  apiKey:"", model:"balanced", keyVerified:false,
+  apiKey:"", model:"balanced", keyVerified:false, agreed:false, saveKey:false,
   profile:{ lastName:"", firstName:"", kana:"", email:"", tel:"" },
   certs:[{y:"",m:"",name:"",expiry:""}],
   skills:[{name:"",years:"",achv:""}],
-  jobs:[{company:"",role:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
+  jobs:[{company:"",role:"",employment:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
   date:new Date().toISOString().slice(0,10)
@@ -270,7 +368,13 @@ function viewKey(){ return `
     <input id="keyInput" type="password" autocomplete="off" spellcheck="false"
       value="${esc(S.apiKey)}" oninput="S.apiKey=this.value.trim();S.keyVerified=false;clearMsg('keyMsg')"
       placeholder="sk-ant-... で始まる文字列を貼り付け">
-    <div class="hint">入力は保存されません。画面を閉じると消えます。</div>
+    <div class="hint" style="margin-top:9px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
+        <input type="checkbox" style="width:auto" ${S.saveKey?"checked":""}
+          onchange="S.saveKey=this.checked;saveNow()"> このキーをこの端末に保存する
+      </label>
+      <div style="margin-top:4px">共用の端末では、チェックを外したままにしてください。</div>
+    </div>
   </label>
   <label class="f"><span>使用するモデル</span>
     <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
@@ -279,7 +383,12 @@ function viewKey(){ return `
     <div class="hint">迷ったら「標準」のままで大丈夫です。</div>
   </label>
   <button class="ai" onclick="testKey(this)">接続テスト</button>
-  <div id="keyMsg">${S.keyVerified?'<div class="ok">✓ 接続できました。「次へ」に進んでください。</div>':""}</div>
+  <div id="keyMsg">${S.keyVerified?'<div class="ok">✓ 接続できました。</div>':""}</div>
+
+  <label class="agree">
+    <input type="checkbox" ${S.agreed?"checked":""} onchange="S.agreed=this.checked;saveNow();updateNav()">
+    <span><a onclick="openTerms()">利用規約・プライバシーポリシー</a>を読み、同意します。</span>
+  </label>
 `;}
 
 async function testKey(btn){
@@ -289,7 +398,7 @@ async function testKey(btn){
   try{
     await callAI("「準備完了」とだけ返してください。",20);
     S.keyVerified=true;
-    zone.innerHTML=`<div class="ok">✓ 接続できました。「次へ」に進んでください。</div>`;
+    zone.innerHTML=`<div class="ok">✓ 接続できました。</div>`;
   }catch(err){ S.keyVerified=false; zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
   setLoading(btn,false); updateNav();
 }
@@ -368,6 +477,11 @@ const VIEWS = [
           <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
         <label class="f"><span>ロール（職務名／部署／担当範囲）</span>
           <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="ITサポート リード / 情報システム部"></label>
+        <label class="f"><span>雇用形態</span>
+          <select onchange="S.jobs[${i}].employment=this.value">
+            <option value="">選択してください</option>
+            ${EMPLOYMENTS.map(e=>`<option value="${e}" ${j.employment===e?"selected":""}>${e}</option>`).join("")}
+          </select></label>
         <label class="f"><span>在籍期間（開始）</span>
           <div class="row2">${ySel(j.fromY,`S.jobs[${i}].fromY=this.value`)}${mSel(j.fromM,`S.jobs[${i}].fromM=this.value`)}</div></label>
         <label class="f"><span>在籍期間（終了）</span>
@@ -384,7 +498,7 @@ const VIEWS = [
         <button class="ai" onclick="brushAchv(${i},this)">✦ この実績をAIで整える</button>
         <div id="aiz${i}">${cmpHTML(j.achvOrig, j.achv, `undoJob(${i})`)}</div>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('jobs',{company:'',role:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
+    <button class="addbtn" onclick="addItem('jobs',{company:'',role:'',employment:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
 
   /* 4 職務要約 */ ()=>`
     <div class="h2">職務要約</div>
@@ -511,6 +625,18 @@ function period(j){
   const t=j.current?"現在":[j.toY&&`${j.toY}年`,j.toM&&`${j.toM}月`].filter(Boolean).join("");
   return [f,t].filter(Boolean).join("〜");
 }
+/* 在籍期間を ○年○ヶ月 で算出（開始・終了の年月が揃っているときだけ） */
+function duration(j){
+  const fy=+j.fromY, fm=+j.fromM;
+  if(!fy||!fm) return "";
+  let ty,tm;
+  if(j.current){ const d=new Date(); ty=d.getFullYear(); tm=d.getMonth()+1; }
+  else { ty=+j.toY; tm=+j.toM; if(!ty||!tm) return ""; }
+  const months=(ty-fy)*12+(tm-fm)+1;
+  if(months<=0) return "";
+  const y=Math.floor(months/12), m=months%12;
+  return [y?`${y}年`:"", m?`${m}ヶ月`:""].filter(Boolean).join("") || "1ヶ月";
+}
 function docHTML(){
   const p=S.profile;
   const name=[p.lastName,p.firstName].filter(Boolean).join(" ")||"氏名未入力";
@@ -519,29 +645,74 @@ function docHTML(){
   const jobs=S.jobs.filter(j=>j.company.trim()||j.achv.trim());
   return `<div class="doc">
     <h1>職務経歴書</h1>
-    <div class="meta">${fmtDate(S.date)} 現在<br>${esc(name)}${p.kana?`（${esc(p.kana)}）`:""}</div>
-    ${p.email||p.tel?`<div>${[p.email,p.tel].filter(Boolean).map(esc).join(" ／ ")}</div>`:""}
+    <div class="meta">${fmtDate(S.date)} 現在</div>
+    <div class="who">
+      <div class="nm">${esc(name)}${p.kana?`（${esc(p.kana)}）`:""}</div>
+      ${p.email?`<div>Mail：${esc(p.email)}</div>`:""}
+      ${p.tel?`<div>電話：${esc(p.tel)}</div>`:""}
+    </div>
     ${S.summary.trim()?`<h2>職務要約</h2><p>${esc(S.summary)}</p>`:""}
     ${skills.length?`<h2>活かせるスキル・経験</h2>${skills.map(s=>`<div class="sk">
       <div class="n">${esc(s.name)}${s.years?`（${esc(s.years)}）`:""}</div>
       ${s.achv?`<div class="a">${esc(s.achv)}</div>`:""}</div>`).join("")}`:""}
     ${certs.length?`<h2>資格</h2>${certs.map(c=>`<div class="kv"><span>${esc(c.name)}</span>
       <span class="r">${[c.y?`${c.y}年${c.m?c.m+"月":""}取得`:"",c.expiry?`期限 ${esc(c.expiry)}`:""].filter(Boolean).join("／")}</span></div>`).join("")}`:""}
-    ${jobs.length?`<h2>職務経歴</h2>${jobs.map(j=>`<div class="exp">
+    ${jobs.length?`<h2>職務経歴</h2>${jobs.map(j=>{const d=duration(j);return `<div class="exp">
       <div class="co">${esc(j.company||"（会社名）")}</div>
-      <div class="rl">${[j.role,period(j)].filter(Boolean).map(esc).join("　|　")}</div>
-      <div class="ac">${esc(j.achv)}</div></div>`).join("")}`:""}
+      <div class="rl">${[j.role,j.employment].filter(Boolean).map(esc).join("　|　")}</div>
+      <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}</div>
+      <div class="ac">${esc(j.achv)}</div></div>`}).join("")}`:""}
     ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
   </div>`;
 }
 /* PDFのファイル名を Resume Mirror_職務経歴書_氏名 にする */
 function printDoc(){
   const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"氏名";
-  const old=document.title;
-  document.title=`Resume Mirror_職務経歴書_${nm}`;
-  window.print();
-  setTimeout(()=>{document.title=old;},1500);
+  /* 保存名にはページタイトルが使われる。
+     元に戻す処理を入れると、保存操作の途中でタイトルが戻ってしまい反映されないため、戻さない。 */
+  document.title=`職務経歴書_${nm}`;
+  setTimeout(()=>window.print(),60);
 }
+
+/* ============ BLOCK 9: 保存・復元（この端末のブラウザ内のみ） ============ */
+const STORE_KEY = "resume_mirror_v1";
+let saveTimer=null;
+
+function saveNow(){
+  try{
+    const d=JSON.parse(JSON.stringify(S));
+    if(!S.saveKey) d.apiKey="";      /* 既定ではAPIキーを保存しない */
+    d.keyVerified=false;             /* 起動時は必ず接続テストからやり直す */
+    d._at=Date.now();
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+    showSaved(d._at);
+  }catch(e){ /* 保存不可（プライベートモード等）でも動作は継続 */ }
+}
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,600); }
+
+function restore(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY); if(!raw) return;
+    const d=JSON.parse(raw);
+    Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
+    S.keyVerified=false;
+    if(d._at) showSaved(d._at);
+  }catch(e){}
+}
+function showSaved(t){
+  const el=document.getElementById("savedAt"); if(!el) return;
+  const d=new Date(t);
+  el.textContent=`最終保存 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}（この端末内）`;
+}
+function clearAll(){
+  if(!confirm("この端末に保存された入力内容を、すべて消去します。よろしいですか？")) return;
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  location.reload();
+}
+
+/* 利用規約モーダル */
+function openTerms(){ document.getElementById("termsModal").classList.add("on"); }
+function closeTerms(){ document.getElementById("termsModal").classList.remove("on"); }
 
 /* ============ BLOCK 8: 画面制御・共通処理 ============ */
 const main=document.getElementById("main");
@@ -565,7 +736,7 @@ function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
   next.textContent = step===TOTAL-1 ? "PDFで保存" : "次へ";
-  next.disabled = (step===0 && !S.keyVerified);
+  next.disabled = (step===0 && !(S.keyVerified && S.agreed));
 }
 function go(dir){
   if(dir>0 && step===TOTAL-1){ printDoc(); return; }
@@ -581,8 +752,15 @@ function setLoading(btn,on,label){
 function clearMsg(id){ const el=document.getElementById(id); if(el) el.innerHTML=""; updateNav(); }
 function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function fmtDate(iso){const d=new Date(iso);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;}
-function addItem(k,o){S[k].push(o);render();}
-function delItem(k,i){S[k].splice(i,1);render();}
+function addItem(k,o){S[k].push(o);render();saveNow();}
+function delItem(k,i){S[k].splice(i,1);render();saveNow();}
+
+/* 入力のたびに自動保存（600ms待ってからまとめて書き込む） */
+main.addEventListener("input", scheduleSave);
+main.addEventListener("change", scheduleSave);
+window.addEventListener("beforeunload", saveNow);
+
+restore();
 render();
 </script>
 </body>
