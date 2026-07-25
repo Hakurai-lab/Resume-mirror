@@ -1,2 +1,2 @@
 # Resume-mirror
-Resume mirrorのテスト版です
+Resume mirrorのMVPです
