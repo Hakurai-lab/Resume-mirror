@@ -216,6 +216,7 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v10</span>
     <button onclick="openTerms()">利用規約・プライバシー</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
   </div>
@@ -578,6 +579,8 @@ const STORY_INTRO = `あなたのことをもっと知りたいです。職務�
 
 function storyView(){
   const st=S.story;
+  if(!Array.isArray(st.chat)) st.chat=[];
+  if(!Array.isArray(st.patterns)) st.patterns=[];
 
   if(st.phase==="patterns") return `
     <div class="h2">語り口を選ぶ</div>
@@ -908,6 +911,11 @@ function restore(){
     const d=JSON.parse(raw);
     Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
     S.keyVerified=false;
+    // 旧バージョンで保存された story 形式を新形式へ移行（不足フィールドを補う）
+    S.story = Object.assign({ phase:"chat", input:"", chat:[], patterns:[], chosen:-1, draft:"" }, S.story||{});
+    if(typeof S.story.phase!=="string") S.story.phase="chat";
+    if(!Array.isArray(S.story.chat)) S.story.chat=[];
+    if(!Array.isArray(S.story.patterns)) S.story.patterns=[];
     if(d._at) showSaved(d._at);
   }catch(e){}
 }
@@ -948,7 +956,7 @@ function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
   if(step===TOTAL-1){ next.style.display="none"; }
-  else { next.style.display=""; next.textContent = step===6 ? "次へ：面接ストーリー" : "次へ"; }
+  else { next.style.display=""; next.textContent = step===6 ? "経験を伝わる強みに変える" : "次へ"; }
   next.disabled = (step===0 && !(S.keyVerified && S.agreed));
 }
 function go(dir){
