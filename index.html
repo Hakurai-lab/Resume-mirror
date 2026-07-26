@@ -164,6 +164,10 @@
   .lens .lt{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15px;color:var(--navy);margin-bottom:6px}
   .lens .ld{font-size:13px;color:#333;line-height:1.8}
   .lens::after{content:"この切り口で語る →";display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--accent);text-align:right}
+  .chatlog{display:flex;flex-direction:column;gap:9px;margin:6px 0 14px}
+  .bubble{max-width:85%;padding:11px 14px;border-radius:15px;font-size:13.5px;line-height:1.8;white-space:normal}
+  .bubble.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:5px}
+  .bubble.ai{align-self:flex-start;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-bottom-left-radius:5px}
 
   /* BLOCK 2-c: 保存バー・利用規約モーダル */
   .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:19;
@@ -299,7 +303,7 @@ const S = {
   jobs:[{company:"",client:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
-  story:{ phase:0, challenge:"", understanding:"", lenses:[], chosen:-1, draft:"" },
+  story:{ phase:"chat", input:"", chat:[], patterns:[], chosen:-1, draft:"" },
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
@@ -567,117 +571,144 @@ const VIEWS = [
   /* 7 面接ストーリー */ ()=>storyView()
 ];
 
-/* ============ BLOCK 10: 面接ストーリー（P2） ============ */
+/* ============ BLOCK 10: 面接ストーリー（P2・チャット版） ============ */
+const STORY_INTRO = `あなたのことをもっと知りたいです。職務経歴書に入力したことや、これまで入力してこなかった内容から、あなたの魅力をもっと言語化できるかもしれません。あなたが一番語りたい経験や実績は何ですか？
+
+もしすぐに思いつかなければ、これまでの業務の中で、悩んだことや引っかかったこと、入ってすぐの環境で何を感じて何を変えたいと思ったか、教えてください。あなたの力になりたいので、正直な気持ちを入れてください。`;
+
 function storyView(){
   const st=S.story;
-  if(st.phase===0) return `
-    <div class="slabor">
-      <div class="stitle">職務経歴書、完成しました。</div>
-      <div class="stext">まず、おつかれさまでした。これは、あなたが目的に向かって踏み出した、確かな一歩です。</div>
-    </div>
-    <div class="spartner">
-      <div class="stext">ここからは、私があなたのパートナーです。面接で"勝てる一つのストーリー"を、一緒に組み立てましょう。職務経歴書のすべてを面接で読み上げる必要はありません。あなたが一番語りたい経験を、面接官が思わず聞きたくなる形に整えます。</div>
-    </div>
-    <label class="f"><span>いま、お仕事で悩んでいること・引っかかっていることは何ですか？</span>
-      <textarea class="big" id="chBox" oninput="S.story.challenge=this.value;grow(this)"
-        placeholder="例：やっていることは多いのに、成果として何を語ればいいか分からない。／今のやり方に無駄を感じるが、変える提案ができていない。など、正直な気持ちで。">${esc(st.challenge)}</textarea></label>
-    <div class="ssafe">ここでお話しいただく内容は、運営者（私たち）には一切届きません。サーバーに保存されることもありません。安心して、正直に教えてください。</div>
-    <button class="ai" onclick="reflectBack(this)">次へ（あなたの状況を確認します）</button>
-    <div id="stMsg"></div>`;
 
-  if(st.phase===1) return `
-    <div class="h2">認識の確認</div>
-    <div class="lede">すぐに答えを出す前に、私があなたの状況を正しく理解できているか、確認させてください。</div>
-    <div class="squote">こういう認識で合っていますか？</div>
-    <label class="f"><span>私の理解（違っていれば直してください）</span>
-      <textarea class="big" id="undBox" oninput="S.story.understanding=this.value;grow(this)">${esc(st.understanding)}</textarea></label>
-    <button class="ai" onclick="generateLenses(this)">はい、合っています（切り口を見る）</button>
-    <button class="ai sub" onclick="backStory(0)">悩みを入れ直す</button>
-    <div id="stMsg"></div>`;
-
-  if(st.phase===2) return `
-    <div class="h2">語り方の切り口</div>
-    <div class="lede">あなたの経験を、面接で強く伝えるための"切り口"です。ピンとくるものを一つ選んでください。選ぶのはあなたです。</div>
-    ${st.lenses.map((l,i)=>`
-      <div class="lens" onclick="chooseLens(${i},this)">
-        <div class="lt">${esc(l.title||"")}</div>
-        <div class="ld">${esc(l.desc||"")}</div>
+  if(st.phase==="patterns") return `
+    <div class="h2">語り口を選ぶ</div>
+    <div class="lede">お話を踏まえて、面接での語り方を3つの切り口にしました。ピンとくるものを一つ選んでください。選ぶのはあなたです。</div>
+    ${st.patterns.map((p,i)=>`
+      <div class="lens" onclick="choosePattern(${i},this)">
+        <div class="lt">${esc(p.title||"")}</div>
+        <div class="ld">${esc(p.desc||"")}</div>
       </div>`).join("")}
-    <button class="ai sub" onclick="generateLenses(this,true)">どれも違う（切り口を出し直す）</button>
-    <button class="ai sub" onclick="backStory(1)">認識の確認にもどる</button>
+    <button class="ai sub" onclick="backToChat()">実績の入力に戻る</button>
     <div id="stMsg"></div>`;
 
-  // phase 3
-  return `
+  if(st.phase==="draft") return `
     <div class="h2">あなたのストーリー（下書き）</div>
     <div class="lede">選んだ切り口で、面接で語る骨組みを作りました。これは下書きです。<b>必ずあなたの言葉に直してください。</b></div>
     <label class="f"><span>ストーリー骨組み（編集できます）</span>
-      <textarea class="big" id="stDraft" style="min-height:320px" oninput="S.story.draft=this.value;grow(this)">${esc(st.draft)}</textarea></label>
+      <textarea class="big" id="stDraft" style="min-height:340px" oninput="S.story.draft=this.value;grow(this)">${esc(st.draft)}</textarea></label>
     <div class="note"><b>「根底」は、聞かれるまで言わない隠し玉です。</b>すべてを話しきらないことが、静かな自信になります。整いすぎた言葉は面接で浮くので、少し崩して、あなたの声にしてください。</div>
-    <button class="ai sub" onclick="chooseLens(S.story.chosen)">この切り口で作り直す</button>
-    <button class="ai sub" onclick="backStory(2)">切り口を選び直す</button>`;
+    <button class="ai sub" onclick="choosePattern(S.story.chosen)">この切り口で作り直す</button>
+    <button class="ai sub" onclick="S.story.phase='patterns';render();window.scrollTo(0,0);saveNow()">語り口を選び直す</button>
+    <button class="ai sub" onclick="backToChat()">実績の入力に戻る</button>`;
+
+  // phase === "chat"
+  const hasTurns = st.chat.length>0;
+  return `
+    <div class="slabor">
+      <div class="stitle">職務経歴書、完成しました。</div>
+      <div class="stext">まず、おつかれさまでした。これは、あなたが目的に向かって踏み出した、確かな一歩です。ここからは私がパートナーとして、面接で語る一つのストーリーを一緒に見つけます。</div>
+    </div>
+    <div class="spartner"><div class="stext">${esc(STORY_INTRO).replace(/\n/g,"<br>")}</div></div>
+    <div class="ssafe">ここでお話しいただく内容は、運営者（私たち）には一切届きません。サーバーに保存されることもありません。安心して、正直に教えてください。</div>
+
+    <div class="chatlog" id="chatlog">
+      ${st.chat.map(m=>`<div class="bubble ${m.role}">${esc(m.text).replace(/\n/g,"<br>")}</div>`).join("")}
+    </div>
+
+    <label class="f" style="margin-top:6px"><span>${hasTurns?"続けて話す":"まず、あなたの言葉で教えてください"}</span>
+      <textarea id="chIn" oninput="S.story.input=this.value;grow(this)" placeholder="${hasTurns?"返信を入力…":"例：ナレッジを整備して、問い合わせを減らした経験があります。ただ、それをどう語ればいいか…"}">${esc(st.input)}</textarea></label>
+    <button class="ai" onclick="chatTurn(this)">送信</button>
+    ${hasTurns?`<button class="ai sub" onclick="summarizeChat(this)">このチャットの内容をまとめる</button>`:""}
+    <div id="stMsg"></div>
+    ${hasTurns?"":`<div class="hint" style="margin-top:10px">思いつくままで大丈夫です。私が、数字にできる点や、あなたが見落としている強みを一緒に探します。</div>`}`;
 }
 
-function backStory(p){ S.story.phase=p; render(); window.scrollTo(0,0); saveNow(); }
+const STORY_RULE = `厳守事項：
+・本人が実際に経験した事実だけを扱う。新しい成果や数字を勝手に作らない。盛らない。
+・数字を尋ねるときは、本人が実際に把握している数字（件数・人数・回数・時間など）だけを聞く。「何%改善したはず」など、本人が測っていない数字を作らせない。
+・本人が数字を持っていない場合は、無理に出させず、「次にこう動けば、この数字が測れる」という前向きな次の一歩に変える。
+・成果が少ない・穴がある場合は、ごまかさず正直に伝える。そのうえで現職で何をすればその経験に繋がるかを示す。`;
 
-async function reflectBack(btn){
-  const zone=document.getElementById("stMsg");
-  const raw=(S.story.challenge||"").trim();
-  if(!raw){ zone.innerHTML=`<div class="ng">まず、悩んでいることを書いてください。</div>`; return; }
-  setLoading(btn,true,"確認中…");
-  try{
-    const out=await callAI(`利用者が、仕事の悩み・引っかかりを話しました。あなたは聞き役です。すぐに解決策や助言を出さず、あなたの理解が正しいか確認するために、聞いた内容を言い換えて返してください。
-・事実を一つも足さない。盛らない。決めつけない。
-・オウム返しにせず、要点と本質を掴んで整理する。
-・「〜という状況で、〜に引っかかっている、という理解で合っていますか？」のような、確認のトーンで。
-・120字程度。出力は言い換え本文のみ。
+function backToChat(){ S.story.phase="chat"; render(); window.scrollTo(0,0); saveNow(); }
 
-【利用者の悩み】
-${raw}`,600);
-    S.story.understanding=out; S.story.phase=1; render(); window.scrollTo(0,0); saveNow();
-  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+function storyTranscript(){
+  return S.story.chat.map(m=>`${m.role==="user"?"利用者":"あなた（コーチ）"}：${m.text}`).join("\n");
 }
 
-async function generateLenses(btn,regen){
+async function chatTurn(btn){
   const zone=document.getElementById("stMsg");
-  const und=(S.story.understanding||"").trim();
+  const txt=(S.story.input||"").trim();
+  if(!txt){ zone.innerHTML=`<div class="ng">メッセージを入力してください。</div>`; return; }
+  S.story.chat.push({role:"user",text:txt});
+  S.story.input="";
+  render(); // reflect the user's message immediately
   const {skills,jobs}=inputsForAI();
-  setLoading(btn,true,regen?"出し直し中…":"考え中…");
   try{
-    const out=await callAI(`あなたは採用のプロであり、面接コーチです。利用者の「状況」と「職務経歴」をもとに、面接で自分を強く伝えるための"語り方の切り口（レンズ）"を提案してください。
+    const out=await callAI(`あなたは採用のプロであり、温かい面接コーチです。利用者と対話しながら、面接で語れる「本人の実績」を2〜3個、引き出すのが目的です。
 
-切り口とは、平凡な事実を「戦略的な物語」に見せる視点です（例：単なる問い合わせ対応→「最もコストの高い部分を見抜いて叩いた」＝パレートの法則）。当てはまるビジネス法則やPMフレームワークがあれば、それを一言添える。
+進め方：
+・まず利用者の話を受け止め、共感を示す。
+・そのうえで、実績を具体化する質問を「一度に一つだけ」する。特に、数字にできる点（件数・人数・回数・短縮した時間など）や、本人が強みだと気づいていない点を掘り下げる。
+・返答は簡潔に（3〜5文程度）。長く説明しない。会話のテンポを保つ。
+・十分に実績が見えてきたら、「この内容をまとめる』ボタンを押すと語り口の候補が出ます」と、そっと次に案内する。
+${STORY_RULE}
 
-厳守：
-・利用者が実際に経験した事実だけを使う。新しい成果や数字を捏造しない。盛らない。
-・本当に当てはまる切り口だけを出す。無理に数を増やさない。
+【参考：この人の職務経歴】
+${jobs||"（記載が少ない）"}
+【参考：スキル】
+${skills||"（記載が少ない）"}
+
+【これまでの会話】
+${storyTranscript()}
+
+上記の会話を踏まえ、あなた（コーチ）の次の返答を一つだけ、簡潔に生成してください。出力は返答本文のみ。`,900);
+    S.story.chat.push({role:"ai",text:out});
+    render(); window.scrollTo(0,document.body.scrollHeight); saveNow();
+  }catch(err){
+    S.story.chat.push({role:"ai",text:"（うまく応答できませんでした。少し時間をおいて、もう一度送信してください。）"});
+    render();
+    const z=document.getElementById("stMsg"); if(z) z.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`;
+    saveNow();
+  }
+}
+
+async function summarizeChat(btn){
+  const zone=document.getElementById("stMsg");
+  if(!S.story.chat.some(m=>m.role==="user")){ zone.innerHTML=`<div class="ng">まず、少しお話を聞かせてください。</div>`; return; }
+  setLoading(btn,true,"まとめています…");
+  const {skills,jobs}=inputsForAI();
+  try{
+    const out=await callAI(`あなたは採用のプロであり、面接コーチです。以下の「会話」と「職務経歴」から、面接で自分を強く伝えるための"語り方の切り口"を提案してください。
+
+切り口とは、平凡な事実を戦略的な物語に見せる視点です（例：単なる問い合わせ対応→「最もコストの高い部分を見抜いて叩いた」＝パレートの法則）。可能なら、複数の実績を束ねて一段上の切り口にする（例：ナレッジ整備＋先回り対応＋研修→「戦略的に問い合わせ総量を下げ、人的・時間的リソースを生んだ」）。当てはまるビジネス法則やPMフレームワークがあれば一言添える。
+
+${STORY_RULE}
 ・互いに明確に異なる切り口にする。似たものを並べない。
-・実績が薄い場合でも突き放さず、「今の経験をこう捉え直せる」という前向きな切り口にする。
+・実績が薄い場合は、無理に3つ作らず、正直に「今ある材料はここまで」と分かる切り口にし、次の一歩を含める。
 
-出力形式：JSON配列だけを出力（前置き・説明・マークダウン記号なし）。各要素は {"title":"切り口の名前と一言の視点（30字以内）","desc":"その視点でどう語れるかを2〜3文で。利用者の実際の経験に即して。"}。要素数は2または3。確信を持てるものだけ。
+出力形式：JSON配列だけを出力（前置き・説明・マークダウン記号なし）。各要素は {"title":"切り口の名前と一言の視点（30字以内）","desc":"その視点でどう語れるかを2〜3文で。本人の実際の経験に即して。"}。要素数は2または3。
 
-【状況】
-${und}
+【会話】
+${storyTranscript()}
 
 【職務経歴】
 ${jobs||"（記載が少ない）"}
-
 【スキル】
-${skills||"（記載が少ない）"}`,2000);
+${skills||"（記載が少ない）"}`,2200);
     let parsed=[];
     try{ parsed=JSON.parse(out.replace(/```json|```/g,"").trim()); }catch(e){ parsed=[]; }
     if(!Array.isArray(parsed)||!parsed.length){
-      zone.innerHTML=`<div class="ng">切り口をうまく作れませんでした。悩みや経歴をもう少し具体的にすると、精度が上がります。もう一度お試しください。</div>`;
+      zone.innerHTML=`<div class="ng">うまくまとめられませんでした。もう少しお話を続けると精度が上がります。</div>`;
       setLoading(btn,false); return;
     }
-    S.story.lenses=parsed.slice(0,3); S.story.chosen=-1; S.story.phase=2; render(); window.scrollTo(0,0); saveNow();
+    S.story.patterns=parsed.slice(0,3); S.story.chosen=-1; S.story.phase="patterns";
+    render(); window.scrollTo(0,0); saveNow();
   }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
 }
 
-async function chooseLens(i,el){
+async function choosePattern(i,el){
   S.story.chosen=i;
-  if(el){ el.style.opacity=".6"; el.style.pointerEvents="none"; }
-  const lens=S.story.lenses[i]; const und=(S.story.understanding||"").trim();
+  if(el){ el.style.opacity=".55"; el.style.pointerEvents="none"; el.insertAdjacentHTML("beforeend",'<div class="ld" style="margin-top:8px;color:var(--accent)"><span class="sp" style="border-color:rgba(46,139,87,.3);border-top-color:var(--accent)"></span> 組み立てています…</div>'); }
+  const pat=S.story.patterns[i];
   const {skills,jobs}=inputsForAI();
   try{
     const out=await callAI(`あなたは採用のプロであり、面接コーチです。選ばれた「切り口」で、面接で語る一つのストーリーの骨組みを作ってください。
@@ -689,24 +720,22 @@ async function chooseLens(i,el){
 【手段】具体的に何をしたか
 【根底（隠し玉）】この取り組みの奥にある、より大きな狙い。※面接で聞かれるまで言わない、静かな自信の土台。
 
-厳守：
-・利用者が実際に経験した事実だけを使う。新しい数字や成果を捏造しない。盛らない。
-・もし実績が薄く、語れる結果がまだ弱い場合は、突き放さず、代わりに「次にこう動けば、こういう数字・成果が測れる」という次の一歩を【次のアクション】という見出しで具体的に示す。
-・利用者本人が自分の言葉に直せるよう、平易で自然な日本語で。断定しすぎない。
+${STORY_RULE}
+・もし語れる結果がまだ弱い場合は、突き放さず、【次のアクション】という見出しで「次にこう動けば、こういう数字・成果が測れる」を具体的に示す。
+・本人が自分の言葉に直せるよう、平易で自然な日本語で。断定しすぎない。
 ・出力は本文（見出し＋各内容）のみ。前置き・解説不要。
 
 【選ばれた切り口】
-${lens?.title||""}：${lens?.desc||""}
+${pat?.title||""}：${pat?.desc||""}
 
-【状況】
-${und}
+【会話】
+${storyTranscript()}
 
 【職務経歴】
 ${jobs||"（記載が少ない）"}
-
 【スキル】
 ${skills||"（記載が少ない）"}`,3000);
-    S.story.draft=out; S.story.phase=3; render(); window.scrollTo(0,0); saveNow();
+    S.story.draft=out; S.story.phase="draft"; render(); window.scrollTo(0,0); saveNow();
   }catch(err){
     S.story.chosen=-1; render();
     const zone=document.getElementById("stMsg"); if(zone) zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`;
