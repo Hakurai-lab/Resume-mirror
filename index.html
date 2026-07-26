@@ -139,12 +139,31 @@
   .doc .sk{border-bottom:1px dotted var(--line);padding:7px 0}
   .doc .sk .n{font-weight:700}
   .doc .sk .a{font-size:12.5px;white-space:pre-wrap}
+  .doc table.hist{width:100%;border-collapse:collapse;font-size:12px;margin:4px 0 8px}
+  .doc table.hist th{background:var(--navy);color:#fff;font-weight:700;text-align:left;padding:6px 8px;font-size:11.5px}
+  .doc table.hist td{border-bottom:1px solid var(--line);padding:6px 8px;vertical-align:top}
+  .doc table.hist .dur{color:var(--muted);font-size:10.5px}
   .doc p,.doc .ac{white-space:pre-wrap}
 
   .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
   .toolbar button{flex:1;min-width:135px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;
     border-radius:11px;padding:12px;cursor:pointer;border:1.5px solid var(--navy);background:#fff;color:var(--navy)}
   .toolbar button.primary{background:var(--navy);color:#fff}
+
+  /* BLOCK 2-d: 入力順ノート・面接ストーリー */
+  .ordernote{background:var(--ice-soft);border-radius:11px;padding:11px 14px;font-size:12.5px;color:var(--navy);margin-bottom:16px;line-height:1.7}
+  .slabor{background:linear-gradient(135deg,var(--navy),#2E4A8B);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}
+  .slabor .stitle{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:18px;margin-bottom:6px}
+  .slabor .stext{font-size:13px;color:var(--ice);line-height:1.8}
+  .spartner{background:var(--ice-soft);border-radius:14px;padding:16px;margin-bottom:18px}
+  .spartner .stext{font-size:13px;color:var(--ink);line-height:1.85}
+  .ssafe{border:1.5px solid var(--accent);background:#F1F8F3;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.7;color:#2b6b47;margin:6px 0 14px}
+  .squote{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:16px;color:var(--navy);background:var(--ice-soft);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .lens{background:#fff;border:1.5px solid var(--line);border-radius:15px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:var(--shadow);transition:border-color .15s,transform .1s}
+  .lens:active{transform:scale(.99)}
+  .lens .lt{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15px;color:var(--navy);margin-bottom:6px}
+  .lens .ld{font-size:13px;color:#333;line-height:1.8}
+  .lens::after{content:"この切り口で語る →";display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--accent);text-align:right}
 
   /* BLOCK 2-c: 保存バー・利用規約モーダル */
   .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:19;
@@ -277,13 +296,14 @@ const S = {
   profile:{ lastName:"", firstName:"", kana:"", email:"", tel:"" },
   certs:[{y:"",m:"",name:"",expiry:""}],
   skills:[{name:"",years:"",achv:""}],
-  jobs:[{company:"",role:"",employment:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
+  jobs:[{company:"",client:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
+  story:{ phase:0, challenge:"", understanding:"", lenses:[], chosen:-1, draft:"" },
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
-const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","職務要約","自己PR","確認・出力"];
+const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","職務要約","自己PR","確認・出力","面接ストーリー"];
 const TOTAL = STEPS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
@@ -439,13 +459,13 @@ const VIEWS = [
         <div class="cardhead"><b>スキル ${i+1}</b>${S.skills.length>1?`<button class="del" onclick="delItem('skills',${i})">削除</button>`:""}</div>
         <div class="row2">
           <label class="f"><span>名称</span>
-            <input value="${esc(s.name)}" oninput="S.skills[${i}].name=this.value" placeholder="ITトレーニング"></label>
+            <input value="${esc(s.name)}" oninput="S.skills[${i}].name=this.value" placeholder="例：スタッフ育成 / 販売企画"></label>
           <label class="f"><span>経験年数</span>
             <input value="${esc(s.years)}" oninput="S.skills[${i}].years=this.value" placeholder="2年"></label>
         </div>
         <label class="f"><span>実績（何をして、どうなったか）</span>
           <textarea id="skv${i}" oninput="S.skills[${i}].achv=this.value;grow(this);cnt('skc${i}',this)"
-            placeholder="例：27回開催、参加者2,331名。アンケートで83%が「次に同じ問題が起きても自分で対処できる」と回答。">${esc(s.achv)}</textarea>
+            placeholder="例：店舗スタッフ15名の育成を担当。接客マニュアルを整備し、新人が独り立ちするまでの期間を2か月→3週間に短縮。">${esc(s.achv)}</textarea>
           <div class="count" id="skc${i}"></div>
           <div class="hint">初級・上級ではなく、回数・人数・結果で書くと、採用側に実力が伝わります。</div>
         </label>
@@ -470,18 +490,26 @@ const VIEWS = [
   /* 3 職務経歴 */ ()=>`
     <div class="h2">職務経歴</div>
     <div class="lede">会社ごとに、担当と実績を。長文をそのまま貼り付けても構いません（欄は自動で広がります）。</div>
+    <div class="ordernote">上から<b>新しい順</b>に入力してください（職歴1＝現職・直近）。職務経歴書でも、この順に上から並びます。</div>
     ${S.jobs.map((j,i)=>`
       <div class="card">
         <div class="cardhead"><b>職歴 ${i+1}</b>${S.jobs.length>1?`<button class="del" onclick="delItem('jobs',${i})">削除</button>`:""}</div>
         <label class="f"><span>会社名</span>
           <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
+        <label class="f"><span>出向先・常駐先（任意）</span>
+          <input value="${esc(j.client)}" oninput="S.jobs[${i}].client=this.value" placeholder="例：◯◯株式会社（客先常駐の場合）">
+          <div class="hint">派遣・SES・出向などで、実際の勤務先が所属会社と異なる場合に記入します。</div></label>
         <label class="f"><span>ロール（職務名／部署／担当範囲）</span>
           <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="ITサポート リード / 情報システム部"></label>
-        <label class="f"><span>雇用形態</span>
-          <select onchange="S.jobs[${i}].employment=this.value">
-            <option value="">選択してください</option>
-            ${EMPLOYMENTS.map(e=>`<option value="${e}" ${j.employment===e?"selected":""}>${e}</option>`).join("")}
-          </select></label>
+        <div class="row2">
+          <label class="f"><span>雇用形態</span>
+            <select onchange="S.jobs[${i}].employment=this.value">
+              <option value="">選択</option>
+              ${EMPLOYMENTS.map(e=>`<option value="${e}" ${j.employment===e?"selected":""}>${e}</option>`).join("")}
+            </select></label>
+          <label class="f"><span>対象ユーザー数（任意）</span>
+            <input value="${esc(j.users)}" oninput="S.jobs[${i}].users=this.value" placeholder="例：5,000名"></label>
+        </div>
         <label class="f"><span>在籍期間（開始）</span>
           <div class="row2">${ySel(j.fromY,`S.jobs[${i}].fromY=this.value`)}${mSel(j.fromM,`S.jobs[${i}].fromM=this.value`)}</div></label>
         <label class="f"><span>在籍期間（終了）</span>
@@ -498,7 +526,7 @@ const VIEWS = [
         <button class="ai" onclick="brushAchv(${i},this)">✦ この実績をAIで整える</button>
         <div id="aiz${i}">${cmpHTML(j.achvOrig, j.achv, `undoJob(${i})`)}</div>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('jobs',{company:'',role:'',employment:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
+    <button class="addbtn" onclick="addItem('jobs',{company:'',client:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
 
   /* 4 職務要約 */ ()=>`
     <div class="h2">職務要約</div>
@@ -534,8 +562,156 @@ const VIEWS = [
     <div class="toolbar">
       <button class="primary" onclick="printDoc()">PDFで保存・印刷</button>
     </div>
-    <div id="docWrap">${docHTML()}</div>`
+    <div id="docWrap">${docHTML()}</div>`,
+
+  /* 7 面接ストーリー */ ()=>storyView()
 ];
+
+/* ============ BLOCK 10: 面接ストーリー（P2） ============ */
+function storyView(){
+  const st=S.story;
+  if(st.phase===0) return `
+    <div class="slabor">
+      <div class="stitle">職務経歴書、完成しました。</div>
+      <div class="stext">まず、おつかれさまでした。これは、あなたが目的に向かって踏み出した、確かな一歩です。</div>
+    </div>
+    <div class="spartner">
+      <div class="stext">ここからは、私があなたのパートナーです。面接で"勝てる一つのストーリー"を、一緒に組み立てましょう。職務経歴書のすべてを面接で読み上げる必要はありません。あなたが一番語りたい経験を、面接官が思わず聞きたくなる形に整えます。</div>
+    </div>
+    <label class="f"><span>いま、お仕事で悩んでいること・引っかかっていることは何ですか？</span>
+      <textarea class="big" id="chBox" oninput="S.story.challenge=this.value;grow(this)"
+        placeholder="例：やっていることは多いのに、成果として何を語ればいいか分からない。／今のやり方に無駄を感じるが、変える提案ができていない。など、正直な気持ちで。">${esc(st.challenge)}</textarea></label>
+    <div class="ssafe">ここでお話しいただく内容は、運営者（私たち）には一切届きません。サーバーに保存されることもありません。安心して、正直に教えてください。</div>
+    <button class="ai" onclick="reflectBack(this)">次へ（あなたの状況を確認します）</button>
+    <div id="stMsg"></div>`;
+
+  if(st.phase===1) return `
+    <div class="h2">認識の確認</div>
+    <div class="lede">すぐに答えを出す前に、私があなたの状況を正しく理解できているか、確認させてください。</div>
+    <div class="squote">こういう認識で合っていますか？</div>
+    <label class="f"><span>私の理解（違っていれば直してください）</span>
+      <textarea class="big" id="undBox" oninput="S.story.understanding=this.value;grow(this)">${esc(st.understanding)}</textarea></label>
+    <button class="ai" onclick="generateLenses(this)">はい、合っています（切り口を見る）</button>
+    <button class="ai sub" onclick="backStory(0)">悩みを入れ直す</button>
+    <div id="stMsg"></div>`;
+
+  if(st.phase===2) return `
+    <div class="h2">語り方の切り口</div>
+    <div class="lede">あなたの経験を、面接で強く伝えるための"切り口"です。ピンとくるものを一つ選んでください。選ぶのはあなたです。</div>
+    ${st.lenses.map((l,i)=>`
+      <div class="lens" onclick="chooseLens(${i},this)">
+        <div class="lt">${esc(l.title||"")}</div>
+        <div class="ld">${esc(l.desc||"")}</div>
+      </div>`).join("")}
+    <button class="ai sub" onclick="generateLenses(this,true)">どれも違う（切り口を出し直す）</button>
+    <button class="ai sub" onclick="backStory(1)">認識の確認にもどる</button>
+    <div id="stMsg"></div>`;
+
+  // phase 3
+  return `
+    <div class="h2">あなたのストーリー（下書き）</div>
+    <div class="lede">選んだ切り口で、面接で語る骨組みを作りました。これは下書きです。<b>必ずあなたの言葉に直してください。</b></div>
+    <label class="f"><span>ストーリー骨組み（編集できます）</span>
+      <textarea class="big" id="stDraft" style="min-height:320px" oninput="S.story.draft=this.value;grow(this)">${esc(st.draft)}</textarea></label>
+    <div class="note"><b>「根底」は、聞かれるまで言わない隠し玉です。</b>すべてを話しきらないことが、静かな自信になります。整いすぎた言葉は面接で浮くので、少し崩して、あなたの声にしてください。</div>
+    <button class="ai sub" onclick="chooseLens(S.story.chosen)">この切り口で作り直す</button>
+    <button class="ai sub" onclick="backStory(2)">切り口を選び直す</button>`;
+}
+
+function backStory(p){ S.story.phase=p; render(); window.scrollTo(0,0); saveNow(); }
+
+async function reflectBack(btn){
+  const zone=document.getElementById("stMsg");
+  const raw=(S.story.challenge||"").trim();
+  if(!raw){ zone.innerHTML=`<div class="ng">まず、悩んでいることを書いてください。</div>`; return; }
+  setLoading(btn,true,"確認中…");
+  try{
+    const out=await callAI(`利用者が、仕事の悩み・引っかかりを話しました。あなたは聞き役です。すぐに解決策や助言を出さず、あなたの理解が正しいか確認するために、聞いた内容を言い換えて返してください。
+・事実を一つも足さない。盛らない。決めつけない。
+・オウム返しにせず、要点と本質を掴んで整理する。
+・「〜という状況で、〜に引っかかっている、という理解で合っていますか？」のような、確認のトーンで。
+・120字程度。出力は言い換え本文のみ。
+
+【利用者の悩み】
+${raw}`,600);
+    S.story.understanding=out; S.story.phase=1; render(); window.scrollTo(0,0); saveNow();
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+}
+
+async function generateLenses(btn,regen){
+  const zone=document.getElementById("stMsg");
+  const und=(S.story.understanding||"").trim();
+  const {skills,jobs}=inputsForAI();
+  setLoading(btn,true,regen?"出し直し中…":"考え中…");
+  try{
+    const out=await callAI(`あなたは採用のプロであり、面接コーチです。利用者の「状況」と「職務経歴」をもとに、面接で自分を強く伝えるための"語り方の切り口（レンズ）"を提案してください。
+
+切り口とは、平凡な事実を「戦略的な物語」に見せる視点です（例：単なる問い合わせ対応→「最もコストの高い部分を見抜いて叩いた」＝パレートの法則）。当てはまるビジネス法則やPMフレームワークがあれば、それを一言添える。
+
+厳守：
+・利用者が実際に経験した事実だけを使う。新しい成果や数字を捏造しない。盛らない。
+・本当に当てはまる切り口だけを出す。無理に数を増やさない。
+・互いに明確に異なる切り口にする。似たものを並べない。
+・実績が薄い場合でも突き放さず、「今の経験をこう捉え直せる」という前向きな切り口にする。
+
+出力形式：JSON配列だけを出力（前置き・説明・マークダウン記号なし）。各要素は {"title":"切り口の名前と一言の視点（30字以内）","desc":"その視点でどう語れるかを2〜3文で。利用者の実際の経験に即して。"}。要素数は2または3。確信を持てるものだけ。
+
+【状況】
+${und}
+
+【職務経歴】
+${jobs||"（記載が少ない）"}
+
+【スキル】
+${skills||"（記載が少ない）"}`,2000);
+    let parsed=[];
+    try{ parsed=JSON.parse(out.replace(/```json|```/g,"").trim()); }catch(e){ parsed=[]; }
+    if(!Array.isArray(parsed)||!parsed.length){
+      zone.innerHTML=`<div class="ng">切り口をうまく作れませんでした。悩みや経歴をもう少し具体的にすると、精度が上がります。もう一度お試しください。</div>`;
+      setLoading(btn,false); return;
+    }
+    S.story.lenses=parsed.slice(0,3); S.story.chosen=-1; S.story.phase=2; render(); window.scrollTo(0,0); saveNow();
+  }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+}
+
+async function chooseLens(i,el){
+  S.story.chosen=i;
+  if(el){ el.style.opacity=".6"; el.style.pointerEvents="none"; }
+  const lens=S.story.lenses[i]; const und=(S.story.understanding||"").trim();
+  const {skills,jobs}=inputsForAI();
+  try{
+    const out=await callAI(`あなたは採用のプロであり、面接コーチです。選ばれた「切り口」で、面接で語る一つのストーリーの骨組みを作ってください。
+
+構成は必ず次の順で、各見出しを付ける：
+【結果】まず結論・成果を一言で（数字があれば事実のまま）
+【課題】その裏にあった問題を簡潔に
+【どのように】どういう考え方・戦略で取り組んだか（ここが切り口の核）
+【手段】具体的に何をしたか
+【根底（隠し玉）】この取り組みの奥にある、より大きな狙い。※面接で聞かれるまで言わない、静かな自信の土台。
+
+厳守：
+・利用者が実際に経験した事実だけを使う。新しい数字や成果を捏造しない。盛らない。
+・もし実績が薄く、語れる結果がまだ弱い場合は、突き放さず、代わりに「次にこう動けば、こういう数字・成果が測れる」という次の一歩を【次のアクション】という見出しで具体的に示す。
+・利用者本人が自分の言葉に直せるよう、平易で自然な日本語で。断定しすぎない。
+・出力は本文（見出し＋各内容）のみ。前置き・解説不要。
+
+【選ばれた切り口】
+${lens?.title||""}：${lens?.desc||""}
+
+【状況】
+${und}
+
+【職務経歴】
+${jobs||"（記載が少ない）"}
+
+【スキル】
+${skills||"（記載が少ない）"}`,3000);
+    S.story.draft=out; S.story.phase=3; render(); window.scrollTo(0,0); saveNow();
+  }catch(err){
+    S.story.chosen=-1; render();
+    const zone=document.getElementById("stMsg"); if(zone) zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`;
+  }
+}
 
 /* ============ BLOCK 7: AI機能（整形・生成・前後比較） ============ */
 const RULE = `・記載された事実だけを使い、新しい数字や成果を勝手に足さない。
@@ -577,7 +753,7 @@ function inputsForAI(){
   const certs=S.certs.filter(c=>c.name.trim())
     .map(c=>`・${c.name}${c.y?`（${c.y}年${c.m||""}${c.m?"月":""}取得）`:""}`).join("\n");
   const jobs=S.jobs.filter(j=>j.company.trim()||j.achv.trim())
-    .map(j=>`■${j.company}／${j.role}（${period(j)}）\n${j.achv}`).join("\n\n");
+    .map(j=>`■${j.company}${j.client?`（就業先：${j.client}）`:""}／${j.role}（${period(j)}）${j.users?`／対象${j.users}`:""}\n${j.achv}`).join("\n\n");
   return {skills,certs,jobs};
 }
 
@@ -657,10 +833,17 @@ function docHTML(){
       ${s.achv?`<div class="a">${esc(s.achv)}</div>`:""}</div>`).join("")}`:""}
     ${certs.length?`<h2>資格</h2>${certs.map(c=>`<div class="kv"><span>${esc(c.name)}</span>
       <span class="r">${[c.y?`${c.y}年${c.m?c.m+"月":""}取得`:"",c.expiry?`期限 ${esc(c.expiry)}`:""].filter(Boolean).join("／")}</span></div>`).join("")}`:""}
-    ${jobs.length?`<h2>職務経歴</h2>${jobs.map(j=>{const d=duration(j);return `<div class="exp">
-      <div class="co">${esc(j.company||"（会社名）")}</div>
+    ${jobs.length?`<h2>略歴</h2>
+      <table class="hist"><thead><tr><th>期間</th><th>会社名</th><th>就業先</th><th>雇用形態</th></tr></thead>
+      <tbody>${jobs.map(j=>{const d=duration(j);return `<tr>
+        <td>${esc(period(j))}${d?`<br><span class="dur">（${esc(d)}）</span>`:""}</td>
+        <td>${esc(j.company||"—")}</td>
+        <td>${esc(j.client||"—")}</td>
+        <td>${esc(j.employment||"—")}</td></tr>`}).join("")}</tbody></table>`:""}
+    ${jobs.length?`<h2>職務経歴（詳細）</h2>${jobs.map(j=>{const d=duration(j);return `<div class="exp">
+      <div class="co">${esc(j.company||"（会社名）")}${j.client?` <span style="font-weight:400;color:var(--muted)">→ ${esc(j.client)}</span>`:""}</div>
       <div class="rl">${[j.role,j.employment].filter(Boolean).map(esc).join("　|　")}</div>
-      <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}</div>
+      <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}${j.users?`　|　対象ユーザー ${esc(j.users)}`:""}</div>
       <div class="ac">${esc(j.achv)}</div></div>`}).join("")}`:""}
     ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
   </div>`;
@@ -730,19 +913,20 @@ function render(){
   document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
   document.getElementById("barFill").style.width=`${((step+1)/TOTAL)*100}%`;
   main.innerHTML=VIEWS[step]();
-  growAll(); updateNav(); window.scrollTo(0,0);
+  growAll(); updateNav();
 }
 function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
-  next.textContent = step===TOTAL-1 ? "PDFで保存" : "次へ";
+  if(step===TOTAL-1){ next.style.display="none"; }
+  else { next.style.display=""; next.textContent = step===6 ? "次へ：面接ストーリー" : "次へ"; }
   next.disabled = (step===0 && !(S.keyVerified && S.agreed));
 }
 function go(dir){
-  if(dir>0 && step===TOTAL-1){ printDoc(); return; }
-  if(dir>0 && step<TOTAL-1) step++;
+  if(dir>0 && step>=TOTAL-1) return;
+  if(dir>0) step++;
   else if(dir<0 && step>0) step--;
-  render();
+  render(); window.scrollTo(0,0);
 }
 function setLoading(btn,on,label){
   btn.disabled=on;
@@ -752,7 +936,10 @@ function setLoading(btn,on,label){
 function clearMsg(id){ const el=document.getElementById(id); if(el) el.innerHTML=""; updateNav(); }
 function esc(s){return (s||"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function fmtDate(iso){const d=new Date(iso);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;}
-function addItem(k,o){S[k].push(o);render();saveNow();}
+function addItem(k,o){
+  S[k].push(o); render(); saveNow();
+  requestAnimationFrame(()=>{const cards=main.querySelectorAll('.card'); if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
+}
 function delItem(k,i){S[k].splice(i,1);render();saveNow();}
 
 /* 入力のたびに自動保存（600ms待ってからまとめて書き込む） */
