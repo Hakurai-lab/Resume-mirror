@@ -164,10 +164,11 @@
   .lens .lt{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:15px;color:var(--navy);margin-bottom:6px}
   .lens .ld{font-size:13px;color:#333;line-height:1.8}
   .lens::after{content:"この切り口で語る →";display:block;margin-top:10px;font-size:12px;font-weight:700;color:var(--accent);text-align:right}
-  .chatlog{display:flex;flex-direction:column;gap:9px;margin:6px 0 14px}
-  .bubble{max-width:85%;padding:11px 14px;border-radius:15px;font-size:13.5px;line-height:1.8;white-space:normal}
-  .bubble.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:5px}
-  .bubble.ai{align-self:flex-start;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-bottom-left-radius:5px}
+  .chatlog{display:flex;flex-direction:column;gap:2px;margin:8px 0 16px}
+  .turnblock{padding:14px 2px;border-bottom:1px solid var(--line)}
+  .turnblock .who{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:11.5px;color:var(--navy);margin-bottom:5px;letter-spacing:.02em}
+  .turnblock .msg{font-size:14px;line-height:1.9;color:var(--ink)}
+  .turnblock.user{background:var(--ice-soft);border:none;border-radius:13px;padding:13px 15px;margin:4px 0}
 
   /* BLOCK 2-c: 保存バー・利用規約モーダル */
   .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:19;
@@ -216,7 +217,7 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v10</span>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v11</span>
     <button onclick="openTerms()">利用規約・プライバシー</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
   </div>
@@ -614,7 +615,7 @@ function storyView(){
     <div class="ssafe">ここでお話しいただく内容は、運営者（私たち）には一切届きません。サーバーに保存されることもありません。安心して、正直に教えてください。</div>
 
     <div class="chatlog" id="chatlog">
-      ${st.chat.map(m=>`<div class="bubble ${m.role}">${esc(m.text).replace(/\n/g,"<br>")}</div>`).join("")}
+      ${st.chat.map(m=>`<div class="turnblock ${m.role}"><div class="who">${m.role==="user"?"あなた":"Resume Mirror"}</div><div class="msg">${esc(m.text).replace(/\n/g,"<br>")}</div></div>`).join("")}
     </div>
 
     <label class="f" style="margin-top:6px"><span>${hasTurns?"続けて話す":"まず、あなたの言葉で教えてください"}</span>
@@ -632,6 +633,20 @@ const STORY_RULE = `厳守事項：
 ・成果が少ない・穴がある場合は、ごまかさず正直に伝える。そのうえで現職で何をすればその経験に繋がるかを示す。`;
 
 function backToChat(){ S.story.phase="chat"; render(); window.scrollTo(0,0); saveNow(); }
+
+/* AIの返答から JSON 配列だけを頑健に取り出す（余計な文・記号・末尾カンマに耐える） */
+function extractJsonArray(text){
+  if(!text) return null;
+  let t=String(text).replace(/```json/gi,"").replace(/```/g,"").trim();
+  try{ const p=JSON.parse(t); if(Array.isArray(p)) return p; }catch(e){}
+  const s=t.indexOf("["), e=t.lastIndexOf("]");
+  if(s!==-1 && e!==-1 && e>s){
+    let sub=t.slice(s,e+1);
+    try{ const p=JSON.parse(sub); if(Array.isArray(p)) return p; }catch(e2){}
+    try{ const p=JSON.parse(sub.replace(/,\s*([\]}])/g,"$1")); if(Array.isArray(p)) return p; }catch(e3){}
+  }
+  return null;
+}
 
 function storyTranscript(){
   return S.story.chat.map(m=>`${m.role==="user"?"利用者":"あなた（コーチ）"}：${m.text}`).join("\n");
@@ -697,10 +712,22 @@ ${storyTranscript()}
 ${jobs||"（記載が少ない）"}
 【スキル】
 ${skills||"（記載が少ない）"}`,2200);
-    let parsed=[];
-    try{ parsed=JSON.parse(out.replace(/```json|```/g,"").trim()); }catch(e){ parsed=[]; }
-    if(!Array.isArray(parsed)||!parsed.length){
-      zone.innerHTML=`<div class="ng">うまくまとめられませんでした。もう少しお話を続けると精度が上がります。</div>`;
+    let parsed=extractJsonArray(out);
+    if(!parsed || !parsed.length){
+      // 1回だけ、AIの出力をJSON配列だけに整形し直してもらう（余計な前置き対策）
+      try{
+        const fixed=await callAI(`次のテキストから、面接の語り口候補を表すJSON配列だけを取り出して出力してください。各要素は {"title":"...","desc":"..."} の形。配列以外の文字（説明・記号・コードブロック）は一切付けないこと。\n\n${out}`,1500);
+        parsed=extractJsonArray(fixed);
+      }catch(e2){}
+    }
+    if(!Array.isArray(parsed) || !parsed.length){
+      zone.innerHTML=`<div class="ng">うまくまとめられませんでした。もう少しお話を続けてから、もう一度お試しください。</div>`;
+      setLoading(btn,false); return;
+    }
+    // title/desc を持つ要素だけに整える
+    parsed=parsed.filter(p=>p && (p.title||p.desc)).map(p=>({title:String(p.title||"").trim(),desc:String(p.desc||"").trim()}));
+    if(!parsed.length){
+      zone.innerHTML=`<div class="ng">うまくまとめられませんでした。もう少しお話を続けてから、もう一度お試しください。</div>`;
       setLoading(btn,false); return;
     }
     S.story.patterns=parsed.slice(0,3); S.story.chosen=-1; S.story.phase="patterns";
