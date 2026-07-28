@@ -209,6 +209,19 @@
   .asumh{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12.5px;color:var(--navy);margin-bottom:7px}
   .asumi{font-size:12.5px;line-height:1.7;color:#333;margin-bottom:3px}
   .asumi b{color:var(--navy);margin-right:7px}
+  .tabs{display:flex;gap:8px;margin:14px 0 12px}
+  .tab{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--muted);
+    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;cursor:pointer}
+  .tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .styleswitch{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:12px;font-size:12.5px;color:var(--muted)}
+  .sw{padding:7px 13px;border-radius:99px;border:1.5px solid var(--line);background:#fff;color:var(--navy);
+    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12px;cursor:pointer}
+  .sw.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .usechk{display:flex;align-items:center;gap:7px;cursor:pointer;margin:0}
+  .usechk input{width:auto;margin:0}
+  .usetag{font-size:11px;color:var(--muted);font-weight:700}
+  .tofirst{background:#fff;color:var(--accent);border:1.5px solid var(--accent);border-radius:8px;padding:4px 10px;
+    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:11.5px;cursor:pointer;margin-left:8px}
   .sj.set{width:auto;padding:0 9px;font-size:11px}
   .stale{border:2px solid var(--warn);background:#FDF3F4;border-radius:13px;padding:13px 15px;margin:12px 0;font-size:13px;line-height:1.75}
   .stale b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:4px}
@@ -275,14 +288,51 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v17</span>
-    <button onclick="openTerms()">利用規約・プライバシー</button>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v18</span>
+    <button onclick="openTips()">利用料の確認</button>
+    <button onclick="openTerms()">規約</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
   </div>
   <nav class="nav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
     <button class="next" id="nextBtn" onclick="go(1)">次へ</button>
   </nav>
+</div>
+
+<!-- ============ 利用料・残高の確認方法（TIPS） ============ -->
+<div class="modal" id="tipsModal" onclick="if(event.target===this)closeTips()">
+  <div class="sheet">
+    <div class="mh"><b>利用料と残高の確認方法</b><button onclick="closeTips()">閉じる</button></div>
+    <div class="mb">
+      <div class="em"><b>まず、安心してください。</b><br>
+      このツールの1回のAI呼び出しで使う量は、ごくわずかです。職務経歴書と面接シートを一通り作っても、通常は数十円程度に収まります。</div>
+
+      <h3>残高と使用量を見る場所</h3>
+      <p>残高は、このツールからは取得できません（Anthropicが外部に公開していないため）。ご自身のConsoleで確認してください。</p>
+      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
+        <b>Anthropic Console を開く</b>
+        <small><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> にログインします。</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
+        <b>残高を見る</b>
+        <small>左メニューの「Billing（お支払い）」に、現在の残高（Credit balance）が表示されます。ここから追加もできます。</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
+        <b>使用量を見る</b>
+        <small>左メニューの「Usage（使用状況）」で、日ごと・モデルごとの使用量と金額を確認できます。実際にいくら使ったかは、ここが正確です。</small>
+      </div></div>
+
+      <h3>費用を抑えたいとき</h3>
+      <ul>
+        <li>STEP 0 でモデルを「軽量」に切り替えると、費用が下がります</li>
+        <li>面接シートは項目ごとに作り直せます。全部作り直すより、気になる項目だけやり直すほうが安く済みます</li>
+        <li>職務経歴書の入力・編集・PDF出力は、AIを使わなければ費用はかかりません</li>
+      </ul>
+
+      <h3>残高が切れたら</h3>
+      <p>AIボタンを押したときに「残高が不足しているようです」と表示されます。その場合も、<b>入力内容はこの端末に残っています</b>。残高を追加すれば、続きから作業できます。急ぎでない場合は、STEP 0 の「AIを使わずに進む」で、職務経歴書の確認とPDF出力だけ行うこともできます。</p>
+    </div>
+  </div>
 </div>
 
 <!-- ============ 利用規約・プライバシーポリシー ============ -->
@@ -365,8 +415,8 @@ const S = {
   pr:"", prOrig:"",
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
-    achv:[{what:"",num:"",hints:[]},{what:"",num:"",hints:[]}],
-    patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[]
+    achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}],
+    patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[], sheetTab:"sheet", cheatMode:"full", sheetKey:""
   },
   date:new Date().toISOString().slice(0,10)
 };
@@ -763,7 +813,11 @@ function viewPrep(){
   <div class="secnote">面接で話したい経験を書き出します（最大10件・保存されます）。<b>実際に語るのは2〜3件</b>なので、まずは自信のあるものから。数字が思いつかないときは、ボタンで一緒に探します。<br>※面接シート作成時は、各実績の<b>先頭400字まで</b>を使用します。重要な内容は前半に書いてください。</div>
   ${st.achv.map((a,i)=>`
     <div class="card">
-      <div class="cardhead"><b>実績 ${i+1}</b>${st.achv.length>1?`<button class="del" onclick="delAchv(${i})">削除</button>`:""}</div>
+      <div class="cardhead">
+        <label class="usechk"><input type="checkbox" ${a.use!==false?"checked":""}
+          onchange="S.story.achv[${i}].use=this.checked;render(true);saveNow()"><b>実績 ${i+1}</b><span class="usetag">${a.use!==false?"今回使う":"使わない"}</span></label>
+        ${st.achv.length>1?`<button class="del" onclick="delAchv(${i})">削除</button>`:""}
+      </div>
       <label class="f"><span>実績として実行したこと</span>
         <textarea oninput="S.story.achv[${i}].what=this.value;grow(this);scheduleSave()"
           placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した。">${esc(a.what)}</textarea>
@@ -790,7 +844,7 @@ function viewPrep(){
     const rank=(Array.isArray(st.ranked)?st.ranked.indexOf(i):-1);
     return `
     <div class="lens ${rank>=0?"picked":""}" onclick="pickPattern(${i})">
-      ${rank>=0?`<div class="rank">${rank===0?"1位・入り口の一本":(rank+1)+"位・弾薬"}</div>`:""}
+      ${rank>=0?`<div class="rank">${rank===0?"1位・入り口の一本":(rank+1)+"位・弾薬"}</div>${rank>0?`<button class="tofirst" onclick="event.stopPropagation();makeFirst(${i})">1位にする</button>`:""}`:""}
       <div class="lt">${esc(p.title||"")}</div>
       <div class="ld">${esc(p.desc||"")}</div>
       ${(p.evidence&&p.evidence.length)?`<div class="ev">根拠：実績${esc(p.evidence.join("、"))}</div>`:""}
@@ -798,7 +852,7 @@ function viewPrep(){
   ${(Array.isArray(st.ranked)&&st.ranked.length)?`<div class="ok">✓ ${st.ranked.length}件を選びました（1位：${esc(st.patterns[st.ranked[0]]?.title||"")}）。下の「次へ」で面接シートを作成します。</div>`:""}`;
 }
 
-function addAchv(){ S.story.achv.push({what:"",num:"",hints:[]}); render(); saveNow();
+function addAchv(){ S.story.achv.push({what:"",num:"",hints:[],use:true}); render(); saveNow();
   requestAnimationFrame(()=>{const c=main.querySelectorAll('.card'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});}); }
 function delAchv(i){ S.story.achv.splice(i,1); render(true); saveNow(); }
 /* AI文字列をインラインJavaScriptに埋めず、配列の位置だけを渡す */
@@ -812,6 +866,12 @@ function addHint(i,label){
   S.story.achv[i].num = cur ? cur+"\n"+label+"：" : label+"：";
   render(true); saveNow();
   requestAnimationFrame(()=>{const el=document.getElementById("anum"+i); if(el){el.focus(); el.setSelectionRange(el.value.length,el.value.length);}});
+}
+function makeFirst(i){
+  const r=(Array.isArray(S.story.ranked)?S.story.ranked:[]).filter(x=>x!==i);
+  S.story.ranked=[i,...r];
+  S.story.chosen=i;
+  render(true); updateNav(); saveNow();
 }
 function pickPattern(i){
   const r=Array.isArray(S.story.ranked)?S.story.ranked.slice():[];
@@ -896,10 +956,13 @@ ${what}`,1000);
 }
 
 /* AIに送る実績テキスト。1件あたりを刻み、根拠になった実績を優先して並べる（打ち切り防止） */
+function usedAchv(){ return S.story.achv.filter(a=>a.use!==false && (a.what||"").trim()); }
 function achvText(priorityIdx){
+  /* 「今回使う」に絞る。1件も選ばれていなければ、全件を対象にする */
+  const anyUsed=S.story.achv.some(a=>a.use!==false && (a.what||"").trim());
   const items=S.story.achv
     .map((a,i)=>({i, a}))
-    .filter(x=>(x.a.what||"").trim());
+    .filter(x=>(x.a.what||"").trim() && (!anyUsed || x.a.use!==false));
   if(!items.length) return "（未記入）";
   let ordered=items;
   if(Array.isArray(priorityIdx) && priorityIdx.length){
@@ -910,9 +973,11 @@ function achvText(priorityIdx){
   return ordered.map(x=>`実績${x.i+1}：${clip(x.a.what)}\n数字：${clip(x.a.num)||"（未記入）"}`).join("\n\n");
 }
 function achvSummary(){
-  const items=S.story.achv.map((a,i)=>({i,a})).filter(x=>(x.a.what||"").trim());
-  if(!items.length) return "";
-  return `<div class="asum"><div class="asumh">登録済みの実績（${items.length}件）</div>
+  const all=S.story.achv.map((a,i)=>({i,a})).filter(x=>(x.a.what||"").trim());
+  const items=all.filter(x=>x.a.use!==false);
+  if(!all.length) return "";
+  if(!items.length) return `<div class="asum"><div class="asumh">「今回使う」が1件も選ばれていません（全${all.length}件を対象にします）</div></div>`;
+  return `<div class="asum"><div class="asumh">今回使う実績（${items.length}件 / 登録${all.length}件）${items.length>4?" ※4件以内が目安です":""}</div>
     ${items.map(x=>`<div class="asumi"><b>実績${x.i+1}</b>${esc((x.a.what||"").trim().slice(0,60))}${(x.a.what||"").trim().length>60?"…":""}</div>`).join("")}</div>`;
 }
 function jdText(){
@@ -1034,8 +1099,45 @@ function renderSheetText(t){
   }).join("");
 }
 
+function setTab(t){ S.story.sheetTab=t; render(); window.scrollTo(0,0); saveNow(); }
+function setCheat(m){ S.story.cheatMode=m; render(true); saveNow(); }
+
+function keySheetHTML(){
+  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join(" ");
+  const head=[S.story.jd.company,S.story.jd.position].filter(Boolean).join("／");
+  return `<div class="sheetdoc" id="sheetdoc">
+    <h1>面接シート（キーワード版）</h1>
+    <div class="smeta">${esc(head||"応募先未入力")}${nm?`　／　${esc(nm)}`:""}</div>
+    <div class="sbody">${renderSheetText(S.story.sheetKey)}</div>
+  </div>`;
+}
+
+/* キーワード版は1回のAI呼び出しでまとめて作る（呼び出し回数を増やさないため） */
+async function buildKeywords(btn){
+  const zone=document.getElementById("sheetMsg");
+  const sh=S.story.sheet||{};
+  const body=SHEET_BLOCKS.filter(b=>sh[b.key]).map(b=>`【${b.label}】\n${sh[b.key]}`).join("\n\n");
+  if(!body){ if(zone) zone.innerHTML=`<div class="ng">先にシートを作成してください。</div>`; return; }
+  setLoading(btn,true,"作成中…");
+  try{
+    S.story.sheetKey=await callAI(`次の面接シートを、面接中にちらっと見るための「キーワード版」に変換してください。
+
+厳守：
+・文章にしない。各項目、キーワードと短い語句の箇条書きだけにする。1行は20字以内。
+・書かれている事実だけを使う。新しい内容を足さない。数字はそのまま残す。
+・元の見出し（【】で囲まれた行）はそのまま残し、その下に箇条書きを置く。
+・「▶」で始まる行（ターンを返す合図）は、短くしてそのまま残す。
+・出力は本文のみ。
+
+${body}`,2500);
+    S.story.cheatMode="key";
+    render(true); saveNow();
+  }catch(err){ if(zone) zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+}
+
 function viewSheet(){
   const sh=S.story.sheet||{};
+  const tab=S.story.sheetTab==="resume"?"resume":"sheet";
   const done=SHEET_BLOCKS.filter(b=>sh[b.key]).length;
   const r=Array.isArray(S.story.ranked)&&S.story.ranked.length ? S.story.ranked : (S.story.chosen>=0?[S.story.chosen]:[]);
   const pat=S.story.patterns[r[0]];
@@ -1043,6 +1145,14 @@ function viewSheet(){
   return `
   <div class="h2">面接シート</div>
   <div class="lede">面接当日、手元で見るためのシートです。読み上げる台本ではなく、確認するカンペとして使ってください。</div>
+  <div class="tabs">
+    <button class="tab ${tab==="sheet"?"on":""}" onclick="setTab('sheet')">カンペ</button>
+    <button class="tab ${tab==="resume"?"on":""}" onclick="setTab('resume')">職務経歴書</button>
+  </div>
+  ${tab==="resume"?`
+    <div class="hint" style="margin-bottom:12px">面接中、経歴を確認したいときはこちら。</div>
+    <div class="toolbar"><button class="primary" onclick="printDoc()">職務経歴書をPDFで保存</button></div>
+    <div id="docWrap">${docHTML()}</div>`:`
   ${pat?`<div class="note"><b>主軸の語り口：</b>${esc(pat.title)}${subCount?`　／　補強の弾薬 ${subCount}件`:""}</div>`:`<div class="ng">先にSTEP 7で語り口を選んでください。</div>`}
   ${sheetIsStale()?`<div class="stale">
     <b>この面接シートは、変更前の内容で作られています。</b>
@@ -1055,7 +1165,13 @@ function viewSheet(){
   </div>
   <div class="hint" style="margin-bottom:14px">項目ごとに1回ずつAIを呼び出します。1つ失敗しても、作成済みの内容は消えません。</div>
   <div id="sheetMsg"></div>
-  <div id="sheetWrap">${sheetHTML()}</div>
+  ${done?`<div class="styleswitch">
+    <span>表示：</span>
+    <button class="sw ${S.story.cheatMode!=="key"?"on":""}" onclick="setCheat('full')">フル（文章）</button>
+    <button class="sw ${S.story.cheatMode==="key"?"on":""}" onclick="setCheat('key')">キーワード</button>
+    ${(S.story.cheatMode==="key"&&!S.story.sheetKey)?`<button class="ai sub" style="margin-left:8px" onclick="buildKeywords(this)">キーワード版を作る</button>`:""}
+  </div>`:""}
+  <div id="sheetWrap">${(S.story.cheatMode==="key"&&S.story.sheetKey)?keySheetHTML():sheetHTML()}</div>
   ${done?`
   <div class="fchk">
     <div class="fchkh">出す前の事実確認（AIではなく、あなたが確認してください）</div>
@@ -1064,7 +1180,7 @@ function viewSheet(){
       .map((t,i)=>`<label class="fchkitem"><input type="checkbox" ${S.story.checks&&S.story.checks[i]?"checked":""}
         onchange="S.story.checks=S.story.checks||[];S.story.checks[${i}]=this.checked;saveNow()"><span>${t}</span></label>`).join("")}
     <div class="hint" style="margin-top:8px">このツールは事実を作りません。最後に守るのは、あなた自身の確認です。</div>
-  </div>`:""}`;
+  </div>`:""}`}`;
 }
 
 function sheetHTML(){
@@ -1091,7 +1207,12 @@ function blockPrompt(key){
   /* 根拠になった実績を優先して送る（実績が多くても打ち切られないように） */
   const ev=[].concat(pat.evidence||[], ...subs.map(s=>s.evidence||[]));
   const {jobs}=inputsForAI();
+  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join(" ");
   const common=`
+【応募者本人】
+氏名：${nm||"（未入力）"}${S.profile.kana?`（${S.profile.kana}）`:""}
+※自己紹介などで名前を書く場合は、必ずこの氏名を使う。「◯◯」のような伏せ字を使わない。氏名が未入力の場合のみ、名前に触れない文にする。
+
 【応募先】
 ${jdText()}
 
@@ -1363,16 +1484,19 @@ function restore(){
     S.keyVerified=false;
     // 旧バージョンで保存された story 形式を新形式へ移行（不足フィールドを補う）
     S.story = Object.assign({ jd:{company:"",position:"",audience:"不明 / 未定",raw:"",digest:null},
-      achv:[], patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[] }, S.story||{});
+      achv:[], patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[], sheetTab:"sheet", cheatMode:"full", sheetKey:"" }, S.story||{});
     S.story.jd = Object.assign({company:"",position:"",audience:"不明 / 未定",raw:"",digest:null}, S.story.jd||{});
     if(!Array.isArray(S.story.achv)) S.story.achv=[];
-    if(!S.story.achv.length) S.story.achv=[{what:"",num:"",hints:[]},{what:"",num:"",hints:[]}];
-    S.story.achv=S.story.achv.map(a=>Object.assign({what:"",num:"",hints:[]},a||{}));
+    if(!S.story.achv.length) S.story.achv=[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}];
+    S.story.achv=S.story.achv.map(a=>Object.assign({what:"",num:"",hints:[],use:true},a||{}));
     if(!Array.isArray(S.story.patterns)) S.story.patterns=[];
     if(typeof S.story.chosen!=="number") S.story.chosen=-1;
     if(!Array.isArray(S.story.ranked)) S.story.ranked = (S.story.chosen>=0?[S.story.chosen]:[]);
     if(!Array.isArray(S.story.checks)) S.story.checks=[];
     if(typeof S.story.sheetSig!=="string") S.story.sheetSig="";
+    if(S.story.sheetTab!=="resume") S.story.sheetTab="sheet";
+    if(S.story.cheatMode!=="key") S.story.cheatMode="full";
+    if(typeof S.story.sheetKey!=="string") S.story.sheetKey="";
     if(S.story.jd.digest && typeof S.story.jd.digest==="object"){
       S.story.jd.digest=Object.assign({role:"",must:"",want:"",culture:""}, S.story.jd.digest);
     }
@@ -1392,6 +1516,8 @@ function clearAll(){
 }
 
 /* 利用規約モーダル */
+function openTips(){ document.getElementById("tipsModal").classList.add("on"); }
+function closeTips(){ document.getElementById("tipsModal").classList.remove("on"); }
 function openTerms(){ document.getElementById("termsModal").classList.add("on"); }
 function closeTerms(){ document.getElementById("termsModal").classList.remove("on"); }
 
