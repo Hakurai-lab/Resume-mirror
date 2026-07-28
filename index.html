@@ -275,7 +275,7 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v16</span>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v17</span>
     <button onclick="openTerms()">利用規約・プライバシー</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
   </div>
@@ -800,7 +800,7 @@ function viewPrep(){
 
 function addAchv(){ S.story.achv.push({what:"",num:"",hints:[]}); render(); saveNow();
   requestAnimationFrame(()=>{const c=main.querySelectorAll('.card'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});}); }
-function delAchv(i){ S.story.achv.splice(i,1); render(); saveNow(); }
+function delAchv(i){ S.story.achv.splice(i,1); render(true); saveNow(); }
 /* AI文字列をインラインJavaScriptに埋めず、配列の位置だけを渡す */
 function addHintByIndex(i,hi){
   const h=S.story.achv[i] && Array.isArray(S.story.achv[i].hints) ? S.story.achv[i].hints[hi] : null;
@@ -810,7 +810,7 @@ function addHintByIndex(i,hi){
 function addHint(i,label){
   const cur=(S.story.achv[i].num||"").trim();
   S.story.achv[i].num = cur ? cur+"\n"+label+"：" : label+"：";
-  render(); saveNow();
+  render(true); saveNow();
   requestAnimationFrame(()=>{const el=document.getElementById("anum"+i); if(el){el.focus(); el.setSelectionRange(el.value.length,el.value.length);}});
 }
 function pickPattern(i){
@@ -820,7 +820,7 @@ function pickPattern(i){
   else r.push(i);                   /* タップした順に優先順位がつく */
   S.story.ranked=r;
   S.story.chosen = r.length ? r[0] : -1;   /* 1位を主軸として保持（既存処理との互換） */
-  render(); updateNav(); saveNow();
+  render(true); updateNav(); saveNow();     /* 連続で選べるよう、位置を動かさない */
 }
 
 async function extractJD(btn){
@@ -1015,13 +1015,13 @@ function sheetIsStale(){
 /* maxTokens はブロックごとに設定する。短い出力に大きな上限を与えると、指示を外れて長文化する余地が増えるため。 */
 const SHEET_BLOCKS = [
   { key:"policy",   label:"1. 面談での方針",            max:700 },
-  { key:"stance",   label:"2. 自分の立ち位置",          max:900 },
+  { key:"stance",   label:"2. 自分の立ち位置",          max:1300 },
   { key:"intro",    label:"3. 簡単な自己紹介",          max:700 },
   { key:"opening",  label:"4. 入り口の一本",            max:700 },
-  { key:"deepdive", label:"5. 掘られたら話すこと",      max:1500 },
+  { key:"deepdive", label:"5. 掘られたら話すこと",      max:2200 },
   { key:"gap",      label:"6. 弱み・ギャップを聞かれたら", max:900 },
   { key:"questions",label:"7. 相手への質問",            max:800 },
-  { key:"lens",     label:"8. あなたの実績につく名前",    max:900 }
+  { key:"lens",     label:"8. あなたの実績につく名前",    max:1800 }
 ];
 function blockMax(key){ const b=SHEET_BLOCKS.find(x=>x.key===key); return b&&b.max?b.max:1200; }
 
@@ -1125,7 +1125,7 @@ ${SPEAK_RULE}
     opening:`「ご経歴を教えてください」と聞かれたときに、まず話す“入り口の一本”を、実際に声に出す言葉として書いてください。入力済みの数字があればそれを先に置き、なければ対象規模や実行した行動を具体的に置く。次に「どういう考え方でやったか」を一言。全部を語り切らず、2〜3文で止める。最後に必ず改行して「▶ ここで止めて、ターンを返す。食いついてきたら次を話す。」という行を入れる。${common}`,
     deepdive:`相手が「どうやって？」と食いついてきたときに話す内容を、実際に声に出す言葉として書いてください。まず主軸の語り口について、具体的な打ち手を2〜3つ。入力済みの数字がある場合のみ、その数字を添える。ない場合は対象・頻度・範囲・手順など入力済みの具体情報を使う。補強の語り口がある場合は、その後に「さらに聞かれたら出す話」として、優先順位の順に1つずつ短く添える（自分から並べ立てないトーンで）。本人の行動に当てはまるビジネス法則やフレームワーク（ITIL、パレートの法則など）があれば、最後に一言だけ添える。ただし「これに基づいて実施した」とは言わず、「結果的にこういう考え方に当たる形でした」という振り返りの言い方にする。最後に必ず改行して「▶ ここで一度区切り、相手の反応を見る。」という行を入れる。${common}`,
     gap:`「（応募先が求める分野）の経験はありますか？」と弱みを突かれたときの返し方を、実際に声に出す言葉として書いてください。順番は必ず、①正直に足りない部分を認める → ②それでも持っている近い経験や土台を示す → ③自分の本当の強みに話を戻す。盛らないこと。最後に必ず改行して「▶ 強みで締めてターンを返す。」という行を入れる。${common}`,
-    lens:`本人が自覚していない可能性が高い「自分の実績につく名前」を教えてください。本人の行動に実際に合致するビジネス法則・フレームワーク・専門用語を3つまで挙げ、それぞれ「あなたの◯◯という行動は、△△（名前）に当たります」という形で、なぜそう言えるかを1〜2文で説明する。
+    lens:`本人が自覚していない可能性が高い「自分の実績につく名前」を教えてください。本人の行動に実際に合致するビジネス法則・フレームワーク・専門用語を3つまで挙げ、それぞれ「あなたの◯◯という行動は、△△（名前）に当たります」という形で、なぜそう言えるかを1〜2文（各100字以内）で説明する。全体で500字以内に収める。
 これは面接で読み上げる文ではなく、本人が自分の仕事の意味を理解するための説明です。専門用語を知らない人にも分かる平易な言葉で書いてください。
 ・本人が当時それを意識していたかは問わない。行動が合致していれば名前を当ててよい。
 ・当てはまるものがなければ、無理に挙げず、代わりに「今の業務でこういう視点を持つと、こう名前がつく」という形で示す。
@@ -1421,12 +1421,19 @@ function jumpStep(i){
   if(i>0 && !(S.agreed && (S.keyVerified || S.aiSkipped))) return;   /* 設定(0)へはいつでも戻れる */
   step=i; render(); window.scrollTo(0,0);
 }
-function render(){
+/* keepScroll=true のとき、再描画してもスクロール位置を保つ。
+   画面を作り直すと一瞬ページ高さが縮み、ブラウザが位置を巻き戻すため。 */
+function render(keepScroll){
+  const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : null;
   document.getElementById("stepName").textContent=STEPS[step];
   document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
   document.getElementById("barFill").style.width=`${((step+1)/TOTAL)*100}%`;
   main.innerHTML=VIEWS[step]();
   growAll(); updateNav(); drawStepJump();
+  if(y!==null){
+    window.scrollTo(0,y);
+    requestAnimationFrame(()=>window.scrollTo(0,y));   /* 高さが戻った後にもう一度合わせる */
+  }
 }
 function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
