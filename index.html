@@ -232,6 +232,23 @@
     color:var(--navy);font-size:13px;cursor:pointer;padding:0}
   .rlbtns button:disabled{opacity:.3;cursor:default}
   .rlbtns .rlx{width:auto;padding:0 10px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:11.5px;color:var(--warn);border-color:var(--warn)}
+  /* BLOCK 2-g: 実績グラフ */
+  .chartsvg{width:100%;height:auto;display:block;margin:6px 0}
+  .chartempty{background:var(--ice-soft);border-radius:11px;padding:20px;text-align:center;font-size:12.5px;color:var(--muted)}
+  .chartblock{margin:14px 0 18px;page-break-inside:avoid}
+  .charttitle{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:4px}
+  .chartnote{font-size:11px;color:var(--muted);margin:2px 0 6px}
+  .chartsrc{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic}
+  .charttbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px}
+  .charttbl th,.charttbl td{border:1px solid var(--line);padding:5px 7px;text-align:right}
+  .charttbl th:first-child,.charttbl td:first-child{text-align:left;white-space:nowrap}
+  .charttbl thead th{background:var(--ice-soft);color:var(--navy);font-weight:700}
+  .cdot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle}
+  .serieRow{border-top:1px solid var(--line);padding-top:11px;margin-top:11px}
+  .serieHead{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12px;color:var(--navy);margin-bottom:7px}
+  .row3s{display:grid;grid-template-columns:1fr 92px;gap:8px;margin-bottom:8px}
+  .chartprev{margin-top:14px;background:#fff;border:1.5px dashed var(--line);border-radius:12px;padding:12px}
+  .chartprevh{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:6px}
   .sj.set{width:auto;padding:0 9px;font-size:11px}
   .stale{border:2px solid var(--warn);background:#FDF3F4;border-radius:13px;padding:13px 15px;margin:12px 0;font-size:13px;line-height:1.75}
   .stale b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:4px}
@@ -298,7 +315,7 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v19</span>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v20</span>
     <button onclick="openTips()">利用料の確認</button>
     <button onclick="openTerms()">規約</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
@@ -423,6 +440,7 @@ const S = {
   jobs:[{company:"",client:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
+  charts:[],
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
     achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}],
@@ -431,7 +449,7 @@ const S = {
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
-const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","職務要約","自己PR","確認・出力","面接の準備","面接シート"];
+const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","職務要約","自己PR","実績グラフ","確認・出力","面接の準備","面接シート"];
 const TOTAL = STEPS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
@@ -701,7 +719,9 @@ const VIEWS = [
     <div id="cmpPR">${cmpHTML(S.prOrig, S.pr, "undoPR()")}</div>
     <div class="note"><b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。</div>`,
 
-  /* 6 確認・出力 */ ()=>`
+  /* 6 実績グラフ */ ()=>viewCharts(),
+
+  /* 7 確認・出力 */ ()=>`
     <div class="h2">確認・出力</div>
     <div class="lede">仕上がりを確認して、PDFで保存できます。</div>
     <div class="toolbar">
@@ -709,8 +729,8 @@ const VIEWS = [
     </div>
     <div id="docWrap">${docHTML()}</div>`,
 
-  /* 7 面接の準備 */ ()=>viewPrep(),
-  /* 8 面接シート */ ()=>viewSheet()
+  /* 8 面接の準備 */ ()=>viewPrep(),
+  /* 9 面接シート */ ()=>viewSheet()
 ];
 
 /* ガードレールは2種類。用途で使い分ける。※v12で「見捨てない」が脱落した。消さないこと。 */
@@ -1085,6 +1105,189 @@ ${achvText()}`,3000);
     S.story.patterns=parsed.slice(0,3); S.story.chosen=-1; S.story.ranked=[];
     render(); saveNow();
   }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+}
+
+/* ============ BLOCK 12: 実績グラフ（Step6） ============ */
+const MAX_CHARTS = 5;
+const CHART_COLORS = ["#1E2761","#2E8B57","#B23A48"];
+const CHART_PLACES = [
+  {v:"skills", label:"スキル・経験の後"},
+  {v:"jobs",   label:"職務経歴（詳細）の後"},
+  {v:"pr",     label:"自己PRの後（最後）"}
+];
+
+function newChart(){
+  return { title:"", place:"jobs", labels:"", normalize:false, source:"",
+    series:[{name:"",type:"bar",values:""},{name:"",type:"line",values:""},{name:"",type:"line",values:""}] };
+}
+function parseLabels(str){ return String(str==null?"":str).split(/[,、]+/).map(x=>x.trim()).filter(Boolean); }
+/* 「25,512」のような桁区切りと、区切り文字としてのカンマは見分けがつかない。
+   そこで2通りに解釈し、期間ラベルの個数に合うほうを採用する。 */
+function parseNums(str, expect){
+  const t=String(str==null?"":str).replace(/[，]/g,",").replace(/[　]/g," ").trim();
+  if(!t) return [];
+  const toNums=(arr)=>arr.map(x=>x.trim()).filter(Boolean).map(x=>Number(x)).filter(n=>isFinite(n));
+  /* 解釈A：カンマも区切りとして扱う（例 "25512, 22678"） */
+  const a=toNums(t.split(/[,、;\s]+/));
+  /* 解釈B：カンマは桁区切りとして扱う（例 "25,512、22,678"） */
+  const b=toNums(t.split(/[、;\s]+/).map(x=>x.replace(/,/g,"")));
+  if(expect>0){
+    if(a.length===expect && b.length!==expect) return a;
+    if(b.length===expect && a.length!==expect) return b;
+  }
+  return b.length?b:a;
+}
+function chartData(c){
+  const labels=parseLabels(c.labels);
+  const series=(c.series||[]).map(s=>({name:(s.name||"").trim(), type:s.type==="line"?"line":"bar", vals:parseNums(s.values, labels.length)}))
+    .filter(s=>s.vals.length>0);
+  return {labels, series};
+}
+function fmtNum(n){ return n.toLocaleString("ja-JP"); }
+
+/* 数値をSVGの折れ線・棒グラフに描く。目盛りを揃える指定があれば系列ごとに正規化する。 */
+function chartSVG(c){
+  const {labels, series}=chartData(c);
+  if(!labels.length || !series.length) return `<div class="chartempty">期間ラベルと数値を入力すると、ここにグラフが表示されます。</div>`;
+  const n=labels.length;
+  const W=640,H=300,L=58,R=24,T=20,B=62, iw=W-L-R, ih=H-T-B;
+  const gmax=Math.max(...series.map(s=>Math.max(...s.vals)),1);
+  const maxOf=(s)=> c.normalize ? Math.max(...s.vals,1) : gmax;
+  const x=(i)=> L + (iw/n)*(i+0.5);
+  const y=(v,s)=> T + ih - (v/maxOf(s))*ih;
+  const bars=series.filter(s=>s.type==="bar");
+  const slot=iw/n, bw=Math.min(38,(slot*0.62)/Math.max(bars.length,1));
+
+  let g="";
+  /* 目盛り線 */
+  [0,0.5,1].forEach(t=>{
+    const yy=T+ih-ih*t;
+    g+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#DDE3F0" stroke-width="1"/>`;
+    if(!c.normalize) g+=`<text x="${L-8}" y="${yy+4}" font-size="11" fill="#6B7280" text-anchor="end">${fmtNum(Math.round(gmax*t))}</text>`;
+  });
+  /* 棒 */
+  bars.forEach((s,bi)=>{
+    const ci=series.indexOf(s);
+    s.vals.forEach((v,i)=>{
+      if(i>=n) return;
+      const bx=x(i) - (bars.length*bw)/2 + bi*bw;
+      const by=y(v,s), bh=Math.max(1,T+ih-by);
+      g+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${CHART_COLORS[ci%3]}" opacity="0.85" rx="2"/>`;
+    });
+  });
+  /* 折れ線 */
+  series.filter(s=>s.type==="line").forEach(s=>{
+    const ci=series.indexOf(s);
+    const pts=s.vals.slice(0,n).map((v,i)=>`${x(i).toFixed(1)},${y(v,s).toFixed(1)}`).join(" ");
+    g+=`<polyline points="${pts}" fill="none" stroke="${CHART_COLORS[ci%3]}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    s.vals.slice(0,n).forEach((v,i)=>{
+      g+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v,s).toFixed(1)}" r="4" fill="#fff" stroke="${CHART_COLORS[ci%3]}" stroke-width="2.5"/>`;
+    });
+  });
+  /* 期間ラベル */
+  labels.forEach((lb,i)=>{
+    g+=`<text x="${x(i).toFixed(1)}" y="${T+ih+20}" font-size="12" fill="#141A3C" text-anchor="middle">${esc(lb)}</text>`;
+  });
+  /* 凡例 */
+  let lx=L;
+  series.forEach((s,ci)=>{
+    const nm=s.name||`系列${ci+1}`;
+    g+=`<rect x="${lx}" y="${T+ih+34}" width="11" height="11" fill="${CHART_COLORS[ci%3]}" rx="2"/>`;
+    g+=`<text x="${lx+16}" y="${T+ih+44}" font-size="11.5" fill="#141A3C">${esc(nm)}</text>`;
+    lx += 22 + nm.length*12;
+  });
+  return `<svg class="chartsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+
+/* グラフの下に、実数のデータ表を必ず添える（見た目だけで判断させないため） */
+function chartTable(c){
+  const {labels, series}=chartData(c);
+  if(!labels.length || !series.length) return "";
+  return `<table class="charttbl"><thead><tr><th></th>${labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead>
+    <tbody>${series.map((s,ci)=>`<tr><td><span class="cdot" style="background:${CHART_COLORS[ci%3]}"></span>${esc(s.name||`系列${ci+1}`)}</td>
+      ${labels.map((_,i)=>`<td>${s.vals[i]!=null?fmtNum(s.vals[i]):"—"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+}
+
+function chartBlockHTML(c){
+  const {labels, series}=chartData(c);
+  if(!labels.length || !series.length) return "";
+  return `<div class="chartblock">
+    ${c.title?`<div class="charttitle">${esc(c.title)}</div>`:""}
+    ${chartSVG(c)}
+    ${c.normalize?`<div class="chartnote">※系列ごとに目盛りを揃えています。実数は下の表をご覧ください。</div>`:""}
+    ${chartTable(c)}
+    ${c.source?`<div class="chartsrc">${esc(c.source)}</div>`:""}
+  </div>`;
+}
+/* 指定した配置のグラフを、職務経歴書の該当位置に差し込む */
+function chartsAt(place){
+  return (S.charts||[]).filter(c=>(c.place||"jobs")===place).map(chartBlockHTML).join("");
+}
+
+function addChart(){
+  if((S.charts||[]).length>=MAX_CHARTS) return;
+  S.charts.push(newChart()); render(); saveNow();
+  requestAnimationFrame(()=>{const c=main.querySelectorAll('.card'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
+}
+function delChart(i){ S.charts.splice(i,1); render(true); saveNow(); }
+
+function viewCharts(){
+  const list=S.charts||[];
+  return `
+  <div class="h2">実績グラフ</div>
+  <div class="lede">数字の変化を1枚の図にすると、採用担当の理解が一気に速くなります。任意です。作らなくても先へ進めます。</div>
+  <div class="note"><b>盛らないための約束。</b>グラフの下には、必ず実数の表と出典が出ます。図の印象だけで判断させず、根拠を一緒に示すためです。</div>
+
+  ${list.map((c,i)=>`
+    <div class="card">
+      <div class="cardhead"><b>グラフ ${i+1}</b><button class="del" onclick="delChart(${i})">削除</button></div>
+      <label class="f"><span>タイトル</span>
+        <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="例：ナレッジ整理と問い合わせ件数の推移"></label>
+      <label class="f"><span>職務経歴書のどこに置くか</span>
+        <select onchange="S.charts[${i}].place=this.value;render(true);saveNow()">
+          ${CHART_PLACES.map(p=>`<option value="${p.v}" ${(c.place||"jobs")===p.v?"selected":""}>${p.label}</option>`).join("")}
+        </select></label>
+      <label class="f"><span>横軸のラベル（読点かカンマで区切る）</span>
+        <input value="${esc(c.labels)}" oninput="S.charts[${i}].labels=this.value;render(true);saveNow()" placeholder="例：2023, 2024, 2025">
+        <div class="hint">年度・四半期・施策の前後など。3〜6個が読みやすいです。</div></label>
+
+      ${c.series.map((s,si)=>`
+        <div class="serieRow">
+          <div class="serieHead"><span class="cdot" style="background:${CHART_COLORS[si%3]}"></span>系列 ${si+1}${si>0?"（任意）":""}</div>
+          <div class="row3s">
+            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;render(true);saveNow()" placeholder="例：問い合わせ件数">
+            <select onchange="S.charts[${i}].series[${si}].type=this.value;render(true);saveNow()">
+              <option value="bar" ${s.type!=="line"?"selected":""}>棒</option>
+              <option value="line" ${s.type==="line"?"selected":""}>折れ線</option>
+            </select>
+          </div>
+          <input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;render(true);saveNow()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">
+        </div>`).join("")}
+
+      <label class="f" style="margin-top:12px">
+        <div class="hint">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
+            <input type="checkbox" style="width:auto" ${c.normalize?"checked":""}
+              onchange="S.charts[${i}].normalize=this.checked;render(true);saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
+          </label>
+          <div style="margin-top:4px">例：記事数585件と問い合わせ25,512件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
+        </div></label>
+
+      <label class="f"><span>出典・対象期間</span>
+        <input value="${esc(c.source)}" oninput="S.charts[${i}].source=this.value;scheduleSave()" placeholder="例：出典 社内ServiceNowデータ（在職期間 約2年の比較）">
+        <div class="hint">面接では「その数字はどこから？」が必ず来ます。ここを書いておくと強いです。</div></label>
+
+      <div class="chartprev">
+        <div class="chartprevh">プレビュー</div>
+        ${chartSVG(c)}
+        ${chartTable(c)}
+      </div>
+    </div>`).join("")}
+
+  ${list.length<MAX_CHARTS
+    ? `<button class="addbtn" onclick="addChart()">＋ グラフを追加（${list.length} / ${MAX_CHARTS}）</button>`
+    : `<div class="hint">グラフは最大${MAX_CHARTS}枚までです。</div>`}
+  ${!list.length?`<div class="hint" style="margin-top:10px">数字がまだ揃っていなくても大丈夫です。あとから戻って追加できます。</div>`:""}`;
 }
 
 /* ============ BLOCK 11: 面接シート（Step8） ============ */
@@ -1481,6 +1684,7 @@ function docHTML(){
     ${skills.length?`<h2>活かせるスキル・経験</h2>${skills.map(s=>`<div class="sk">
       <div class="n">${esc(s.name)}${s.years?`（${esc(s.years)}）`:""}</div>
       ${s.achv?`<div class="a">${esc(s.achv)}</div>`:""}</div>`).join("")}`:""}
+    ${chartsAt("skills")}
     ${certs.length?`<h2>資格</h2>${certs.map(c=>`<div class="kv"><span>${esc(c.name)}</span>
       <span class="r">${[c.y?`${c.y}年${c.m?c.m+"月":""}取得`:"",c.expiry?`期限 ${esc(c.expiry)}`:""].filter(Boolean).join("／")}</span></div>`).join("")}`:""}
     ${jobs.length?`<h2>略歴</h2>
@@ -1495,7 +1699,9 @@ function docHTML(){
       <div class="rl">${[j.role,j.employment].filter(Boolean).map(esc).join("　|　")}</div>
       <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}${j.users?`　|　対象ユーザー ${esc(j.users)}`:""}</div>
       <div class="ac">${esc(j.achv)}</div></div>`}).join("")}`:""}
+    ${chartsAt("jobs")}
     ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
+    ${chartsAt("pr")}
   </div>`;
 }
 /* PDFのファイル名を Resume Mirror_職務経歴書_氏名 にする */
@@ -1540,6 +1746,14 @@ function restore(){
     if(typeof S.story.chosen!=="number") S.story.chosen=-1;
     if(!Array.isArray(S.story.ranked)) S.story.ranked = (S.story.chosen>=0?[S.story.chosen]:[]);
     if(!Array.isArray(S.story.checks)) S.story.checks=[];
+    if(!Array.isArray(S.charts)) S.charts=[];
+    S.charts=S.charts.slice(0,MAX_CHARTS).map(c=>{
+      const d=Object.assign(newChart(), c||{});
+      d.series=(Array.isArray(c&&c.series)?c.series:[]).slice(0,3);
+      while(d.series.length<3) d.series.push({name:"",type:d.series.length?"line":"bar",values:""});
+      d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:""}, x||{}));
+      return d;
+    });
     if(typeof S.story.sheetSig!=="string") S.story.sheetSig="";
     if(S.story.sheetTab!=="resume") S.story.sheetTab="sheet";
     if(S.story.cheatMode!=="key") S.story.cheatMode="full";
@@ -1612,7 +1826,7 @@ function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
   if(step===TOTAL-1){ next.style.display="none"; }
-  else { next.style.display=""; next.textContent = step===6 ? "経験を伝わる強みに変える" : (step===7 ? "次へ：面接シートを作る" : "次へ"); }
+  else { next.style.display=""; next.textContent = step===7 ? "経験を伝わる強みに変える" : (step===8 ? "次へ：面接シートを作る" : "次へ"); }
   next.disabled = (step===0 && !(S.agreed && (S.keyVerified || S.aiSkipped)));
 }
 function go(dir){
