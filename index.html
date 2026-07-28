@@ -249,6 +249,23 @@
   .row3s{display:grid;grid-template-columns:1fr 92px;gap:8px;margin-bottom:8px}
   .chartprev{margin-top:14px;background:#fff;border:1.5px dashed var(--line);border-radius:12px;padding:12px}
   .chartprevh{font-size:11.5px;color:var(--muted);font-weight:700;margin-bottom:6px}
+  .chartlg{display:flex;flex-direction:column;gap:4px;margin:4px 0 8px}
+  .lgrow{display:flex;align-items:center;gap:8px;font-size:11.5px;flex-wrap:wrap}
+  .lgdot{width:11px;height:11px;border-radius:2px;flex:0 0 auto}
+  .lgdot.bar{opacity:.45}
+  .lgname{font-weight:700;color:var(--ink)}
+  .lgkind{font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:1px 7px}
+  .lgval{color:var(--navy);font-weight:700;margin-left:auto}
+  .clearapp{width:100%;background:#fff;color:var(--warn);border:1.5px solid var(--warn);border-radius:12px;
+    padding:12px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13.5px;cursor:pointer;margin-bottom:8px}
+  .kwhead{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:13.5px;color:#fff;background:var(--navy);
+    border-radius:8px;padding:7px 12px;margin:14px 0 8px}
+  .kwhead:first-child{margin-top:0}
+  .kwbul{position:relative;padding-left:18px;margin-bottom:5px;font-size:13.5px;line-height:1.7}
+  .kwbul::before{content:"";position:absolute;left:4px;top:9px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .kwbul.num::before{display:none}
+  .kwbul.num{padding-left:4px;font-weight:700;color:var(--navy)}
+  .sgap{height:7px}
   .sj.set{width:auto;padding:0 9px;font-size:11px}
   .stale{border:2px solid var(--warn);background:#FDF3F4;border-radius:13px;padding:13px 15px;margin:12px 0;font-size:13px;line-height:1.75}
   .stale b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:4px}
@@ -315,11 +332,14 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v20</span>
-    <button onclick="openTips()">利用料の確認</button>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v21</span>
+    <button onclick="exportData()">書き出し</button>
+    <button onclick="document.getElementById('importFile').click()">読み込み</button>
+    <button onclick="openTips()">利用料</button>
     <button onclick="openTerms()">規約</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
   </div>
+  <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importData(this)">
   <nav class="nav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
     <button class="next" id="nextBtn" onclick="go(1)">次へ</button>
@@ -453,7 +473,22 @@ const STEPS = ["はじめの設定","プロフィール","スキル・資格","�
 const TOTAL = STEPS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
+/* 途中打ち切りが起きたら、上限を上げて自動でもう一度だけ試す。
+   利用者に「入力を短くしてください」と手作業を求める前に、こちらで吸収する。 */
 async function callAI(prompt, maxTokens=3000){
+  try{
+    return await callAIOnce(prompt, maxTokens);
+  }catch(err){
+    if(err && err.message==="TRUNCATED"){
+      const bigger = Math.min(Math.round(maxTokens*2), 8000);
+      if(bigger > maxTokens){
+        try{ return await callAIOnce(prompt, bigger); }catch(e2){ throw e2; }
+      }
+    }
+    throw err;
+  }
+}
+async function callAIOnce(prompt, maxTokens=3000){
   if(!S.apiKey) throw new Error("NOKEY");
   const res = await fetch(API_URL,{
     method:"POST",
@@ -481,7 +516,7 @@ async function callAI(prompt, maxTokens=3000){
 }
 function humanError(err){
   if(err.message==="NOKEY") return "APIキーが設定されていません。STEP 0 に戻って設定してください。";
-  if(err.message==="TRUNCATED") return "文章が途中で切れました。入力を短くするか、もう一度作成してください。";
+  if(err.message==="TRUNCATED") return "分量が多く、一度で書き切れませんでした。入力を少し減らすか、もう一度お試しください。";
   if(err.message==="REFUSAL") return "AIがこの内容への回答を生成できませんでした。入力内容をご確認ください。";
   if(err.message==="EMPTY") return "AIから文章を受け取れませんでした。もう一度お試しください。";
   const s=err.status;
@@ -819,6 +854,9 @@ function viewPrep(){
   <div class="ssafe">ここで入力された内容は、運営者には一切届かず、運営者のサーバーに保存されることもありません。AI機能を使った部分だけは、あなた自身のAPIキーでAnthropicへ送信されます。安心して、正直に教えてください。</div>
 
   <div class="sechead">① 応募先の情報</div>
+  ${(st.jd.company||st.jd.position||st.jd.raw||st.jd.digest||st.patterns.length||Object.keys(st.sheet||{}).length)?`
+    <button class="clearapp" onclick="clearApplication()">別の応募先に切り替える（この応募先の情報を消す）</button>
+    <div class="hint" style="margin-bottom:12px">職務経歴書・実績・グラフは残ります。消えるのは応募先情報・語り口・面接シートだけです。</div>`:""}
   <div class="secnote">求人票があると、シートの精度が大きく変わります。なければ空欄でも進めます。</div>
   <div class="row2">
     <label class="f"><span>会社名</span>
@@ -896,6 +934,15 @@ function viewPrep(){
   </div>`:""}`;
 }
 
+/* 応募先だけを切り替える。職務経歴書側のデータは絶対に消さない。 */
+function clearApplication(){
+  if(!confirm("この応募先の情報を消して、別の応募先に切り替えます。\n\n消えるもの：会社名・ポジション・面談相手・求人票・求人の要点・今回使う実績の選択・語り口・面接シート・キーワード版・事実確認チェック\n\n残るもの：プロフィール・職歴・スキル・資格・実績の内容・職務要約・自己PR・グラフ\n\nよろしいですか？")) return;
+  S.story.jd={ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null };
+  S.story.patterns=[]; S.story.chosen=-1; S.story.ranked=[];
+  S.story.sheet={}; S.story.sheetSig=""; S.story.sheetKey=""; S.story.cheatMode="full"; S.story.checks=[];
+  (S.story.achv||[]).forEach(a=>{ a.use=true; });   /* 実績の内容は残し、選択だけ戻す */
+  render(); window.scrollTo(0,0); saveNow();
+}
 function addAchv(){ S.story.achv.push({what:"",num:"",hints:[],use:true}); render(); saveNow();
   requestAnimationFrame(()=>{const c=main.querySelectorAll('.card'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});}); }
 function delAchv(i){ S.story.achv.splice(i,1); render(true); saveNow(); }
@@ -1110,14 +1157,19 @@ ${achvText()}`,3000);
 /* ============ BLOCK 12: 実績グラフ（Step6） ============ */
 const MAX_CHARTS = 5;
 const CHART_COLORS = ["#1E2761","#2E8B57","#B23A48"];
-const CHART_PLACES = [
-  {v:"skills", label:"スキル・経験の後"},
-  {v:"jobs",   label:"職務経歴（詳細）の後"},
-  {v:"pr",     label:"自己PRの後（最後）"}
+const CHART_SECTIONS = [
+  {v:"summary", label:"職務要約"},
+  {v:"skills",  label:"スキル・経験"},
+  {v:"job",     label:"職務経歴（特定の1社）"},
+  {v:"pr",      label:"自己PR"}
 ];
 
+function newId(pre){ return pre+"_"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function ensureJobIds(){
+  (S.jobs||[]).forEach(j=>{ if(!j.id) j.id=newId("job"); });
+}
 function newChart(){
-  return { title:"", place:"jobs", labels:"", normalize:false, source:"",
+  return { title:"", place:"jobs", section:"job", jobId:"", position:"after", labels:"", normalize:false, source:"",
     series:[{name:"",type:"bar",values:""},{name:"",type:"line",values:""},{name:"",type:"line",values:""}] };
 }
 function parseLabels(str){ return String(str==null?"":str).split(/[,、]+/).map(x=>x.trim()).filter(Boolean); }
@@ -1150,7 +1202,7 @@ function chartSVG(c){
   const {labels, series}=chartData(c);
   if(!labels.length || !series.length) return `<div class="chartempty">期間ラベルと数値を入力すると、ここにグラフが表示されます。</div>`;
   const n=labels.length;
-  const W=640,H=300,L=58,R=24,T=20,B=62, iw=W-L-R, ih=H-T-B;
+  const W=640,H=270,L=58,R=24,T=20,B=36, iw=W-L-R, ih=H-T-B;
   const gmax=Math.max(...series.map(s=>Math.max(...s.vals)),1);
   const maxOf=(s)=> c.normalize ? Math.max(...s.vals,1) : gmax;
   const x=(i)=> L + (iw/n)*(i+0.5);
@@ -1172,7 +1224,7 @@ function chartSVG(c){
       if(i>=n) return;
       const bx=x(i) - (bars.length*bw)/2 + bi*bw;
       const by=y(v,s), bh=Math.max(1,T+ih-by);
-      g+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${CHART_COLORS[ci%3]}" opacity="0.85" rx="2"/>`;
+      g+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${CHART_COLORS[ci%3]}" opacity="0.30" rx="2"/>`;
     });
   });
   /* 折れ線 */
@@ -1188,15 +1240,25 @@ function chartSVG(c){
   labels.forEach((lb,i)=>{
     g+=`<text x="${x(i).toFixed(1)}" y="${T+ih+20}" font-size="12" fill="#141A3C" text-anchor="middle">${esc(lb)}</text>`;
   });
-  /* 凡例 */
-  let lx=L;
-  series.forEach((s,ci)=>{
-    const nm=s.name||`系列${ci+1}`;
-    g+=`<rect x="${lx}" y="${T+ih+34}" width="11" height="11" fill="${CHART_COLORS[ci%3]}" rx="2"/>`;
-    g+=`<text x="${lx+16}" y="${T+ih+44}" font-size="11.5" fill="#141A3C">${esc(nm)}</text>`;
-    lx += 22 + nm.length*12;
-  });
   return `<svg class="chartsvg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img">${g}</svg>`;
+}
+
+/* 凡例はSVGの外に出す。目盛りを揃えると水準が図から読めなくなるため、
+   系列名の横に実数の増減（最初→最後）を必ず併記する。 */
+function chartLegend(c){
+  const {labels, series}=chartData(c);
+  if(!labels.length || !series.length) return "";
+  return `<div class="chartlg">${series.map((s,ci)=>{
+    const v=s.vals.slice(0,labels.length);
+    const first=v[0], last=v[v.length-1];
+    const range=(v.length>1 && first!=null && last!=null) ? `${fmtNum(first)} → ${fmtNum(last)}` : (first!=null?fmtNum(first):"");
+    const kind=s.type==="line"?"折れ線":"棒";
+    return `<div class="lgrow">
+      <span class="lgdot ${s.type==="bar"?"bar":""}" style="background:${CHART_COLORS[ci%3]}"></span>
+      <span class="lgname">${esc(s.name||`系列${ci+1}`)}</span>
+      <span class="lgkind">${kind}</span>
+      <span class="lgval">${esc(range)}</span>
+    </div>`;}).join("")}</div>`;
 }
 
 /* グラフの下に、実数のデータ表を必ず添える（見た目だけで判断させないため） */
@@ -1214,16 +1276,30 @@ function chartBlockHTML(c){
   return `<div class="chartblock">
     ${c.title?`<div class="charttitle">${esc(c.title)}</div>`:""}
     ${chartSVG(c)}
-    ${c.normalize?`<div class="chartnote">※系列ごとに目盛りを揃えています。実数は下の表をご覧ください。</div>`:""}
+    ${chartLegend(c)}
+    ${c.normalize?`<div class="chartnote">※系列ごとに目盛りを揃えています（桁が違うため）。実数は上の増減と下の表をご覧ください。</div>`:""}
     ${chartTable(c)}
     ${c.source?`<div class="chartsrc">${esc(c.source)}</div>`:""}
   </div>`;
 }
-/* 指定した配置のグラフを、職務経歴書の該当位置に差し込む */
-function chartsAt(place){
-  return (S.charts||[]).filter(c=>(c.place||"jobs")===place).map(chartBlockHTML).join("");
+/* 指定した位置（セクション・上下・職歴）に一致するグラフだけを差し込む */
+function chartsAt(section, position, jobId){
+  return (S.charts||[]).filter(c=>{
+    const sec=c.section||"job";
+    const pos=c.position||"after";
+    if(sec!==section) return false;
+    if(pos!==position) return false;
+    if(section==="job") return jobId && c.jobId===jobId;
+    return true;
+  }).map(chartBlockHTML).join("");
 }
 
+/* 入力のたびに画面全体を作り直すと、入力欄が消えてキーボードが閉じる。
+   プレビュー部分だけを差し替えること。 */
+function updateChartPreview(i){
+  const el=document.getElementById("cprev"+i);
+  if(el) el.innerHTML = chartSVG(S.charts[i]) + chartLegend(S.charts[i]) + chartTable(S.charts[i]);
+}
 function addChart(){
   if((S.charts||[]).length>=MAX_CHARTS) return;
   S.charts.push(newChart()); render(); saveNow();
@@ -1244,31 +1320,43 @@ function viewCharts(){
       <label class="f"><span>タイトル</span>
         <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="例：ナレッジ整理と問い合わせ件数の推移"></label>
       <label class="f"><span>職務経歴書のどこに置くか</span>
-        <select onchange="S.charts[${i}].place=this.value;render(true);saveNow()">
-          ${CHART_PLACES.map(p=>`<option value="${p.v}" ${(c.place||"jobs")===p.v?"selected":""}>${p.label}</option>`).join("")}
-        </select></label>
+        <div class="row2">
+          <select onchange="S.charts[${i}].section=this.value;render(true);saveNow()">
+            ${CHART_SECTIONS.map(p=>`<option value="${p.v}" ${(c.section||"job")===p.v?"selected":""}>${p.label}</option>`).join("")}
+          </select>
+          <select onchange="S.charts[${i}].position=this.value;saveNow()">
+            <option value="before" ${c.position==="before"?"selected":""}>の上</option>
+            <option value="after" ${c.position!=="before"?"selected":""}>の下</option>
+          </select>
+        </div>
+        ${(c.section||"job")==="job"?`
+        <select style="margin-top:8px" onchange="S.charts[${i}].jobId=this.value;saveNow()">
+          <option value="">どの職歴か選んでください</option>
+          ${(S.jobs||[]).filter(j=>(j.company||"").trim()).map(j=>`<option value="${esc(j.id)}" ${c.jobId===j.id?"selected":""}>${esc(j.company)}${j.role?`（${esc(j.role)}）`:""}</option>`).join("")}
+        </select>`:""}
+      </label>
       <label class="f"><span>横軸のラベル（読点かカンマで区切る）</span>
-        <input value="${esc(c.labels)}" oninput="S.charts[${i}].labels=this.value;render(true);saveNow()" placeholder="例：2023, 2024, 2025">
+        <input value="${esc(c.labels)}" oninput="S.charts[${i}].labels=this.value;updateChartPreview(${i});scheduleSave()" placeholder="例：2023, 2024, 2025">
         <div class="hint">年度・四半期・施策の前後など。3〜6個が読みやすいです。</div></label>
 
       ${c.series.map((s,si)=>`
         <div class="serieRow">
           <div class="serieHead"><span class="cdot" style="background:${CHART_COLORS[si%3]}"></span>系列 ${si+1}${si>0?"（任意）":""}</div>
           <div class="row3s">
-            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;render(true);saveNow()" placeholder="例：問い合わせ件数">
-            <select onchange="S.charts[${i}].series[${si}].type=this.value;render(true);saveNow()">
+            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="例：問い合わせ件数">
+            <select onchange="S.charts[${i}].series[${si}].type=this.value;updateChartPreview(${i});saveNow()">
               <option value="bar" ${s.type!=="line"?"selected":""}>棒</option>
               <option value="line" ${s.type==="line"?"selected":""}>折れ線</option>
             </select>
           </div>
-          <input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;render(true);saveNow()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">
+          <input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">
         </div>`).join("")}
 
       <label class="f" style="margin-top:12px">
         <div class="hint">
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
             <input type="checkbox" style="width:auto" ${c.normalize?"checked":""}
-              onchange="S.charts[${i}].normalize=this.checked;render(true);saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
+              onchange="S.charts[${i}].normalize=this.checked;updateChartPreview(${i});saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
           </label>
           <div style="margin-top:4px">例：記事数585件と問い合わせ25,512件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
         </div></label>
@@ -1279,8 +1367,7 @@ function viewCharts(){
 
       <div class="chartprev">
         <div class="chartprevh">プレビュー</div>
-        ${chartSVG(c)}
-        ${chartTable(c)}
+        <div id="cprev${i}">${chartSVG(c)}${chartLegend(c)}${chartTable(c)}</div>
       </div>
     </div>`).join("")}
 
@@ -1324,8 +1411,11 @@ function blockMax(key){ const b=SHEET_BLOCKS.find(x=>x.key===key); return b&&b.m
 function renderSheetText(t){
   return esc(t||"").split("\n").map(line=>{
     const s=line.trim();
-    if(!s) return "";
+    if(!s) return `<div class="sgap"></div>`;
     if(s.startsWith("▶")) return `<div class="turncue">${s}</div>`;
+    if(/^【.+】$/.test(s)) return `<div class="kwhead">${s.replace(/^【|】$/g,"")}</div>`;
+    if(/^[・･]/.test(s)) return `<div class="kwbul">${s.replace(/^[・･]\s*/,"")}</div>`;
+    if(/^[0-9０-９]+[.．)）]/.test(s)) return `<div class="kwbul num">${s}</div>`;
     return `<div class="sline">${line}</div>`;
   }).join("");
 }
@@ -1680,11 +1770,14 @@ function docHTML(){
       ${p.email?`<div>Mail：${esc(p.email)}</div>`:""}
       ${p.tel?`<div>電話：${esc(p.tel)}</div>`:""}
     </div>
+    ${chartsAt("summary","before")}
     ${S.summary.trim()?`<h2>職務要約</h2><p>${esc(S.summary)}</p>`:""}
+    ${chartsAt("summary","after")}
+    ${chartsAt("skills","before")}
     ${skills.length?`<h2>活かせるスキル・経験</h2>${skills.map(s=>`<div class="sk">
       <div class="n">${esc(s.name)}${s.years?`（${esc(s.years)}）`:""}</div>
       ${s.achv?`<div class="a">${esc(s.achv)}</div>`:""}</div>`).join("")}`:""}
-    ${chartsAt("skills")}
+    ${chartsAt("skills","after")}
     ${certs.length?`<h2>資格</h2>${certs.map(c=>`<div class="kv"><span>${esc(c.name)}</span>
       <span class="r">${[c.y?`${c.y}年${c.m?c.m+"月":""}取得`:"",c.expiry?`期限 ${esc(c.expiry)}`:""].filter(Boolean).join("／")}</span></div>`).join("")}`:""}
     ${jobs.length?`<h2>略歴</h2>
@@ -1694,14 +1787,14 @@ function docHTML(){
         <td>${esc(j.company||"—")}</td>
         <td>${esc(j.client||"—")}</td>
         <td>${esc(j.employment||"—")}</td></tr>`}).join("")}</tbody></table>`:""}
-    ${jobs.length?`<h2>職務経歴（詳細）</h2>${jobs.map(j=>{const d=duration(j);return `<div class="exp">
+    ${jobs.length?`<h2>職務経歴（詳細）</h2>${jobs.map(j=>{const d=duration(j);return `${chartsAt("job","before",j.id)}<div class="exp">
       <div class="co">${esc(j.company||"（会社名）")}${j.client?` <span style="font-weight:400;color:var(--muted)">→ ${esc(j.client)}</span>`:""}</div>
       <div class="rl">${[j.role,j.employment].filter(Boolean).map(esc).join("　|　")}</div>
       <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}${j.users?`　|　対象ユーザー ${esc(j.users)}`:""}</div>
-      <div class="ac">${esc(j.achv)}</div></div>`}).join("")}`:""}
-    ${chartsAt("jobs")}
+      <div class="ac">${esc(j.achv)}</div></div>${chartsAt("job","after",j.id)}`}).join("")}`:""}
+    ${chartsAt("pr","before")}
     ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
-    ${chartsAt("pr")}
+    ${chartsAt("pr","after")}
   </div>`;
 }
 /* PDFのファイル名を Resume Mirror_職務経歴書_氏名 にする */
@@ -1729,12 +1822,9 @@ function saveNow(){
 }
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,600); }
 
-function restore(){
-  try{
-    const raw=localStorage.getItem(STORE_KEY); if(!raw) return;
-    const d=JSON.parse(raw);
-    Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
-    S.keyVerified=false;
+/* 保存データ・読み込んだファイルを、今の版の形に揃える。
+   restore() と importData() の両方から使うため、関数として切り出す。 */
+function migrateState(){
     // 旧バージョンで保存された story 形式を新形式へ移行（不足フィールドを補う）
     S.story = Object.assign({ jd:{company:"",position:"",audience:"不明 / 未定",raw:"",digest:null},
       achv:[], patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[], sheetTab:"sheet", cheatMode:"full", sheetKey:"" }, S.story||{});
@@ -1746,9 +1836,21 @@ function restore(){
     if(typeof S.story.chosen!=="number") S.story.chosen=-1;
     if(!Array.isArray(S.story.ranked)) S.story.ranked = (S.story.chosen>=0?[S.story.chosen]:[]);
     if(!Array.isArray(S.story.checks)) S.story.checks=[];
+    ensureJobIds();
     if(!Array.isArray(S.charts)) S.charts=[];
     S.charts=S.charts.slice(0,MAX_CHARTS).map(c=>{
       const d=Object.assign(newChart(), c||{});
+      /* 旧形式（place: skills/jobs/pr）から新形式（section＋position）へ */
+      if(!c || !c.section){
+        const old=(c&&c.place)||"jobs";
+        d.section = old==="skills" ? "skills" : (old==="pr" ? "pr" : "job");
+        d.position = "after";
+        if(d.section==="job" && !d.jobId){
+          const firstJob=(S.jobs||[]).find(j=>(j.company||"").trim());
+          d.jobId = firstJob ? firstJob.id : "";
+        }
+      }
+      if(d.position!=="before") d.position="after";
       d.series=(Array.isArray(c&&c.series)?c.series:[]).slice(0,3);
       while(d.series.length<3) d.series.push({name:"",type:d.series.length?"line":"bar",values:""});
       d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:""}, x||{}));
@@ -1762,6 +1864,15 @@ function restore(){
       S.story.jd.digest=Object.assign({role:"",must:"",want:"",culture:""}, S.story.jd.digest);
     }
     if(!S.story.sheet || typeof S.story.sheet!=="object") S.story.sheet={};
+}
+
+function restore(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY); if(!raw) return;
+    const d=JSON.parse(raw);
+    Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
+    S.keyVerified=false;
+    migrateState();
     if(d._at) showSaved(d._at);
   }catch(e){}
 }
@@ -1770,6 +1881,52 @@ function showSaved(t){
   const d=new Date(t);
   el.textContent=`最終保存 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}（この端末内）`;
 }
+/* ---- データの書き出し／読み込み ----
+   PDFを解析して読み戻すのは高くつき精度も出ないため、最初から読み戻せる形（JSON）で書き出す。
+   端末の乗り換え・バックアップ・将来の自動入力の土台を、これ1つで兼ねる。 */
+const EXPORT_VERSION = 1;
+
+function exportData(){
+  try{
+    const d=JSON.parse(JSON.stringify(S));
+    d.apiKey=""; d.keyVerified=false;      /* APIキーは絶対に書き出さない */
+    const pack={ app:"ResumeMirror", exportVersion:EXPORT_VERSION, savedAt:new Date().toISOString(), data:d };
+    const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"職務経歴";
+    const stamp=new Date().toISOString().slice(0,10).replace(/-/g,"");
+    const blob=new Blob([JSON.stringify(pack,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=`ResumeMirror_${nm}_${stamp}.json`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
+  }catch(e){ alert("書き出しに失敗しました。時間をおいて、もう一度お試しください。"); }
+}
+
+function importData(input){
+  const f=input && input.files && input.files[0];
+  if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const pack=JSON.parse(String(rd.result||""));
+      const d = (pack && pack.app==="ResumeMirror" && pack.data) ? pack.data : pack;
+      if(!d || typeof d!=="object") throw new Error("形式が違います");
+      if(!confirm("読み込むと、今この端末に入っている内容は置き換わります。\n\n先に「データを書き出す」でバックアップを取っておくことをおすすめします。\n\n続けますか？")) { input.value=""; return; }
+      const keepKey=S.apiKey, keepSave=S.saveKey, keepAgreed=S.agreed;
+      Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
+      S.apiKey=keepKey; S.saveKey=keepSave; S.agreed=keepAgreed||!!S.agreed; S.keyVerified=false;
+      migrateState();               /* 古い版のファイルでも、今の形に揃える */
+      step=1; render(); window.scrollTo(0,0); saveNow();
+      alert("読み込みました。STEP 0 で接続テストを行うと、AI機能が使えるようになります。");
+    }catch(e){
+      alert("このファイルは読み込めませんでした。Resume Mirror で書き出したファイルを選んでください。");
+    }
+    input.value="";
+  };
+  rd.onerror=()=>{ alert("ファイルを読めませんでした。"); input.value=""; };
+  rd.readAsText(f);
+}
+
 function clearAll(){
   if(!confirm("この端末に保存された入力内容を、すべて消去します。よろしいですか？")) return;
   try{ localStorage.removeItem(STORE_KEY); }catch(e){}
@@ -1844,6 +2001,7 @@ function clearMsg(id){ const el=document.getElementById(id); if(el) el.innerHTML
 function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function fmtDate(iso){const d=new Date(iso);return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;}
 function addItem(k,o){
+  if(k==="jobs" && !o.id) o.id=newId("job");
   S[k].push(o); render(); saveNow();
   requestAnimationFrame(()=>{const cards=main.querySelectorAll('.card'); if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
 }
