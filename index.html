@@ -220,8 +220,18 @@
   .usechk{display:flex;align-items:center;gap:7px;cursor:pointer;margin:0}
   .usechk input{width:auto;margin:0}
   .usetag{font-size:11px;color:var(--muted);font-weight:700}
-  .tofirst{background:#fff;color:var(--accent);border:1.5px solid var(--accent);border-radius:8px;padding:4px 10px;
-    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:11.5px;cursor:pointer;margin-left:8px}
+  .ranklist{background:#fff;border:1.5px solid var(--accent);border-radius:14px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}
+  .rlh{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;color:var(--accent);margin-bottom:10px}
+  .rli{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .rli:last-of-type{border-bottom:none}
+  .rlno{flex:0 0 24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-family:"Zen Kaku Gothic New";
+    font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .rlt{flex:1;font-size:13px;font-weight:700;color:var(--ink);line-height:1.5}
+  .rlbtns{display:flex;gap:5px;flex:0 0 auto}
+  .rlbtns button{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--line);background:#fff;
+    color:var(--navy);font-size:13px;cursor:pointer;padding:0}
+  .rlbtns button:disabled{opacity:.3;cursor:default}
+  .rlbtns .rlx{width:auto;padding:0 10px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:11.5px;color:var(--warn);border-color:var(--warn)}
   .sj.set{width:auto;padding:0 9px;font-size:11px}
   .stale{border:2px solid var(--warn);background:#FDF3F4;border-radius:13px;padding:13px 15px;margin:12px 0;font-size:13px;line-height:1.75}
   .stale b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:4px}
@@ -288,7 +298,7 @@
   <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v18</span>
+    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v19</span>
     <button onclick="openTips()">利用料の確認</button>
     <button onclick="openTerms()">規約</button>
     <button class="danger" onclick="clearAll()">保存を消去</button>
@@ -844,12 +854,26 @@ function viewPrep(){
     const rank=(Array.isArray(st.ranked)?st.ranked.indexOf(i):-1);
     return `
     <div class="lens ${rank>=0?"picked":""}" onclick="pickPattern(${i})">
-      ${rank>=0?`<div class="rank">${rank===0?"1位・入り口の一本":(rank+1)+"位・弾薬"}</div>${rank>0?`<button class="tofirst" onclick="event.stopPropagation();makeFirst(${i})">1位にする</button>`:""}`:""}
+      ${rank>=0?`<div class="rank">${rank===0?"1位・入り口の一本":(rank+1)+"位・弾薬"}</div>`:""}
       <div class="lt">${esc(p.title||"")}</div>
       <div class="ld">${esc(p.desc||"")}</div>
       ${(p.evidence&&p.evidence.length)?`<div class="ev">根拠：実績${esc(p.evidence.join("、"))}</div>`:""}
     </div>`;}).join("")}
-  ${(Array.isArray(st.ranked)&&st.ranked.length)?`<div class="ok">✓ ${st.ranked.length}件を選びました（1位：${esc(st.patterns[st.ranked[0]]?.title||"")}）。下の「次へ」で面接シートを作成します。</div>`:""}`;
+  ${(Array.isArray(st.ranked)&&st.ranked.length)?`
+  <div class="ranklist">
+    <div class="rlh">選んだ語り口（上から優先順位）</div>
+    ${st.ranked.map((pi,pos)=>`
+      <div class="rli">
+        <span class="rlno">${pos+1}</span>
+        <span class="rlt">${esc(st.patterns[pi]?.title||"")}</span>
+        <span class="rlbtns">
+          <button ${pos===0?"disabled":""} onclick="moveRank(${pos},-1)">▲</button>
+          <button ${pos===st.ranked.length-1?"disabled":""} onclick="moveRank(${pos},1)">▼</button>
+          <button class="rlx" onclick="pickPattern(${pi})">解除</button>
+        </span>
+      </div>`).join("")}
+    <div class="hint" style="margin-top:8px">1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。▲▼で並べ替えられます。</div>
+  </div>`:""}`;
 }
 
 function addAchv(){ S.story.achv.push({what:"",num:"",hints:[],use:true}); render(); saveNow();
@@ -867,10 +891,14 @@ function addHint(i,label){
   render(true); saveNow();
   requestAnimationFrame(()=>{const el=document.getElementById("anum"+i); if(el){el.focus(); el.setSelectionRange(el.value.length,el.value.length);}});
 }
-function makeFirst(i){
-  const r=(Array.isArray(S.story.ranked)?S.story.ranked:[]).filter(x=>x!==i);
-  S.story.ranked=[i,...r];
-  S.story.chosen=i;
+/* 優先順位の入れ替え（上へ／下へ） */
+function moveRank(pos,dir){
+  const r=(Array.isArray(S.story.ranked)?S.story.ranked.slice():[]);
+  const to=pos+dir;
+  if(to<0||to>=r.length) return;
+  const t=r[pos]; r[pos]=r[to]; r[to]=t;
+  S.story.ranked=r;
+  S.story.chosen=r.length?r[0]:-1;
   render(true); updateNav(); saveNow();
 }
 function pickPattern(i){
@@ -1112,27 +1140,46 @@ function keySheetHTML(){
   </div>`;
 }
 
-/* キーワード版は1回のAI呼び出しでまとめて作る（呼び出し回数を増やさないため） */
+/* キーワード版は「まとめて1回」だと必ず打ち切られるため、数ブロックずつに分けて作る。
+   1つ失敗しても他は残す（失敗の単位を小さくする）。 */
+const KEY_CHUNK = 3;
 async function buildKeywords(btn){
   const zone=document.getElementById("sheetMsg");
   const sh=S.story.sheet||{};
-  const body=SHEET_BLOCKS.filter(b=>sh[b.key]).map(b=>`【${b.label}】\n${sh[b.key]}`).join("\n\n");
-  if(!body){ if(zone) zone.innerHTML=`<div class="ng">先にシートを作成してください。</div>`; return; }
+  const filled=SHEET_BLOCKS.filter(b=>sh[b.key]);
+  if(!filled.length){ if(zone) zone.innerHTML=`<div class="ng">先にシートを作成してください。</div>`; return; }
   setLoading(btn,true,"作成中…");
-  try{
-    S.story.sheetKey=await callAI(`次の面接シートを、面接中にちらっと見るための「キーワード版」に変換してください。
+  const parts=[]; const fail=[];
+  for(let i=0;i<filled.length;i+=KEY_CHUNK){
+    const group=filled.slice(i,i+KEY_CHUNK);
+    const body=group.map(b=>`【${b.label}】\n${(sh[b.key]||"").slice(0,1200)}`).join("\n\n");
+    if(zone) zone.innerHTML=`<div class="ok">キーワード版を作成中…（${Math.min(i+KEY_CHUNK,filled.length)} / ${filled.length}）</div>`;
+    try{
+      const out=await callAI(`次の面接シートの一部を、面接中にちらっと見るための「キーワード版」に変換してください。
 
 厳守：
-・文章にしない。各項目、キーワードと短い語句の箇条書きだけにする。1行は20字以内。
+・文章にしない。キーワードと短い語句の箇条書きだけにする。1行は20字以内。
+・元の文章をそのまま写さない。必ず短く削る。
+・各見出しにつき、箇条書きは最大5行まで。
 ・書かれている事実だけを使う。新しい内容を足さない。数字はそのまま残す。
 ・元の見出し（【】で囲まれた行）はそのまま残し、その下に箇条書きを置く。
-・「▶」で始まる行（ターンを返す合図）は、短くしてそのまま残す。
-・出力は本文のみ。
+・「▶」で始まる行は、20字以内に短くしてそのまま残す。
+・出力は本文のみ。前置き・解説は書かない。
 
-${body}`,2500);
-    S.story.cheatMode="key";
-    render(true); saveNow();
-  }catch(err){ if(zone) zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
+${body}`, 1800);
+      parts.push(out);
+    }catch(err){
+      fail.push(group.map(b=>b.label).join("、"));
+      parts.push(group.map(b=>`【${b.label}】\n（作成できませんでした）`).join("\n\n"));
+    }
+  }
+  S.story.sheetKey=parts.join("\n\n");
+  S.story.cheatMode="key";
+  render(true); saveNow();
+  const z=document.getElementById("sheetMsg");
+  if(z) z.innerHTML = fail.length
+    ? `<div class="ng">一部を作成できませんでした（${esc(fail.join(" ／ "))}）。「キーワード版を作り直す」でもう一度お試しください。</div>`
+    : `<div class="ok">✓ キーワード版ができました。</div>`;
 }
 
 function viewSheet(){
@@ -1169,7 +1216,7 @@ function viewSheet(){
     <span>表示：</span>
     <button class="sw ${S.story.cheatMode!=="key"?"on":""}" onclick="setCheat('full')">フル（文章）</button>
     <button class="sw ${S.story.cheatMode==="key"?"on":""}" onclick="setCheat('key')">キーワード</button>
-    ${(S.story.cheatMode==="key"&&!S.story.sheetKey)?`<button class="ai sub" style="margin-left:8px" onclick="buildKeywords(this)">キーワード版を作る</button>`:""}
+    ${S.story.cheatMode==="key"?`<button class="ai sub" style="margin-left:8px" onclick="buildKeywords(this)">${S.story.sheetKey?"キーワード版を作り直す":"キーワード版を作る"}</button>`:""}
   </div>`:""}
   <div id="sheetWrap">${(S.story.cheatMode==="key"&&S.story.sheetKey)?keySheetHTML():sheetHTML()}</div>
   ${done?`
