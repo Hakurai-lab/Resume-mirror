@@ -236,7 +236,8 @@
   /* BLOCK 2-g: 実績グラフ */
   .chartsvg{width:100%;height:auto;display:block;margin:6px 0}
   .chartempty{background:var(--ice-soft);border-radius:11px;padding:20px;text-align:center;font-size:12.5px;color:var(--muted)}
-  .chartblock{margin:14px 0 18px;page-break-inside:avoid}
+  .chartblock{margin:14px 0 18px}
+  .chartfig{page-break-inside:avoid;break-inside:avoid}
   .charttitle{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13.5px;color:var(--navy);margin-bottom:4px}
   .chartnote{font-size:11px;color:var(--muted);margin:2px 0 6px}
   .chartsrc{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic}
@@ -415,6 +416,17 @@
   .agree a{color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline}
 
   @media print{header,.nav,.savebar,.verline,.modal,.toolbar,.safe,details,.hint,.count,.note,.fchk,.stepjump,.asum,.langbox,.trstat,.trcard,.tabs,.sechead,.secnote,#trMsg{display:none!important}
+    /* グラフは紙面で小さめに。図の塊だけ改ページを避け、表は流す＝無駄な余白を作らない */
+    .chartblock{margin:8px 0 10px}
+    .chartsvg{width:78%;margin:4px auto}
+    .chartlg{margin:2px 0 4px}
+    .lgrow{font-size:10px}
+    .charttbl{font-size:10px;page-break-inside:auto;break-inside:auto}
+    .charttbl th,.charttbl td{padding:3px 5px}
+    .charttitle{font-size:12px;margin-bottom:2px}
+    .chartnote,.chartsrc{font-size:9.5px;margin:2px 0}
+    .doc h2{margin:12px 0 5px}
+    .exp{margin-bottom:10px}
     main{padding:0}.doc{border:none;box-shadow:none;padding:0}body{background:#fff}
     .h2,.lede,#sheetMsg,.redo{display:none!important}
     .sheetdoc{border:none;box-shadow:none;padding:0;border-radius:0}
@@ -432,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v28</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v29</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -1422,7 +1434,8 @@ function chartData(c){
   const labels=parseLabels(labelSrc);
   const series=(c.series||[]).map(s=>{
     const f=s.metricId?findMetric(s.metricId):null;
-    const name=(s.name||"").trim() || (f?(f.met.name||"").trim():"");
+    let name=(s.name||"").trim() || (f?(f.met.name||"").trim():"");
+    if(TR_RENDER && f) name=trOut(`met_${f.met.id}_n`, name);
     const rawVals=f ? f.met.values : s.values;
     return { name, type:s.type==="line"?"line":"bar",
       vals:parseNums(rawVals, labels.length), amin:oneNum(s.amin), amax:oneNum(s.amax),
@@ -1519,16 +1532,28 @@ function chartTable(c){
       ${labels.map((_,i)=>`<td>${s.vals[i]!=null?fmtNum(s.vals[i]):"—"}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
 }
 
+/* 翻訳版の書類を描いている間だけ true。グラフの文言も翻訳に差し替えるために使う */
+let TR_RENDER = false;
+function withTrRender(fn){ TR_RENDER=true; try{ return fn(); } finally { TR_RENDER=false; } }
+function chartText(c, key, fallback){
+  if(!TR_RENDER) return fallback;
+  const i=(S.charts||[]).indexOf(c);
+  return i<0 ? fallback : trOut(`chart${i}_${key}`, fallback);
+}
 function chartBlockHTML(c){
   const {labels, series}=chartData(c);
   if(!labels.length || !series.length) return "";
+  const en = TR_RENDER && S.lang.target==="en";
+  const title=chartText(c,"t",c.title), src=chartText(c,"s",c.source);
   return `<div class="chartblock">
-    ${c.title?`<div class="charttitle">${esc(c.title)}</div>`:""}
-    ${chartLegend(c)}
-    ${chartSVG(c)}
-    ${c.normalize?`<div class="chartnote">※系列ごとに目盛りを揃えています（桁が違うため）。実数は上の増減と下の表をご覧ください。</div>`:""}
+    <div class="chartfig">
+      ${title?`<div class="charttitle">${esc(title)}</div>`:""}
+      ${chartLegend(c)}
+      ${chartSVG(c)}
+    </div>
+    ${c.normalize?`<div class="chartnote">${en?"Note: each series is scaled to its own axis (the figures differ in magnitude). See the ranges above and the table below for actual values.":"※系列ごとに目盛りを揃えています（桁が違うため）。実数は上の増減と下の表をご覧ください。"}</div>`:""}
     ${chartTable(c)}
-    ${c.source?`<div class="chartsrc">${esc(c.source)}</div>`:""}
+    ${src?`<div class="chartsrc">${esc(src)}</div>`:""}
   </div>`;
 }
 /* 指定した位置（セクション・上下・職歴）に一致するグラフだけを差し込む */
@@ -2279,10 +2304,14 @@ function docTransHTML(){
       ${p.email?`<div>${en?"Email":"Mail"}：${esc(p.email)}</div>`:""}
       ${p.tel?`<div>${en?"Phone":"電話"}：${esc(p.tel)}</div>`:""}
     </div>
+    ${chartsAt("summary","before")}
     ${S.summary.trim()?`<h2>${H.summary}</h2><p>${esc(trOut("summary",S.summary))}</p>`:""}
+    ${chartsAt("summary","after")}
+    ${chartsAt("skills","before")}
     ${skills.length?`<h2>${H.skills}</h2>${skills.map((s,i)=>`<div class="sk">
       <div class="n">${esc(trOut(`skill${i}_n`, s.name))}${s.years?`（${esc(s.years)}）`:""}</div>
       ${s.achv?`<div class="a">${esc(trOut(`skill${i}_a`, s.achv))}</div>`:""}</div>`).join("")}`:""}
+    ${chartsAt("skills","after")}
     ${certs.length?`<h2>${H.certs}</h2>${certs.map((c,i)=>`<div class="kv"><span>${esc(trOut(`cert${i}_n`, c.name))}</span>
       <span class="r">${esc([c.y?`${c.y}${en?"":"年"}${c.m?(en?"/"+c.m:c.m+"月"):""}`:"",c.expiry||""].filter(Boolean).join(" / "))}</span></div>`).join("")}`:""}
     ${jobs.length?`<h2>${H.overview}</h2>
@@ -2291,12 +2320,14 @@ function docTransHTML(){
       <tbody>${jobs.map(j=>{const d=dur(j);return `<tr>
         <td>${esc(per(j))}${d?`<br><span class="dur">（${esc(d)}）</span>`:""}</td>
         <td>${esc(co(j)||"—")}</td><td>${esc(cli(j)||"—")}</td><td>${esc(emp(j.employment))}</td></tr>`}).join("")}</tbody></table>`:""}
-    ${jobs.length?`<h2>${H.work}</h2>${jobs.map(j=>{const d=dur(j);return `<div class="exp">
+    ${jobs.length?`<h2>${H.work}</h2>${jobs.map(j=>{const d=dur(j);return `${chartsAt("job","before",j.id)}<div class="exp">
       <div class="co">${esc(co(j)||"—")}${cli(j)?` <span style="font-weight:400;color:var(--muted)">→ ${esc(cli(j))}</span>`:""}</div>
       <div class="rl">${[trOut(`job_${j.id}_r`, j.role), emp(j.employment)].filter(Boolean).map(esc).join("　|　")}</div>
       <div class="rl">${esc(per(j))}${d?`（${esc(d)}）`:""}</div>
-      ${jobBody(j)}</div>`}).join("")}`:""}
+      ${jobBody(j)}</div>${chartsAt("job","after",j.id)}`}).join("")}`:""}
+    ${chartsAt("pr","before")}
     ${S.pr.trim()?`<h2>${H.about}</h2><p>${esc(trOut("pr",S.pr))}</p>`:""}
+    ${chartsAt("pr","after")}
   </div>`;
 }
 /* 面接シートの翻訳版 */
@@ -2323,6 +2354,8 @@ function printSheetTrans(){
 }
 function printTrans(){
   const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"Resume";
+  /* 印刷直前に翻訳版で描き直す（グラフの文言も翻訳に揃える） */
+  const w=document.getElementById("trPrevWrap"); if(w) w.innerHTML=withTrRender(docTransHTML);
   document.title = S.lang.target==="en" ? `Resume_${nm}` : `職務経歴書_${nm}`;
   document.body.classList.add("printtrans");
   setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printtrans"),800); },60);
@@ -2364,7 +2397,7 @@ function viewTrans(scope){
   <div class="hint" style="margin-bottom:12px">${TR_BATCH}項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。</div>
   <div id="trMsg"></div>
 
-  ${st.done?`<div class="trprev">${sc==="sheet"?sheetTransHTML():docTransHTML()}</div>`:""}
+  ${st.done?`<div class="trprev" id="trPrevWrap">${sc==="sheet"?withTrRender(sheetTransHTML):withTrRender(docTransHTML)}</div>`:""}
 
   <div class="sechead">1項目ずつ確認する</div>
   <div class="secnote">原文と「作成言語に再翻訳」を見くらべてください。意味がずれていなければ確認済みにします。</div>
