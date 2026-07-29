@@ -444,13 +444,14 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v29</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v30</span></span>
     <div class="sbbtns">
-      <button onclick="exportData()">書き出し</button>
-      <button onclick="document.getElementById('importFile').click()">読み込み</button>
-      <button onclick="openTips()">利用料</button>
-      <button onclick="openTerms()">規約</button>
-      <button class="danger" onclick="clearAll()">保存を消去</button>
+      <button id="langBtn" onclick="toggleUI()">English</button>
+      <button id="btnExport" onclick="exportData()">書き出し</button>
+      <button id="btnImport" onclick="document.getElementById('importFile').click()">読み込み</button>
+      <button id="btnTips" onclick="openTips()">利用料</button>
+      <button id="btnTerms" onclick="openTerms()">規約</button>
+      <button id="btnClear" class="danger" onclick="clearAll()">保存を消去</button>
     </div>
   </div>
   <main id="main"></main>
@@ -461,98 +462,11 @@
   </nav>
 </div>
 
-<!-- ============ 利用料・残高の確認方法（TIPS） ============ -->
-<div class="modal" id="tipsModal" onclick="if(event.target===this)closeTips()">
-  <div class="sheet">
-    <div class="mh"><b>利用料と残高の確認方法</b><button onclick="closeTips()">閉じる</button></div>
-    <div class="mb">
-      <div class="em"><b>まず、安心してください。</b><br>
-      このツールの1回のAI呼び出しで使う量は、ごくわずかです。職務経歴書と面接シートを一通り作っても、通常は数十円程度に収まります。</div>
+<!-- モーダルはJS生成（BLOCK 0m）。画面表記の言語にあわせて中身を出し分ける -->
+<div class="modal" id="tipsModal" onclick="if(event.target===this)closeTips()"><div class="sheet" id="tipsSheet"></div></div>
+<div class="modal" id="termsModal" onclick="if(event.target===this)closeTerms()"><div class="sheet" id="termsSheet"></div></div>
 
-      <h3>残高と使用量を見る場所</h3>
-      <p>残高は、このツールからは取得できません（Anthropicが外部に公開していないため）。ご自身のConsoleで確認してください。</p>
-      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
-        <b>Anthropic Console を開く</b>
-        <small><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> にログインします。</small>
-      </div></div>
-      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
-        <b>残高を見る</b>
-        <small>左メニューの「Billing（お支払い）」に、現在の残高（Credit balance）が表示されます。ここから追加もできます。</small>
-      </div></div>
-      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
-        <b>使用量を見る</b>
-        <small>左メニューの「Usage（使用状況）」で、日ごと・モデルごとの使用量と金額を確認できます。実際にいくら使ったかは、ここが正確です。</small>
-      </div></div>
 
-      <h3>費用を抑えたいとき</h3>
-      <ul>
-        <li>STEP 0 でモデルを「軽量」に切り替えると、費用が下がります</li>
-        <li>面接シートは項目ごとに作り直せます。全部作り直すより、気になる項目だけやり直すほうが安く済みます</li>
-        <li>職務経歴書の入力・編集・PDF出力は、AIを使わなければ費用はかかりません</li>
-      </ul>
-
-      <h3>残高が切れたら</h3>
-      <p>AIボタンを押したときに「残高が不足しているようです」と表示されます。その場合も、<b>入力内容はこの端末に残っています</b>。残高を追加すれば、続きから作業できます。急ぎでない場合は、STEP 0 の「AIを使わずに進む」で、職務経歴書の確認とPDF出力だけ行うこともできます。</p>
-    </div>
-  </div>
-</div>
-
-<!-- ============ 利用規約・プライバシーポリシー ============ -->
-<div class="modal" id="termsModal" onclick="if(event.target===this)closeTerms()">
-  <div class="sheet">
-    <div class="mh"><b>利用規約・プライバシーポリシー</b><button onclick="closeTerms()">閉じる</button></div>
-    <div class="mb">
-      <div class="em"><b>先に、いちばん大事なことを。</b><br>
-      このツールにはサーバーがありません。あなたが入力した氏名・連絡先・職務経歴は、<b>運営者に一切送信されず、見ることもできません。</b>ただし、AI機能を使った部分だけは、<b>あなた自身のAPIキーを使ってAnthropicへ送信されます</b>（運営者を経由しません）。</div>
-
-      <h3>利用規約</h3>
-
-      <h4>1. 本サービスについて</h4>
-      <p>Resume Mirror（以下「本サービス」）は、職務経歴書の作成を補助する個人開発のツールです。利用者は本規約に同意のうえ、ご利用ください。</p>
-
-      <h4>2. 利用者自身のAI契約が必要です</h4>
-      <p>本サービスのAI機能は、利用者ご自身が取得したAnthropic社のAPIキーを用いて動作します。AIの利用料金は利用者のご負担となります。ご利用にあたっては、Anthropic社の利用規約にも従うものとします。</p>
-
-      <h4>3. 生成された文章の取り扱い</h4>
-      <p>AIが生成する文章は<b>下書き</b>です。事実と異なる記載や、意図しない表現が含まれる可能性があります。<b>内容の確認と最終的な責任は、利用者ご自身が負うもの</b>とします。応募書類として提出する前に、必ずご自身で読み返してください。</p>
-
-      <h4>4. 禁止事項</h4>
-      <ul>
-        <li>虚偽の経歴・実績を作成する目的での利用</li>
-        <li>他者の個人情報を、本人の同意なく入力すること</li>
-        <li>法令または公序良俗に反する利用</li>
-      </ul>
-
-      <h4>5. 免責</h4>
-      <p>本サービスは現状有姿で提供され、動作や生成結果について何ら保証するものではありません。本サービスの利用または利用不能によって生じたいかなる損害についても、運営者は責任を負いません。予告なく内容の変更・提供の停止を行う場合があります。</p>
-
-      <h4>6. 準拠法</h4>
-      <p>本規約は日本法に準拠します。</p>
-
-      <h3>プライバシーポリシー</h3>
-
-      <h4>1. 運営者は、あなたの情報を収集しません</h4>
-      <p>本サービスはサーバーを持たず、利用者の入力内容を送信・収集・保存する仕組みを一切持ちません。氏名、連絡先、職務経歴、その他入力されたすべての情報は、運営者に届きません。</p>
-
-      <h4>2. 入力内容の保存場所</h4>
-      <p>入力内容は、利用者ご自身の端末のブラウザ内（ローカルストレージ）に保存されます。これにより、画面を閉じても作業を再開できます。<b>他の人と共有する端末をお使いの場合は、作業後に画面下の「保存を消去」を押してください。</b></p>
-
-      <h4>3. APIキーの取り扱い</h4>
-      <p>入力されたAPIキーは、Anthropic社へのAI呼び出しにのみ使用され、それ以外のいかなる送信先にも送られません。APIキーは初期設定では保存されません。「この端末に保存する」を選択した場合に限り、端末のブラウザ内にのみ保存されます。共用端末では選択しないことを推奨します。</p>
-
-      <h4>4. AIへの送信について</h4>
-      <p>「AIで整える」「AIで作成」などの機能を使用した際、その処理に必要な入力内容（職務経歴やスキルの記述など）が、利用者ご自身のAPIキーを用いてAnthropic社に送信されます。送信された情報の取り扱いは、Anthropic社のプライバシーポリシーに従います。AIに送信したくない内容は、入力しないでください。</p>
-
-      <h4>5. アクセス解析・Cookie</h4>
-      <p>本サービスは、アクセス解析ツールや広告目的のCookieを使用していません。ただし、本サービスはGitHub Pages上で公開されているため、ホスティング事業者側でアクセスに関する記録（IPアドレス等）が保持される可能性があります。</p>
-
-      <h4>6. お問い合わせ</h4>
-      <p>本サービスに関するお問い合わせは、<a href="mailto:contact@kuurailab.com">contact@kuurailab.com</a> までご連絡ください。</p>
-
-      <div class="dt">制定日：2026年7月<br>Resume Mirror（KUURAI LAB）</div>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ============ BLOCK 1: 設定・定数・データ ============ */
@@ -570,8 +484,101 @@ const YEARS = Array.from({length:51},(_,i)=>NOW_Y-i);
 const MONTHS = Array.from({length:12},(_,i)=>i+1);
 const EMPLOYMENTS = ["正社員","契約社員","派遣社員","業務委託・個人事業主","パート・アルバイト","出向","その他"];
 
+/* ============ BLOCK 0: 画面表記の言語（UI i18n） ============
+   画面表記だけを日本語／英語で切り替える。作成する書類の言語（S.lang）とは別の軸。
+   このブロックで対応済み：ヘッダ／保存バー／ナビ／ステップ名／STEP0／モーダル／エラー文言。
+   未対応（今後の版）：プロフィール〜面接シートの各入力画面の本文。 */
+const UI_LANGS = { ja:"日本語", en:"English" };
+function detectUI(){ return (typeof navigator!=="undefined" && /^en/i.test(navigator.language||"")) ? "en" : "ja"; }
+let lastSavedAt = null;
+
+const T = {
+  "nav.back":       { ja:"もどる",   en:"Back" },
+  "nav.next":       { ja:"次へ",     en:"Next" },
+  "nav.next.prep":  { ja:"経験を伝わる強みに変える", en:"Turn your experience into clear strengths" },
+  "nav.next.sheet": { ja:"次へ：面接シートを作る",   en:"Next: build the interview sheet" },
+
+  "sb.saved":   { ja:"この端末に自動保存されます", en:"Auto-saved on this device" },
+  "sb.export":  { ja:"書き出し", en:"Export" },
+  "sb.import":  { ja:"読み込み", en:"Import" },
+  "sb.cost":    { ja:"利用料",   en:"Cost" },
+  "sb.terms":   { ja:"規約",     en:"Terms" },
+  "sb.clear":   { ja:"保存を消去", en:"Clear data" },
+  "sj.set.short": { ja:"設定", en:"Setup" },
+  "saved.pre":  { ja:"最終保存 ", en:"Last saved " },
+  "saved.suf":  { ja:"（この端末内）", en:" (on this device)" },
+
+  "ld.creating": { ja:"作成中…",  en:"Working…" },
+  "ld.checking": { ja:"確認中…",  en:"Checking…" },
+
+  "step.set":     { ja:"はじめの設定",   en:"Setup" },
+  "step.profile": { ja:"プロフィール",   en:"Profile" },
+  "step.skills":  { ja:"スキル・資格",   en:"Skills & Certifications" },
+  "step.jobs":    { ja:"職務経歴",       en:"Work History" },
+  "step.achvlib": { ja:"実績ライブラリ", en:"Achievements" },
+  "step.summary": { ja:"職務要約",       en:"Summary" },
+  "step.pr":      { ja:"自己PR",         en:"About You" },
+  "step.resume":  { ja:"職務経歴書",     en:"Resume" },
+  "step.prep":    { ja:"面接の準備",     en:"Interview Prep" },
+  "step.sheet":   { ja:"面接シート",     en:"Interview Sheet" },
+
+  "model.balanced": { ja:"標準（おすすめ）",     en:"Standard (recommended)" },
+  "model.cheap":    { ja:"軽量（費用を抑える）", en:"Light (lower cost)" },
+
+  "emp.正社員":               { ja:"正社員", en:"Full-time" },
+  "emp.契約社員":             { ja:"契約社員", en:"Contract" },
+  "emp.派遣社員":             { ja:"派遣社員", en:"Dispatch (temp)" },
+  "emp.業務委託・個人事業主": { ja:"業務委託・個人事業主", en:"Freelance / Contractor" },
+  "emp.パート・アルバイト":   { ja:"パート・アルバイト", en:"Part-time" },
+  "emp.出向":                 { ja:"出向", en:"Secondment" },
+  "emp.その他":               { ja:"その他", en:"Other" },
+
+  "err.nokey":     { ja:"APIキーが設定されていません。STEP 0 に戻って設定してください。",
+                     en:"No API key is set. Go back to STEP 0 to set one." },
+  "err.truncated": { ja:"分量が多く、一度で書き切れませんでした。入力を少し減らすか、もう一度お試しください。",
+                     en:"The response was too long to finish in one pass. Try shortening your input or run it again." },
+  "err.refusal":   { ja:"AIがこの内容への回答を生成できませんでした。入力内容をご確認ください。",
+                     en:"The AI declined to generate a response for this content. Please review your input." },
+  "err.empty":     { ja:"AIから文章を受け取れませんでした。もう一度お試しください。",
+                     en:"No text came back from the AI. Please try again." },
+  "err.401":       { ja:"APIキーが正しくないようです。余分な空白が入っていないか確認し、STEP 0 で入れ直してください。",
+                     en:"The API key looks invalid. Check for stray spaces and re-enter it in STEP 0." },
+  "err.credit":    { ja:"Anthropic側の残高が不足しているようです。Console の Billing で残高を追加してください。",
+                     en:"Your Anthropic balance appears to be insufficient. Add credit under Billing in the Console." },
+  "err.429":       { ja:"短時間に呼び出しすぎたか、利用上限に達しました。1分ほど待ってから再度お試しください。",
+                     en:"Too many requests, or a usage limit was reached. Wait about a minute and try again." },
+  "err.busy":      { ja:"Anthropic側が混雑しています。少し時間をおいて再度お試しください。",
+                     en:"Anthropic is busy right now. Please wait a moment and try again." },
+  "err.500":       { ja:"AI側で一時的な問題が起きています。少し待って再度お試しください。",
+                     en:"A temporary problem occurred on the AI side. Please wait a moment and try again." },
+  "err.generic":   { ja:"AIの呼び出しに失敗しました。通信環境を確認して、もう一度お試しください。",
+                     en:"The AI request failed. Check your connection and try again." },
+
+  "key.paste_first": { ja:"APIキーを貼り付けてください。", en:"Please paste your API key." },
+  "key.ok":          { ja:"✓ 接続できました。", en:"✓ Connected." }
+};
+function t(key){ const e=T[key]; if(!e) return key; return e[S.ui] || e.ja || key; }
+function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
+
+const STEP_KEYS = ["set","profile","skills","jobs","achvlib","summary","pr","resume","prep","sheet"];
+function stepName(i){ return t("step."+STEP_KEYS[i]); }
+
+function toggleUI(){ S.ui = S.ui==="en" ? "ja" : "en"; applyChrome(); render(); saveNow(); }
+function applyChrome(){
+  document.documentElement.lang = S.ui;
+  const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
+  set("btnExport", t("sb.export"));
+  set("btnImport", t("sb.import"));
+  set("btnTips",   t("sb.cost"));
+  set("btnTerms",  t("sb.terms"));
+  set("btnClear",  t("sb.clear"));
+  const lb=document.getElementById("langBtn"); if(lb) lb.textContent = UI_LANGS[S.ui==="en"?"ja":"en"];
+  if(lastSavedAt) showSaved(lastSavedAt); else set("savedAt", t("sb.saved"));
+}
+
 const S = {
   apiKey:"", model:"balanced", keyVerified:false, agreed:false, saveKey:false, aiSkipped:false,
+  ui:detectUI(),
   profile:{ lastName:"", firstName:"", kana:"", nameEn:"", email:"", tel:"" },
   certs:[{y:"",m:"",name:"",expiry:""}],
   skills:[{name:"",years:"",achv:""}],
@@ -593,8 +600,7 @@ const S = {
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
-const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","実績ライブラリ","職務要約","自己PR","職務経歴書","面接の準備","面接シート"];
-const TOTAL = STEPS.length;
+const TOTAL = STEP_KEYS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
 /* 途中打ち切りが起きたら、上限を上げて自動でもう一度だけ試す。
@@ -639,21 +645,22 @@ async function callAIOnce(prompt, maxTokens=3000){
   return text;
 }
 function humanError(err){
-  if(err.message==="NOKEY") return "APIキーが設定されていません。STEP 0 に戻って設定してください。";
-  if(err.message==="TRUNCATED") return "分量が多く、一度で書き切れませんでした。入力を少し減らすか、もう一度お試しください。";
-  if(err.message==="REFUSAL") return "AIがこの内容への回答を生成できませんでした。入力内容をご確認ください。";
-  if(err.message==="EMPTY") return "AIから文章を受け取れませんでした。もう一度お試しください。";
+  if(err.message==="NOKEY") return t("err.nokey");
+  if(err.message==="TRUNCATED") return t("err.truncated");
+  if(err.message==="REFUSAL") return t("err.refusal");
+  if(err.message==="EMPTY") return t("err.empty");
   const s=err.status;
-  if(s===401) return "APIキーが正しくないようです。余分な空白が入っていないか確認し、STEP 0 で入れ直してください。";
-  if(s===400 && /credit|balance/i.test(err.detail||"")) return "Anthropic側の残高が不足しているようです。Console の Billing で残高を追加してください。";
-  if(s===429) return "短時間に呼び出しすぎたか、利用上限に達しました。1分ほど待ってから再度お試しください。";
-  if(s===529||s===503) return "Anthropic側が混雑しています。少し時間をおいて再度お試しください。";
-  if(s>=500) return "AI側で一時的な問題が起きています。少し待って再度お試しください。";
-  return "AIの呼び出しに失敗しました。通信環境を確認して、もう一度お試しください。";
+  if(s===401) return t("err.401");
+  if(s===400 && /credit|balance/i.test(err.detail||"")) return t("err.credit");
+  if(s===429) return t("err.429");
+  if(s===529||s===503) return t("err.busy");
+  if(s>=500) return t("err.500");
+  return t("err.generic");
 }
 
 /* ============ BLOCK 3: APIキー設定画面（STEP 0） ============ */
-function viewKey(){ return `
+function viewKey(){ return S.ui==="en" ? viewKeyEN() : viewKeyJA(); }
+function viewKeyJA(){ return `
   <div class="h2">はじめに、AIの設定をします</div>
   <div class="lede">このツールは、あなた自身のAIアカウント（Anthropic）を使って動きます。5分ほどで準備できます。</div>
 
@@ -711,7 +718,7 @@ function viewKey(){ return `
   </label>
   <label class="f"><span>使用するモデル</span>
     <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
-      ${Object.entries(MODELS).map(([k,v])=>`<option value="${k}" ${S.model===k?"selected":""}>${v.label}</option>`).join("")}
+      ${Object.keys(MODELS).map(k=>`<option value="${k}" ${S.model===k?"selected":""}>${t("model."+k)}</option>`).join("")}
     </select>
     <div class="hint">迷ったら「標準」のままで大丈夫です。</div>
   </label>
@@ -733,14 +740,94 @@ function viewKey(){ return `
   </label>
 `;}
 
+function viewKeyEN(){ return `
+  <div class="h2">First, set up the AI</div>
+  <div class="lede">This tool runs on your own AI account (Anthropic). Setup takes about five minutes.</div>
+
+  <div class="safe">
+    <b>Your key is never sent to us</b>
+    The API key you enter is used only to authenticate with the Anthropic API, and is sent nowhere else. This service has no server, so the operator cannot receive your key or your input. Anything that uses the AI is sent to Anthropic with your own key.
+  </div>
+
+  <details class="guide" ${S.keyVerified?"":"open"}>
+    <summary>How to get an API key (start here if it's your first time)</summary>
+    <div class="gbody">
+      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
+        <b>Open the Anthropic Console</b>
+        <small>Create an account at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>. You can sign up with a Google account.<br>Note: this is a separate developer sign-up from the everyday Claude app.</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
+        <b>Add credit (balance)</b>
+        <small>Under "Billing" in the left menu, register a card and add credit. A small amount (a few dollars) is plenty.<br>Note: the AI won't run without a balance. This is the most common place people get stuck.</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
+        <b>Create an API key</b>
+        <small>Left menu "API Keys" &rarr; "Create Key". Any name is fine.</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">4</div><div class="gtxt">
+        <b>Copy the key</b>
+        <small>A string starting with <code>sk-ant-</code> appears. <b>It is shown only once.</b> Copy it right away (if you close it, just create a new one).</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">5</div><div class="gtxt">
+        <b>Paste it below and test the connection</b>
+        <small>If it succeeds, you're ready.</small>
+      </div></div>
+      <div class="note"><b>Cost guide</b><br>Each text generation costs roughly a few cents (depending on model and length). Finishing a full resume usually stays within a few tens of cents. For exact pricing, check the Anthropic Console. Once your balance runs out, nothing more is charged.</div>
+      <dl class="faq">
+        <dt>If I have a monthly Claude plan, can I use that?</dt>
+        <dd>No. A monthly plan (such as Claude Pro) and API credit are billed separately. You need to add credit on the Console side.</dd>
+        <dt>Can other people see my key?</dt>
+        <dd>The key stays only in your browser and is sent nowhere except Anthropic. On a shared device, close the tab when you're done.</dd>
+        <dt>What should I do with a key I've finished using?</dt>
+        <dd>You can revoke it anytime from API Keys in the Console.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <label class="f"><span>API key<i class="req">required</i></span>
+    <input id="keyInput" type="password" autocomplete="off" spellcheck="false"
+      value="${esc(S.apiKey)}" oninput="S.apiKey=this.value.trim();S.keyVerified=false;clearMsg('keyMsg')"
+      placeholder="Paste the string starting with sk-ant-...">
+    <div class="hint" style="margin-top:9px">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
+        <input type="checkbox" style="width:auto" ${S.saveKey?"checked":""}
+          onchange="S.saveKey=this.checked;saveNow()"> Save this key on this device
+      </label>
+      <div style="margin-top:4px">If saved, the API key is stored <b>unencrypted</b> in this browser. On a shared or work device, leave this unchecked.</div>
+    </div>
+  </label>
+  <label class="f"><span>Model to use</span>
+    <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
+      ${Object.keys(MODELS).map(k=>`<option value="${k}" ${S.model===k?"selected":""}>${t("model."+k)}</option>`).join("")}
+    </select>
+    <div class="hint">If unsure, "Standard" is fine.</div>
+  </label>
+  <button class="ai" onclick="testKey(this)">Test connection</button>
+  <div id="keyMsg">${S.keyVerified?'<div class="ok">'+t("key.ok")+'</div>':""}</div>
+
+  <div class="noai">
+    <b>You can also proceed without the AI</b>
+    Entering, editing, and exporting a resume to PDF all work without the AI. Use this if you just want to retrieve something you saved earlier, or if Anthropic is unavailable.<br>
+    <label class="fchkitem" style="margin-top:9px">
+      <input type="checkbox" ${S.aiSkipped?"checked":""} onchange="S.aiSkipped=this.checked;saveNow();updateNav()">
+      <span>Proceed without the AI (AI buttons won't do anything)</span>
+    </label>
+  </div>
+
+  <label class="agree">
+    <input type="checkbox" ${S.agreed?"checked":""} onchange="S.agreed=this.checked;saveNow();updateNav()">
+    <span>I have read and agree to the <a onclick="openTerms()">Terms of Service and Privacy Policy</a>.</span>
+  </label>
+`;}
+
 async function testKey(btn){
   const zone=document.getElementById("keyMsg");
-  if(!S.apiKey){ zone.innerHTML=`<div class="ng">APIキーを貼り付けてください。</div>`; return; }
-  setLoading(btn,true,"確認中…");
+  if(!S.apiKey){ zone.innerHTML=`<div class="ng">${esc(t("key.paste_first"))}</div>`; return; }
+  setLoading(btn,true,t("ld.checking"));
   try{
     await callAI("「準備完了」とだけ返してください。",20);
     S.keyVerified=true;
-    zone.innerHTML=`<div class="ok">✓ 接続できました。</div>`;
+    zone.innerHTML=`<div class="ok">${esc(t("key.ok"))}</div>`;
   }catch(err){ S.keyVerified=false; zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
   setLoading(btn,false); updateNav();
 }
@@ -2911,6 +2998,7 @@ function migrateState(){
     });
     if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
     if(!["charts","trans"].includes(S.docTab)) S.docTab="preview";
+    if(S.ui!=="ja" && S.ui!=="en") S.ui=detectUI();
     S.lang=Object.assign({doc:"ja",target:"en"}, S.lang||{});
     if(!LANG_LABEL[S.lang.doc]) S.lang.doc="ja";
     if(!LANG_LABEL[S.lang.target] || S.lang.target===S.lang.doc) S.lang.target=otherLang(S.lang.doc);
@@ -2954,10 +3042,12 @@ function restore(){
     if(d._at) showSaved(d._at);
   }catch(e){}
 }
-function showSaved(t){
+function showSaved(ts){
+  lastSavedAt = ts;
   const el=document.getElementById("savedAt"); if(!el) return;
-  const d=new Date(t);
-  el.textContent=`最終保存 ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}（この端末内）`;
+  const d=new Date(ts);
+  const hhmm = `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+  el.textContent = t("saved.pre") + hhmm + t("saved.suf");
 }
 /* ---- データの書き出し／読み込み ----
    PDFを解析して読み戻すのは高くつき精度も出ないため、最初から読み戻せる形（JSON）で書き出す。
@@ -3012,10 +3102,146 @@ function clearAll(){
 }
 
 /* 利用規約モーダル */
-function openTips(){ document.getElementById("tipsModal").classList.add("on"); }
+function openTips(){ document.getElementById("tipsSheet").innerHTML = tipsSheetHTML(); document.getElementById("tipsModal").classList.add("on"); }
 function closeTips(){ document.getElementById("tipsModal").classList.remove("on"); }
-function openTerms(){ document.getElementById("termsModal").classList.add("on"); }
+function openTerms(){ document.getElementById("termsSheet").innerHTML = termsSheetHTML(); document.getElementById("termsModal").classList.add("on"); }
 function closeTerms(){ document.getElementById("termsModal").classList.remove("on"); }
+
+function tipsSheetHTML(){
+  if(S.ui==="en") return `
+    <div class="mh"><b>Cost and how to check your balance</b><button onclick="closeTips()">Close</button></div>
+    <div class="mb">
+      <div class="em"><b>First, don't worry.</b><br>
+      One AI call in this tool uses very little. Even producing a full resume and interview sheet usually costs only tens of cents.</div>
+      <h3>Where to see balance and usage</h3>
+      <p>Your balance can't be read from this tool (Anthropic doesn't expose it externally). Check it in your own Console.</p>
+      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
+        <b>Open the Anthropic Console</b>
+        <small>Sign in at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
+        <b>See your balance</b>
+        <small>"Billing" in the left menu shows your current credit balance. You can add more here too.</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
+        <b>See your usage</b>
+        <small>"Usage" in the left menu shows usage and cost by day and by model. This is the accurate record of what you actually spent.</small>
+      </div></div>
+      <h3>If you want to keep costs down</h3>
+      <ul>
+        <li>Switching the model to "Light" in STEP 0 lowers the cost</li>
+        <li>The interview sheet can be redone item by item. Redoing just the item you care about is cheaper than redoing everything</li>
+        <li>Entering, editing, and exporting the resume to PDF costs nothing as long as you don't use the AI</li>
+      </ul>
+      <h3>If your balance runs out</h3>
+      <p>When you press an AI button you'll see "balance appears to be insufficient". Even then, <b>your input stays on this device</b>. Add credit and you can pick up where you left off. If you're not in a hurry, you can also use "Proceed without the AI" in STEP 0 to just review the resume and export a PDF.</p>
+    </div>`;
+  return `
+    <div class="mh"><b>利用料と残高の確認方法</b><button onclick="closeTips()">閉じる</button></div>
+    <div class="mb">
+      <div class="em"><b>まず、安心してください。</b><br>
+      このツールの1回のAI呼び出しで使う量は、ごくわずかです。職務経歴書と面接シートを一通り作っても、通常は数十円程度に収まります。</div>
+      <h3>残高と使用量を見る場所</h3>
+      <p>残高は、このツールからは取得できません（Anthropicが外部に公開していないため）。ご自身のConsoleで確認してください。</p>
+      <div class="gstep"><div class="gnum">1</div><div class="gtxt">
+        <b>Anthropic Console を開く</b>
+        <small><a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> にログインします。</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">2</div><div class="gtxt">
+        <b>残高を見る</b>
+        <small>左メニューの「Billing（お支払い）」に、現在の残高（Credit balance）が表示されます。ここから追加もできます。</small>
+      </div></div>
+      <div class="gstep"><div class="gnum">3</div><div class="gtxt">
+        <b>使用量を見る</b>
+        <small>左メニューの「Usage（使用状況）」で、日ごと・モデルごとの使用量と金額を確認できます。実際にいくら使ったかは、ここが正確です。</small>
+      </div></div>
+      <h3>費用を抑えたいとき</h3>
+      <ul>
+        <li>STEP 0 でモデルを「軽量」に切り替えると、費用が下がります</li>
+        <li>面接シートは項目ごとに作り直せます。全部作り直すより、気になる項目だけやり直すほうが安く済みます</li>
+        <li>職務経歴書の入力・編集・PDF出力は、AIを使わなければ費用はかかりません</li>
+      </ul>
+      <h3>残高が切れたら</h3>
+      <p>AIボタンを押したときに「残高が不足しているようです」と表示されます。その場合も、<b>入力内容はこの端末に残っています</b>。残高を追加すれば、続きから作業できます。急ぎでない場合は、STEP 0 の「AIを使わずに進む」で、職務経歴書の確認とPDF出力だけ行うこともできます。</p>
+    </div>`;
+}
+
+function termsSheetHTML(){
+  if(S.ui==="en") return `
+    <div class="mh"><b>Terms of Service &amp; Privacy Policy</b><button onclick="closeTerms()">Close</button></div>
+    <div class="mb">
+      <div class="em"><b>The most important thing first.</b><br>
+      This tool has no server. The name, contact details, and work history you enter are <b>never sent to the operator and cannot be seen by them.</b> Only the parts that use the AI are <b>sent to Anthropic using your own API key</b> (not routed through the operator).</div>
+      <h3>Terms of Service</h3>
+      <h4>1. About this service</h4>
+      <p>Resume Mirror ("the Service") is an individually developed tool that assists with creating a resume. Please use it only if you agree to these terms.</p>
+      <h4>2. You need your own AI contract</h4>
+      <p>The AI features of the Service run using an Anthropic API key that you obtain yourself. AI usage fees are your responsibility. Use is also subject to Anthropic's terms of service.</p>
+      <h4>3. Handling of generated text</h4>
+      <p>Text generated by the AI is a <b>draft</b>. It may contain statements that differ from fact, or unintended expressions. <b>Reviewing the content and taking final responsibility rests with you.</b> Always reread it yourself before submitting it as an application document.</p>
+      <h4>4. Prohibited uses</h4>
+      <ul>
+        <li>Using it to fabricate false careers or achievements</li>
+        <li>Entering another person's personal information without their consent</li>
+        <li>Any use that violates laws or public order and morals</li>
+      </ul>
+      <h4>5. Disclaimer</h4>
+      <p>The Service is provided as-is, with no warranty of any kind regarding operation or generated results. The operator bears no responsibility for any damages arising from use or inability to use the Service. Content may be changed or the service discontinued without notice.</p>
+      <h4>6. Governing law</h4>
+      <p>These terms are governed by the laws of Japan.</p>
+      <h3>Privacy Policy</h3>
+      <h4>1. The operator does not collect your information</h4>
+      <p>The Service has no server and no mechanism to send, collect, or store user input. Your name, contact details, work history, and any other information you enter do not reach the operator.</p>
+      <h4>2. Where your input is stored</h4>
+      <p>Your input is stored inside your own device's browser (local storage), so you can resume work after closing the screen. <b>If you use a shared device, press "Clear data" at the bottom of the screen when you're done.</b></p>
+      <h4>3. Handling of the API key</h4>
+      <p>The API key you enter is used only for AI calls to Anthropic, and is sent to no other destination. By default the API key is not saved. Only if you choose "Save this key on this device" is it stored solely within your device's browser. On shared devices, we recommend not choosing this.</p>
+      <h4>4. About sending to the AI</h4>
+      <p>When you use a feature like "Polish with AI" or "Generate with AI", the input needed for that processing (such as your work history and skill descriptions) is sent to Anthropic using your own API key. Handling of the sent information follows Anthropic's privacy policy. Do not enter anything you don't want sent to the AI.</p>
+      <h4>5. Analytics and cookies</h4>
+      <p>The Service does not use analytics tools or advertising cookies. However, because the Service is published on GitHub Pages, the hosting provider may retain access records (such as IP addresses).</p>
+      <h4>6. Contact</h4>
+      <p>For inquiries about the Service, please contact <a href="mailto:contact@kuurailab.com">contact@kuurailab.com</a>.</p>
+      <div class="dt">Established: July 2026<br>Resume Mirror (KUURAI LAB)</div>
+    </div>`;
+  return `
+    <div class="mh"><b>利用規約・プライバシーポリシー</b><button onclick="closeTerms()">閉じる</button></div>
+    <div class="mb">
+      <div class="em"><b>先に、いちばん大事なことを。</b><br>
+      このツールにはサーバーがありません。あなたが入力した氏名・連絡先・職務経歴は、<b>運営者に一切送信されず、見ることもできません。</b>ただし、AI機能を使った部分だけは、<b>あなた自身のAPIキーを使ってAnthropicへ送信されます</b>（運営者を経由しません）。</div>
+      <h3>利用規約</h3>
+      <h4>1. 本サービスについて</h4>
+      <p>Resume Mirror（以下「本サービス」）は、職務経歴書の作成を補助する個人開発のツールです。利用者は本規約に同意のうえ、ご利用ください。</p>
+      <h4>2. 利用者自身のAI契約が必要です</h4>
+      <p>本サービスのAI機能は、利用者ご自身が取得したAnthropic社のAPIキーを用いて動作します。AIの利用料金は利用者のご負担となります。ご利用にあたっては、Anthropic社の利用規約にも従うものとします。</p>
+      <h4>3. 生成された文章の取り扱い</h4>
+      <p>AIが生成する文章は<b>下書き</b>です。事実と異なる記載や、意図しない表現が含まれる可能性があります。<b>内容の確認と最終的な責任は、利用者ご自身が負うもの</b>とします。応募書類として提出する前に、必ずご自身で読み返してください。</p>
+      <h4>4. 禁止事項</h4>
+      <ul>
+        <li>虚偽の経歴・実績を作成する目的での利用</li>
+        <li>他者の個人情報を、本人の同意なく入力すること</li>
+        <li>法令または公序良俗に反する利用</li>
+      </ul>
+      <h4>5. 免責</h4>
+      <p>本サービスは現状有姿で提供され、動作や生成結果について何ら保証するものではありません。本サービスの利用または利用不能によって生じたいかなる損害についても、運営者は責任を負いません。予告なく内容の変更・提供の停止を行う場合があります。</p>
+      <h4>6. 準拠法</h4>
+      <p>本規約は日本法に準拠します。</p>
+      <h3>プライバシーポリシー</h3>
+      <h4>1. 運営者は、あなたの情報を収集しません</h4>
+      <p>本サービスはサーバーを持たず、利用者の入力内容を送信・収集・保存する仕組みを一切持ちません。氏名、連絡先、職務経歴、その他入力されたすべての情報は、運営者に届きません。</p>
+      <h4>2. 入力内容の保存場所</h4>
+      <p>入力内容は、利用者ご自身の端末のブラウザ内（ローカルストレージ）に保存されます。これにより、画面を閉じても作業を再開できます。<b>他の人と共有する端末をお使いの場合は、作業後に画面下の「保存を消去」を押してください。</b></p>
+      <h4>3. APIキーの取り扱い</h4>
+      <p>入力されたAPIキーは、Anthropic社へのAI呼び出しにのみ使用され、それ以外のいかなる送信先にも送られません。APIキーは初期設定では保存されません。「この端末に保存する」を選択した場合に限り、端末のブラウザ内にのみ保存されます。共用端末では選択しないことを推奨します。</p>
+      <h4>4. AIへの送信について</h4>
+      <p>「AIで整える」「AIで作成」などの機能を使用した際、その処理に必要な入力内容（職務経歴やスキルの記述など）が、利用者ご自身のAPIキーを用いてAnthropic社に送信されます。送信された情報の取り扱いは、Anthropic社のプライバシーポリシーに従います。AIに送信したくない内容は、入力しないでください。</p>
+      <h4>5. アクセス解析・Cookie</h4>
+      <p>本サービスは、アクセス解析ツールや広告目的のCookieを使用していません。ただし、本サービスはGitHub Pages上で公開されているため、ホスティング事業者側でアクセスに関する記録（IPアドレス等）が保持される可能性があります。</p>
+      <h4>6. お問い合わせ</h4>
+      <p>本サービスに関するお問い合わせは、<a href="mailto:contact@kuurailab.com">contact@kuurailab.com</a> までご連絡ください。</p>
+      <div class="dt">制定日：2026年7月<br>Resume Mirror（KUURAI LAB）</div>
+    </div>`;
+}
 
 /* ============ BLOCK 8: 画面制御・共通処理 ============ */
 const main=document.getElementById("main");
@@ -3031,11 +3257,11 @@ function growAll(){
 function drawStepJump(){
   const el=document.getElementById("stepJump"); if(!el) return;
   const unlocked = S.agreed && (S.keyVerified || S.aiSkipped);
-  el.innerHTML = STEPS.map((name,i)=>{
+  el.innerHTML = STEP_KEYS.map((_,i)=>{
     const cur = i===step ? " cur":"";
-    if(i===0) return `<button class="sj set${cur}" onclick="jumpStep(0)" title="はじめの設定">設定</button>`;
+    if(i===0) return `<button class="sj set${cur}" onclick="jumpStep(0)" title="${esc(stepName(0))}">${esc(t("sj.set.short"))}</button>`;
     const dis = unlocked ? "" : " dis";
-    return `<button class="sj${cur}${dis}" ${unlocked?`onclick="jumpStep(${i})"`:"disabled"} title="${esc(name)}">${i}</button>`;
+    return `<button class="sj${cur}${dis}" ${unlocked?`onclick="jumpStep(${i})"`:"disabled"} title="${esc(stepName(i))}">${i}</button>`;
   }).join("");
 }
 function jumpStep(i){
@@ -3047,7 +3273,7 @@ function jumpStep(i){
    画面を作り直すと一瞬ページ高さが縮み、ブラウザが位置を巻き戻すため。 */
 function render(keepScroll){
   const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : null;
-  document.getElementById("stepName").textContent=STEPS[step];
+  document.getElementById("stepName").textContent=stepName(step);
   document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
   document.getElementById("barFill").style.width=`${((step+1)/TOTAL)*100}%`;
   main.innerHTML=VIEWS[step]();
@@ -3060,8 +3286,9 @@ function render(keepScroll){
 function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
+  back.textContent = t("nav.back");
   if(step===TOTAL-1){ next.style.display="none"; }
-  else { next.style.display=""; next.textContent = step===7 ? "経験を伝わる強みに変える" : (step===8 ? "次へ：面接シートを作る" : "次へ"); }
+  else { next.style.display=""; next.textContent = step===7 ? t("nav.next.prep") : (step===8 ? t("nav.next.sheet") : t("nav.next")); }
   next.disabled = (step===0 && !(S.agreed && (S.keyVerified || S.aiSkipped)));
 }
 function go(dir){
@@ -3073,7 +3300,7 @@ function go(dir){
 function setLoading(btn,on,label){
   btn.disabled=on;
   if(!btn.dataset.label) btn.dataset.label=btn.innerHTML;
-  btn.innerHTML = on ? `<span class="sp"></span>${label||"作成中…"}` : btn.dataset.label;
+  btn.innerHTML = on ? `<span class="sp"></span>${label||t("ld.creating")}` : btn.dataset.label;
 }
 function clearMsg(id){ const el=document.getElementById(id); if(el) el.innerHTML=""; updateNav(); }
 function esc(v){return String(v==null?"":v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -3091,6 +3318,7 @@ main.addEventListener("change", scheduleSave);
 window.addEventListener("beforeunload", saveNow);
 
 restore();
+applyChrome();
 render();
 </script>
 </body>
