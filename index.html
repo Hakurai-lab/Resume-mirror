@@ -280,14 +280,57 @@
   .turnblock.ai .msg{color:var(--ink)}
 
   /* BLOCK 2-c: 保存バー・利用規約モーダル */
-  .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:19;
-    max-width:560px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:7px 20px;
-    background:rgba(233,240,253,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);
-    font-size:11.5px;color:var(--muted)}
-  .savebar .st{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .savebar button{background:none;border:none;color:var(--navy);font-family:"Zen Kaku Gothic New";
-    font-weight:700;font-size:11.5px;cursor:pointer;padding:3px 2px;white-space:nowrap;text-decoration:underline}
-  .savebar button.danger{color:var(--warn)}
+  .savebar{position:sticky;top:0;z-index:18;background:var(--ice-soft);border-bottom:1px solid var(--line);
+    padding:8px 16px 10px;font-size:11px;color:var(--muted)}
+  .savebar .st{display:block;margin-bottom:7px}
+  .sbbtns{display:flex;gap:7px;flex-wrap:wrap}
+  .savebar button{background:#fff;border:1.5px solid var(--line);color:var(--navy);
+    font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12px;cursor:pointer;
+    padding:9px 13px;border-radius:10px;white-space:nowrap;flex:1;min-width:74px}
+  .savebar button:active{background:var(--ice)}
+  .savebar button.danger{color:var(--warn);border-color:var(--warn)}
+  .verline{text-align:center;font-size:10.5px;color:var(--muted);padding:10px 0 4px}
+  .axisrow{display:flex;align-items:center;gap:7px;margin-top:8px;flex-wrap:wrap}
+  .axislbl{font-size:11.5px;color:var(--muted);font-weight:700;flex:0 0 auto}
+  .axisrow input{flex:1;min-width:70px;font-size:14px;padding:8px 10px}
+  .axistil{color:var(--muted)}
+  .lgax{font-size:10.5px;color:var(--navy);background:var(--ice-soft);border-radius:99px;padding:1px 8px}
+
+  /* BLOCK 2-h: 実績ライブラリ */
+  .acard{background:#fff;border:1.5px solid var(--line);border-radius:15px;margin-bottom:11px;box-shadow:var(--shadow);overflow:hidden}
+  .acard.open{padding:16px}
+  .acardtop{display:flex;align-items:flex-start;gap:11px;padding:14px 15px;cursor:pointer}
+  .aleft{flex:1;min-width:0}
+  .atitle{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;color:var(--ink);line-height:1.5}
+  .ameta{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .anum{font-size:12.5px;color:var(--navy);font-weight:700;margin-top:4px}
+  .atags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+  .atag{font-size:10.5px;font-weight:700;color:var(--navy);background:var(--ice-soft);border-radius:99px;padding:2px 9px}
+  .atag.chart{color:var(--accent);background:#EAF6EF}
+  .atag.num{color:var(--muted);background:#F2F3F7}
+  .aedit{flex:0 0 auto;background:#fff;border:1.5px solid var(--navy);color:var(--navy);border-radius:9px;
+    padding:7px 13px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12px;cursor:pointer}
+  .aclose{background:none;border:none;color:var(--navy);font-family:"Zen Kaku Gothic New";font-weight:700;
+    font-size:12px;cursor:pointer;margin-left:10px;text-decoration:underline}
+  .msec{border-top:1px solid var(--line);padding-top:13px;margin-top:6px}
+  .msech{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px}
+  .mcard{background:var(--ice-soft);border-radius:12px;padding:13px;margin-bottom:10px}
+  .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+  .mhead b{font-family:"Zen Kaku Gothic New";font-size:12px;color:var(--navy)}
+  .usebox{border-top:1px solid var(--line);padding-top:13px;margin-top:13px}
+  .impbox{background:#fff;border:2px solid var(--accent);border-radius:15px;padding:16px;margin-bottom:18px}
+  .impboxh{font-family:"Zen Kaku Gothic New";font-weight:900;font-size:14.5px;color:var(--accent);margin-bottom:5px}
+  .impdone{background:var(--ice-soft);border-radius:12px;padding:14px;font-size:12.5px;color:var(--muted);margin-bottom:18px;line-height:1.7}
+  .cand{border:1.5px solid var(--line);border-radius:12px;padding:13px;margin-top:11px}
+  .candfrom{font-size:11px;color:var(--navy);font-weight:700;background:var(--ice-soft);border-radius:99px;
+    padding:2px 10px;display:inline-block;margin-bottom:7px}
+  .candtext{font-size:12.5px;line-height:1.75;color:#333;white-space:pre-wrap}
+  .candnum{font-size:12px;color:var(--navy);font-weight:700;margin-top:5px}
+  .candbtns{display:flex;gap:8px;margin-top:10px}
+  .candbtns .ai{flex:1;justify-content:center;margin-top:0}
+  .bkline{margin-top:20px;font-size:11.5px;color:var(--muted);text-align:center;line-height:1.8}
+  .bkline button{background:none;border:none;color:var(--warn);font-family:"Zen Kaku Gothic New";
+    font-weight:700;font-size:11.5px;cursor:pointer;text-decoration:underline}
 
   .modal{position:fixed;inset:0;z-index:60;background:rgba(20,26,60,.55);display:none;align-items:flex-end}
   .modal.on{display:flex}
@@ -312,7 +355,7 @@
   .agree input{width:auto;flex:0 0 auto;margin-top:4px}
   .agree a{color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline}
 
-  @media print{header,.nav,.savebar,.modal,.toolbar,.safe,details,.hint,.count,.note,.fchk,.stepjump,.asum{display:none!important}
+  @media print{header,.nav,.savebar,.verline,.modal,.toolbar,.safe,details,.hint,.count,.note,.fchk,.stepjump,.asum{display:none!important}
     main{padding:0}.doc{border:none;box-shadow:none;padding:0}body{background:#fff}
     .h2,.lede,#sheetMsg,.redo{display:none!important}
     .sheetdoc{border:none;box-shadow:none;padding:0;border-radius:0}
@@ -329,16 +372,18 @@
     <div class="bar"><i id="barFill" style="width:8%"></i></div>
     <div class="stepjump" id="stepJump"></div>
   </header>
-  <main id="main"></main>
   <div class="savebar">
     <span class="st" id="savedAt">この端末に自動保存されます</span>
-    <span style="font-size:10.5px;color:var(--muted);margin-right:6px" id="verTag">v21</span>
-    <button onclick="exportData()">書き出し</button>
-    <button onclick="document.getElementById('importFile').click()">読み込み</button>
-    <button onclick="openTips()">利用料</button>
-    <button onclick="openTerms()">規約</button>
-    <button class="danger" onclick="clearAll()">保存を消去</button>
+    <div class="sbbtns">
+      <button onclick="exportData()">書き出し</button>
+      <button onclick="document.getElementById('importFile').click()">読み込み</button>
+      <button onclick="openTips()">利用料</button>
+      <button onclick="openTerms()">規約</button>
+      <button class="danger" onclick="clearAll()">保存を消去</button>
+    </div>
   </div>
+  <main id="main"></main>
+  <div class="verline"><span id="verTag">v23</span></div>
   <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importData(this)">
   <nav class="nav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
@@ -446,6 +491,9 @@ const MODELS = {
   cheap:    { id:"claude-haiku-4-5-20251001", label:"軽量（費用を抑える）" }
 };
 const API_URL = "https://api.anthropic.com/v1/messages";
+/* 保存データの版。実績ライブラリ導入で 2。※ S の定義より前で宣言すること */
+const SCHEMA_VERSION = 2;
+const BACKUP_KEY = "resume_mirror_backup_v1";
 const ANTHROPIC_VERSION = "2023-06-01";
 const NOW_Y = new Date().getFullYear();
 const YEARS = Array.from({length:51},(_,i)=>NOW_Y-i);
@@ -460,6 +508,9 @@ const S = {
   jobs:[{company:"",client:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
+  schemaVersion:SCHEMA_VERSION,
+  achievements:[],
+  importSkipped:[],
   charts:[],
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
@@ -469,7 +520,7 @@ const S = {
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
-const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","職務要約","自己PR","実績グラフ","確認・出力","面接の準備","面接シート"];
+const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","実績ライブラリ","職務要約","自己PR","実績グラフ","確認・出力","面接の準備","面接シート"];
 const TOTAL = STEPS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
@@ -726,7 +777,9 @@ const VIEWS = [
       </div>`).join("")}
     <button class="addbtn" onclick="addItem('jobs',{company:'',client:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
 
-  /* 4 職務要約 */ ()=>`
+  /* 4 実績ライブラリ */ ()=>viewLibrary(),
+
+  /* 5 職務要約 */ ()=>`
     <div class="h2">職務要約</div>
     <div class="lede">AIに作らせても、自分で書いてから整えてもらっても構いません。</div>
     <label class="f"><span>大切にしてきたこと（3つ、読点で区切る）</span>
@@ -741,7 +794,7 @@ const VIEWS = [
     <div id="cmpSum">${cmpHTML(S.summaryOrig, S.summary, "undoSummary()")}</div>
     <div class="note"><b>ここが大事です。</b>AIが作るのは下書きです。必ず読み返し、<b>あなた自身の言葉に直してください。</b>面接では、自分の言葉で語れることが何より効きます。</div>`,
 
-  /* 5 自己PR */ ()=>`
+  /* 6 自己PR */ ()=>`
     <div class="h2">自己PR</div>
     <div class="lede">スキル・職歴・要約から作成できます。自分で書いた文を整えることもできます。</div>
     <button class="ai" onclick="genPR(this)">✦ ゼロから作成</button>
@@ -754,9 +807,9 @@ const VIEWS = [
     <div id="cmpPR">${cmpHTML(S.prOrig, S.pr, "undoPR()")}</div>
     <div class="note"><b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。</div>`,
 
-  /* 6 実績グラフ */ ()=>viewCharts(),
+  /* 7 実績グラフ */ ()=>viewCharts(),
 
-  /* 7 確認・出力 */ ()=>`
+  /* 8 確認・出力 */ ()=>`
     <div class="h2">確認・出力</div>
     <div class="lede">仕上がりを確認して、PDFで保存できます。</div>
     <div class="toolbar">
@@ -764,8 +817,8 @@ const VIEWS = [
     </div>
     <div id="docWrap">${docHTML()}</div>`,
 
-  /* 8 面接の準備 */ ()=>viewPrep(),
-  /* 9 面接シート */ ()=>viewSheet()
+  /* 9 面接の準備 */ ()=>viewPrep(),
+  /* 10 面接シート */ ()=>viewSheet()
 ];
 
 /* ガードレールは2種類。用途で使い分ける。※v12で「見捨てない」が脱落した。消さないこと。 */
@@ -1170,7 +1223,16 @@ function ensureJobIds(){
 }
 function newChart(){
   return { title:"", place:"jobs", section:"job", jobId:"", position:"after", labels:"", normalize:false, source:"",
-    series:[{name:"",type:"bar",values:""},{name:"",type:"line",values:""},{name:"",type:"line",values:""}] };
+    series:[{name:"",type:"bar",values:"",amin:"",amax:""},
+            {name:"",type:"line",values:"",amin:"",amax:""},
+            {name:"",type:"line",values:"",amin:"",amax:""}] };
+}
+/* 軸の下限・上限。1つだけ数値を取り出す（空なら null） */
+function oneNum(v){
+  const t=String(v==null?"":v).replace(/[，,]/g,"").trim();
+  if(!t) return null;
+  const n=Number(t);
+  return isFinite(n) ? n : null;
 }
 function parseLabels(str){ return String(str==null?"":str).split(/[,、]+/).map(x=>x.trim()).filter(Boolean); }
 /* 「25,512」のような桁区切りと、区切り文字としてのカンマは見分けがつかない。
@@ -1191,7 +1253,8 @@ function parseNums(str, expect){
 }
 function chartData(c){
   const labels=parseLabels(c.labels);
-  const series=(c.series||[]).map(s=>({name:(s.name||"").trim(), type:s.type==="line"?"line":"bar", vals:parseNums(s.values, labels.length)}))
+  const series=(c.series||[]).map(s=>({name:(s.name||"").trim(), type:s.type==="line"?"line":"bar",
+      vals:parseNums(s.values, labels.length), amin:oneNum(s.amin), amax:oneNum(s.amax)}))
     .filter(s=>s.vals.length>0);
   return {labels, series};
 }
@@ -1204,9 +1267,20 @@ function chartSVG(c){
   const n=labels.length;
   const W=640,H=270,L=58,R=24,T=20,B=36, iw=W-L-R, ih=H-T-B;
   const gmax=Math.max(...series.map(s=>Math.max(...s.vals)),1);
-  const maxOf=(s)=> c.normalize ? Math.max(...s.vals,1) : gmax;
+  /* 系列ごとの軸範囲。指定があればそれを使い、なければ 0〜最大値 */
+  const rangeOf=(s)=>{
+    let lo = s.amin!=null ? s.amin : 0;
+    let hi = s.amax!=null ? s.amax : (c.normalize ? Math.max(...s.vals,1) : gmax);
+    if(!(hi>lo)) hi = lo + 1;
+    return {lo,hi};
+  };
   const x=(i)=> L + (iw/n)*(i+0.5);
-  const y=(v,s)=> T + ih - (v/maxOf(s))*ih;
+  const y=(v,s)=>{
+    const {lo,hi}=rangeOf(s);
+    const r=(v-lo)/(hi-lo);
+    return T + ih - Math.max(0,Math.min(1,r))*ih;   /* 枠外にはみ出させない */
+  };
+  const customAxis = series.some(s=>s.amin!=null || s.amax!=null);
   const bars=series.filter(s=>s.type==="bar");
   const slot=iw/n, bw=Math.min(38,(slot*0.62)/Math.max(bars.length,1));
 
@@ -1215,7 +1289,7 @@ function chartSVG(c){
   [0,0.5,1].forEach(t=>{
     const yy=T+ih-ih*t;
     g+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#DDE3F0" stroke-width="1"/>`;
-    if(!c.normalize) g+=`<text x="${L-8}" y="${yy+4}" font-size="11" fill="#6B7280" text-anchor="end">${fmtNum(Math.round(gmax*t))}</text>`;
+    if(!c.normalize && !customAxis) g+=`<text x="${L-8}" y="${yy+4}" font-size="11" fill="#6B7280" text-anchor="end">${fmtNum(Math.round(gmax*t))}</text>`;
   });
   /* 棒 */
   bars.forEach((s,bi)=>{
@@ -1223,7 +1297,8 @@ function chartSVG(c){
     s.vals.forEach((v,i)=>{
       if(i>=n) return;
       const bx=x(i) - (bars.length*bw)/2 + bi*bw;
-      const by=y(v,s), bh=Math.max(1,T+ih-by);
+      const base=y(rangeOf(s).lo, s);
+      const by=Math.min(y(v,s), base), bh=Math.max(1, Math.abs(base-y(v,s)));
       g+=`<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${CHART_COLORS[ci%3]}" opacity="0.30" rx="2"/>`;
     });
   });
@@ -1253,10 +1328,12 @@ function chartLegend(c){
     const first=v[0], last=v[v.length-1];
     const range=(v.length>1 && first!=null && last!=null) ? `${fmtNum(first)} → ${fmtNum(last)}` : (first!=null?fmtNum(first):"");
     const kind=s.type==="line"?"折れ線":"棒";
+    const ax=(s.amin!=null||s.amax!=null)
+      ? `<span class="lgax">軸 ${s.amin!=null?fmtNum(s.amin):"0"}〜${s.amax!=null?fmtNum(s.amax):"自動"}</span>` : "";
     return `<div class="lgrow">
       <span class="lgdot ${s.type==="bar"?"bar":""}" style="background:${CHART_COLORS[ci%3]}"></span>
       <span class="lgname">${esc(s.name||`系列${ci+1}`)}</span>
-      <span class="lgkind">${kind}</span>
+      <span class="lgkind">${kind}</span>${ax}
       <span class="lgval">${esc(range)}</span>
     </div>`;}).join("")}</div>`;
 }
@@ -1275,8 +1352,8 @@ function chartBlockHTML(c){
   if(!labels.length || !series.length) return "";
   return `<div class="chartblock">
     ${c.title?`<div class="charttitle">${esc(c.title)}</div>`:""}
-    ${chartSVG(c)}
     ${chartLegend(c)}
+    ${chartSVG(c)}
     ${c.normalize?`<div class="chartnote">※系列ごとに目盛りを揃えています（桁が違うため）。実数は上の増減と下の表をご覧ください。</div>`:""}
     ${chartTable(c)}
     ${c.source?`<div class="chartsrc">${esc(c.source)}</div>`:""}
@@ -1298,7 +1375,7 @@ function chartsAt(section, position, jobId){
    プレビュー部分だけを差し替えること。 */
 function updateChartPreview(i){
   const el=document.getElementById("cprev"+i);
-  if(el) el.innerHTML = chartSVG(S.charts[i]) + chartLegend(S.charts[i]) + chartTable(S.charts[i]);
+  if(el) el.innerHTML = chartLegend(S.charts[i]) + chartSVG(S.charts[i]) + chartTable(S.charts[i]);
 }
 function addChart(){
   if((S.charts||[]).length>=MAX_CHARTS) return;
@@ -1350,6 +1427,12 @@ function viewCharts(){
             </select>
           </div>
           <input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">
+          <div class="axisrow">
+            <span class="axislbl">縦軸の範囲（任意）</span>
+            <input value="${esc(s.amin)}" oninput="S.charts[${i}].series[${si}].amin=this.value;updateChartPreview(${i});scheduleSave()" placeholder="下限">
+            <span class="axistil">〜</span>
+            <input value="${esc(s.amax)}" oninput="S.charts[${i}].series[${si}].amax=this.value;updateChartPreview(${i});scheduleSave()" placeholder="上限">
+          </div>
         </div>`).join("")}
 
       <label class="f" style="margin-top:12px">
@@ -1359,6 +1442,7 @@ function viewCharts(){
               onchange="S.charts[${i}].normalize=this.checked;updateChartPreview(${i});saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
           </label>
           <div style="margin-top:4px">例：記事数585件と問い合わせ25,512件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
+          <div style="margin-top:8px"><b>見せたい変化が埋もれるときは、その系列の「縦軸の範囲」を指定してください。</b>例：問い合わせ件数を 18,000〜27,000 にすると、減少の幅が大きく見えます。指定した範囲は凡例に表示されるので、読み手にも基準が伝わります。</div>
         </div></label>
 
       <label class="f"><span>出典・対象期間</span>
@@ -1367,7 +1451,7 @@ function viewCharts(){
 
       <div class="chartprev">
         <div class="chartprevh">プレビュー</div>
-        <div id="cprev${i}">${chartSVG(c)}${chartLegend(c)}${chartTable(c)}</div>
+        <div id="cprev${i}">${chartLegend(c)}${chartSVG(c)}${chartTable(c)}</div>
       </div>
     </div>`).join("")}
 
@@ -1375,6 +1459,245 @@ function viewCharts(){
     ? `<button class="addbtn" onclick="addChart()">＋ グラフを追加（${list.length} / ${MAX_CHARTS}）</button>`
     : `<div class="hint">グラフは最大${MAX_CHARTS}枚までです。</div>`}
   ${!list.length?`<div class="hint" style="margin-top:10px">数字がまだ揃っていなくても大丈夫です。あとから戻って追加できます。</div>`:""}`;
+}
+
+/* ============ BLOCK 13: 実績ライブラリ（第2段階／STEP4） ============
+   これが「実績の正本」になる。職務経歴書・グラフ・面接は、第3段階でここを参照するようになる。
+   この段階では出力は従来のままで、データを作るだけ。既存の入力欄は削除しない。 */
+
+function newMetric(){
+  return { id:newId("met"), name:"", unit:"", labels:"", values:"", source:"" };
+}
+function newAchievement(jobId){
+  return { id:newId("ach"), jobId:jobId||"", title:"", action:"", result:"",
+    metrics:[], usage:{ resume:true, chart:false },
+    source:{ type:"manual", from:"" }, open:true };
+}
+
+/* 移行前のデータを、別の場所に丸ごと控えておく（取り込みで壊れても戻せるように） */
+function backupOnce(){
+  try{
+    if(localStorage.getItem(BACKUP_KEY)) return;      /* 一度だけ */
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw) localStorage.setItem(BACKUP_KEY, JSON.stringify({ savedAt:new Date().toISOString(), raw }));
+  }catch(e){}
+}
+function hasBackup(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; } }
+function restoreBackup(){
+  try{
+    const b=JSON.parse(localStorage.getItem(BACKUP_KEY)||"null");
+    if(!b || !b.raw){ alert("控えが見つかりませんでした。"); return; }
+    if(!confirm("取り込みを行う前の状態に戻します。\n\n今の内容は失われます。よろしいですか？")) return;
+    localStorage.setItem(STORE_KEY, b.raw);
+    location.reload();
+  }catch(e){ alert("戻せませんでした。"); }
+}
+
+/* ---- 実績カードの表示 ---- */
+function jobName(jobId){
+  const j=(S.jobs||[]).find(x=>x.id===jobId);
+  return j ? (j.company||"（会社名未入力）") : "";
+}
+function metricSummary(a){
+  const m=(a.metrics||[]).find(x=>(x.name||"").trim() && parseNums(x.values, parseLabels(x.labels).length).length);
+  if(!m) return "";
+  const v=parseNums(m.values, parseLabels(m.labels).length);
+  if(!v.length) return "";
+  const head=v.length>1 ? `${fmtNum(v[0])} → ${fmtNum(v[v.length-1])}` : fmtNum(v[0]);
+  return `${m.name}：${head}${m.unit||""}`;
+}
+function achvCardHTML(a,i){
+  if(!a.open){
+    const co=jobName(a.jobId);
+    const ms=metricSummary(a);
+    return `<div class="acard">
+      <div class="acardtop" onclick="toggleAch(${i})">
+        <div class="aleft">
+          <div class="atitle">${esc(a.title|| (a.action||"").slice(0,24) || "（名称未設定）")}</div>
+          ${co?`<div class="ameta">${esc(co)}</div>`:""}
+          ${ms?`<div class="anum">${esc(ms)}</div>`:""}
+          <div class="atags">
+            ${a.usage&&a.usage.resume?`<span class="atag">職務経歴書</span>`:""}
+            ${a.usage&&a.usage.chart?`<span class="atag chart">グラフ候補</span>`:""}
+            ${(a.metrics||[]).length?`<span class="atag num">指標${a.metrics.length}</span>`:""}
+          </div>
+        </div>
+        <button class="aedit">編集</button>
+      </div>
+    </div>`;
+  }
+  return `<div class="acard open">
+    <div class="cardhead"><b>実績 ${i+1}</b>
+      <span><button class="del" onclick="delAch(${i})">削除</button>
+      <button class="aclose" onclick="toggleAch(${i})">閉じる</button></span></div>
+
+    <label class="f"><span>名称（一覧で見分けるための短い名前）</span>
+      <input value="${esc(a.title)}" oninput="S.achievements[${i}].title=this.value;scheduleSave()" placeholder="例：ナレッジ統廃合"></label>
+
+    <label class="f"><span>どの職歴のことか</span>
+      <select onchange="S.achievements[${i}].jobId=this.value;saveNow()">
+        <option value="">（選択なし）</option>
+        ${(S.jobs||[]).filter(j=>(j.company||"").trim()).map(j=>`<option value="${esc(j.id)}" ${a.jobId===j.id?"selected":""}>${esc(j.company)}</option>`).join("")}
+      </select></label>
+
+    <label class="f"><span>実行したこと</span>
+      <textarea oninput="S.achievements[${i}].action=this.value;grow(this);scheduleSave()"
+        placeholder="例：利用状況をもとに、ナレッジを585件から108件へ整理した">${esc(a.action)}</textarea></label>
+
+    <label class="f"><span>何が変わったか（結果）</span>
+      <textarea oninput="S.achievements[${i}].result=this.value;grow(this);scheduleSave()"
+        placeholder="例：自己解決が進み、問い合わせが年25,512件から20,121件に減った">${esc(a.result)}</textarea>
+      <div class="hint">「やったこと」と「その結果」を分けておくと、面接で使い分けられます。</div></label>
+
+    <div class="msec">
+      <div class="msech">数字（指標）${(a.metrics||[]).length?`　${a.metrics.length}件`:""}</div>
+      <div class="secnote" style="margin-left:0">ここに入れた数字が、グラフの材料にもなります（第3段階で連携します）。</div>
+      ${(a.metrics||[]).map((m,mi)=>`
+        <div class="mcard">
+          <div class="mhead"><b>指標 ${mi+1}</b><button class="del" onclick="delMetric(${i},${mi})">削除</button></div>
+          <div class="row2">
+            <label class="f"><span>指標名</span>
+              <input value="${esc(m.name)}" oninput="S.achievements[${i}].metrics[${mi}].name=this.value;scheduleSave()" placeholder="例：問い合わせ件数"></label>
+            <label class="f"><span>単位</span>
+              <input value="${esc(m.unit)}" oninput="S.achievements[${i}].metrics[${mi}].unit=this.value;scheduleSave()" placeholder="件"></label>
+          </div>
+          <label class="f"><span>期間のラベル</span>
+            <input value="${esc(m.labels)}" oninput="S.achievements[${i}].metrics[${mi}].labels=this.value;scheduleSave()" placeholder="例：2023, 2024, 2025"></label>
+          <label class="f"><span>数値（ラベルと同じ順）</span>
+            <input value="${esc(m.values)}" oninput="S.achievements[${i}].metrics[${mi}].values=this.value;scheduleSave()" placeholder="例：25,512、22,678、20,121"></label>
+          <label class="f"><span>出典（任意）</span>
+            <input value="${esc(m.source)}" oninput="S.achievements[${i}].metrics[${mi}].source=this.value;scheduleSave()" placeholder="例：社内ServiceNowデータ"></label>
+        </div>`).join("")}
+      <button class="addbtn" onclick="addMetric(${i})">＋ 数字を追加</button>
+    </div>
+
+    <div class="usebox">
+      <label class="fchkitem"><input type="checkbox" ${a.usage&&a.usage.resume?"checked":""}
+        onchange="S.achievements[${i}].usage.resume=this.checked;render(true);saveNow()"><span>職務経歴書に載せる</span></label>
+      <label class="fchkitem"><input type="checkbox" ${a.usage&&a.usage.chart?"checked":""}
+        onchange="S.achievements[${i}].usage.chart=this.checked;render(true);saveNow()"><span>グラフの候補にする</span></label>
+      <div class="hint">「面接で使うか」は応募先ごとに変わるので、面接の準備の画面で選びます。</div>
+    </div>
+  </div>`;
+}
+
+function toggleAch(i){ S.achievements[i].open=!S.achievements[i].open; render(true); saveNow(); }
+function delAch(i){
+  if(!confirm("この実績を削除します。よろしいですか？")) return;
+  S.achievements.splice(i,1); render(true); saveNow();
+}
+function addAch(){
+  S.achievements.push(newAchievement());
+  render(); saveNow();
+  requestAnimationFrame(()=>{const c=main.querySelectorAll('.acard'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
+}
+function addMetric(i){ S.achievements[i].metrics.push(newMetric()); render(true); saveNow(); }
+function delMetric(i,mi){ S.achievements[i].metrics.splice(mi,1); render(true); saveNow(); }
+
+/* ---- 既存入力からの取り込み ----
+   自動で統合しない。候補を出して、本人が1件ずつ決める。 */
+function buildCandidates(){
+  const out=[];
+  (S.jobs||[]).forEach(j=>{
+    const t=(j.achv||"").trim();
+    if(t) out.push({ key:"job:"+j.id, from:`職務経歴：${j.company||"（会社名未入力）"}`, jobId:j.id, text:t });
+  });
+  (S.skills||[]).forEach((s,si)=>{
+    const t=(s.achv||"").trim();
+    if(t) out.push({ key:"skill:"+si, from:`スキル：${s.name||"（名称未入力）"}`, jobId:"", text:t });
+  });
+  ((S.story&&S.story.achv)||[]).forEach((a,ai)=>{
+    const t=(a.what||"").trim();
+    if(t) out.push({ key:"story:"+ai, from:"面接の準備：語りたい実績", jobId:"", text:t, num:(a.num||"").trim() });
+  });
+  (S.charts||[]).forEach((c,ci)=>{
+    const {labels,series}=chartData(c);
+    if(!labels.length || !series.length) return;
+    out.push({ key:"chart:"+ci, from:`実績グラフ：${c.title||"（タイトル未設定）"}`, jobId:(c.section==="job"?c.jobId:"")||"",
+      text:"", chart:c, chartIdx:ci });
+  });
+  /* すでに取り込んだものは出さない */
+  const done=new Set((S.importSkipped||[]).concat((S.achievements||[]).map(a=>a.source&&a.source.from).filter(Boolean)));
+  return out.filter(x=>!done.has(x.key));
+}
+
+function importCandidate(key){
+  const c=buildCandidates().find(x=>x.key===key);
+  if(!c) return;
+  const a=newAchievement(c.jobId);
+  a.source={ type:"import", from:c.key };
+  if(c.chart){
+    a.title=c.chart.title||"グラフから取り込み";
+    const {labels,series}=chartData(c.chart);
+    a.metrics=series.map(s=>({ id:newId("met"), name:s.name||"", unit:"",
+      labels:c.chart.labels, values:(c.chart.series.find(x=>(x.name||"").trim()===s.name)||{}).values||"",
+      source:c.chart.source||"" }));
+    a.usage.chart=true;
+  }else{
+    a.action=c.text;
+    a.title=(c.text||"").replace(/\s+/g," ").slice(0,20);
+    if(c.num){
+      a.metrics=[{ id:newId("met"), name:"", unit:"", labels:"", values:c.num, source:"" }];
+    }
+  }
+  a.open=false;
+  S.achievements.push(a);
+  render(true); saveNow();
+}
+function skipCandidate(key){
+  if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
+  S.importSkipped.push(key);
+  render(true); saveNow();
+}
+function importAllCandidates(){
+  const list=buildCandidates();
+  if(!list.length) return;
+  if(!confirm(`${list.length}件をまとめて取り込みます。あとから編集・削除できます。よろしいですか？`)) return;
+  list.forEach(c=>importCandidate(c.key));
+  render(true); saveNow();
+}
+function resetSkipped(){ S.importSkipped=[]; render(true); saveNow(); }
+
+/* ---- 画面 ---- */
+function viewLibrary(){
+  const list=S.achievements||[];
+  const cands=buildCandidates();
+  const skipped=(S.importSkipped||[]).length;
+  return `
+  <div class="h2">実績ライブラリ</div>
+  <div class="lede">あなたの実績を、ここに一度だけ登録します。これから、職務経歴書・グラフ・面接シートが、すべてここを見るようになります。</div>
+  <div class="note"><b>この段階では、出力はまだ変わりません。</b>まずデータを作るだけです。今までの入力欄もそのまま残っているので、何も失われません。</div>
+
+  ${cands.length?`
+  <div class="impbox">
+    <div class="impboxh">これまでの入力から取り込めます（${cands.length}件）</div>
+    <div class="hint" style="margin-bottom:11px">同じことを書き直す必要はありません。1件ずつ確認して登録してください。勝手にまとめたりはしません。</div>
+    <button class="ai" onclick="importAllCandidates()">まとめて取り込む（${cands.length}件）</button>
+    ${cands.map(c=>`
+      <div class="cand">
+        <div class="candfrom">${esc(c.from)}</div>
+        <div class="candtext">${c.chart?`（グラフの数値 ${chartData(c.chart).series.length}系列）`:esc((c.text||"").slice(0,140))}${(!c.chart&&(c.text||"").length>140)?"…":""}</div>
+        ${c.num?`<div class="candnum">数字：${esc(c.num.slice(0,80))}</div>`:""}
+        <div class="candbtns">
+          <button class="ai" onclick="importCandidate('${esc(c.key)}')">登録する</button>
+          <button class="ai sub" onclick="skipCandidate('${esc(c.key)}')">取り込まない</button>
+        </div>
+      </div>`).join("")}
+  </div>`:`
+  <div class="impdone">
+    ${list.length?`取り込める候補はありません。${skipped?`（${skipped}件を「取り込まない」にしています）`:""}`:`取り込める候補はまだありません。下の「＋ 実績を追加」から登録できます。`}
+    ${skipped?`<button class="ai sub" style="margin-top:9px" onclick="resetSkipped()">「取り込まない」を取り消して、もう一度候補を見る</button>`:""}
+  </div>`}
+
+  <div class="sechead">登録済みの実績（${list.length}件）</div>
+  ${list.length? list.map((a,i)=>achvCardHTML(a,i)).join("")
+    : `<div class="hint">まだ登録がありません。</div>`}
+  <button class="addbtn" onclick="addAch()">＋ 実績を追加</button>
+
+  ${hasBackup()?`<div class="bkline">
+    取り込み前の状態は控えてあります。
+    <button onclick="restoreBackup()">その状態に戻す</button>
+  </div>`:""}`;
 }
 
 /* ============ BLOCK 11: 面接シート（Step8） ============ */
@@ -1837,6 +2160,19 @@ function migrateState(){
     if(!Array.isArray(S.story.ranked)) S.story.ranked = (S.story.chosen>=0?[S.story.chosen]:[]);
     if(!Array.isArray(S.story.checks)) S.story.checks=[];
     ensureJobIds();
+    /* 実績ライブラリ（第2段階）。旧データを読み込んだ初回に、控えを取る */
+    if(!S.schemaVersion || S.schemaVersion < SCHEMA_VERSION){ backupOnce(); S.schemaVersion=SCHEMA_VERSION; }
+    if(!Array.isArray(S.achievements)) S.achievements=[];
+    S.achievements=S.achievements.map(a=>{
+      const d=Object.assign(newAchievement(), a||{});
+      d.usage=Object.assign({resume:true,chart:false}, (a&&a.usage)||{});
+      d.source=Object.assign({type:"manual",from:""}, (a&&a.source)||{});
+      d.metrics=(Array.isArray(a&&a.metrics)?a.metrics:[]).map(m=>Object.assign(newMetric(), m||{}));
+      if(!d.id) d.id=newId("ach");
+      d.open=false;
+      return d;
+    });
+    if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
     if(!Array.isArray(S.charts)) S.charts=[];
     S.charts=S.charts.slice(0,MAX_CHARTS).map(c=>{
       const d=Object.assign(newChart(), c||{});
@@ -1853,7 +2189,7 @@ function migrateState(){
       if(d.position!=="before") d.position="after";
       d.series=(Array.isArray(c&&c.series)?c.series:[]).slice(0,3);
       while(d.series.length<3) d.series.push({name:"",type:d.series.length?"line":"bar",values:""});
-      d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:""}, x||{}));
+      d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:"",amin:"",amax:""}, x||{}));
       return d;
     });
     if(typeof S.story.sheetSig!=="string") S.story.sheetSig="";
@@ -1983,7 +2319,7 @@ function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
   if(step===TOTAL-1){ next.style.display="none"; }
-  else { next.style.display=""; next.textContent = step===7 ? "経験を伝わる強みに変える" : (step===8 ? "次へ：面接シートを作る" : "次へ"); }
+  else { next.style.display=""; next.textContent = step===8 ? "経験を伝わる強みに変える" : (step===9 ? "次へ：面接シートを作る" : "次へ"); }
   next.disabled = (step===0 && !(S.agreed && (S.keyVerified || S.aiSkipped)));
 }
 function go(dir){
