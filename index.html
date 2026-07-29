@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v32</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v33</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -646,7 +646,85 @@ const T = {
   "pr.title": { ja:"自己PR", en:"About You" },
   "pr.lede":  { ja:"スキル・職歴・要約から作成できます。自分で書いた文を整えることもできます。", en:"Can be generated from your skills, work history, and summary. You can also polish text you wrote yourself." },
   "pr.box":   { ja:"自己PR（編集できます）", en:"About you (editable)" },
-  "pr.note":  { ja:"<b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。", en:"<b>Use this as a starting point and make it your own.</b> Text that's too polished stands out when an interviewer asks 'Did you write this yourself?' Loosening it a little actually comes across better." }
+  "pr.note":  { ja:"<b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。", en:"<b>Use this as a starting point and make it your own.</b> Text that's too polished stands out when an interviewer asks 'Did you write this yourself?' Loosening it a little actually comes across better." },
+
+  "close": { ja:"閉じる", en:"Close" },
+  "lib.h2":   { ja:"実績ライブラリ", en:"Achievements Library" },
+  "lib.lede": { ja:"あなたの実績を、ここに一度だけ登録します。これから、職務経歴書・グラフ・面接シートが、すべてここを見るようになります。", en:"Register your achievements here once. From here on, your resume, charts, and interview sheet all draw from this." },
+  "lib.note": { ja:"<b>この段階では、出力はまだ変わりません。</b>まずデータを作るだけです。今までの入力欄もそのまま残っているので、何も失われません。", en:"<b>At this stage the output doesn't change yet.</b> You're just building the data. Your existing input fields remain, so nothing is lost." },
+
+  "lib.imp.head": { ja:"これまでの入力から取り込めます", en:"You can import from your earlier input" },
+  "lib.imp.hint": { ja:"同じことを書き直す必要はありません。1件ずつ確認して登録してください。勝手にまとめたりはしません。", en:"No need to rewrite the same things. Review and register them one at a time — nothing is merged automatically." },
+  "lib.imp.all":  { ja:"まとめて取り込む", en:"Import all" },
+  "lib.cand.chart.pre": { ja:"（グラフの数値 ", en:"(chart data, " },
+  "lib.cand.chart.suf": { ja:"系列）", en:" series)" },
+  "lib.cand.num":    { ja:"数字：", en:"Numbers: " },
+  "lib.cand.import": { ja:"登録する", en:"Register" },
+  "lib.cand.skip":   { ja:"取り込まない", en:"Don't import" },
+
+  "lib.done.none":  { ja:"取り込める候補はありません。", en:"No import candidates." },
+  "lib.done.none2": { ja:"取り込める候補はまだありません。下の「＋ 実績を追加」から登録できます。", en:"No import candidates yet. You can register them via '＋ Add an achievement' below." },
+  "lib.done.skipped.pre": { ja:"（", en:"(" },
+  "lib.done.skipped.suf": { ja:"件を「取り込まない」にしています）", en:" marked as not imported)" },
+  "lib.done.reset": { ja:"「取り込まない」を取り消して、もう一度候補を見る", en:"Undo 'don't import' and see the candidates again" },
+
+  "lib.registered": { ja:"登録済みの実績", en:"Registered achievements" },
+  "lib.empty":      { ja:"まだ登録がありません。", en:"Nothing registered yet." },
+  "lib.add":        { ja:"＋ 実績を追加", en:"＋ Add an achievement" },
+  "lib.bk.line":    { ja:"取り込み前の状態は控えてあります。", en:"The state from before importing has been backed up." },
+  "lib.bk.btn":     { ja:"その状態に戻す", en:"Restore that state" },
+
+  "lib.co.unset":    { ja:"（会社名未入力）", en:"(company not set)" },
+  "lib.name.unset":  { ja:"（名称未入力）", en:"(name not set)" },
+  "lib.title.unset":  { ja:"（名称未設定）", en:"(untitled)" },
+  "lib.title.unset2": { ja:"（タイトル未設定）", en:"(no title)" },
+  "lib.from.job":   { ja:"職務経歴：", en:"Work history: " },
+  "lib.from.skill": { ja:"スキル：", en:"Skill: " },
+  "lib.from.story": { ja:"面接の準備：語りたい実績", en:"Interview prep: achievement to tell" },
+  "lib.from.chart": { ja:"実績グラフ：", en:"Chart: " },
+
+  "lib.tag.resume":  { ja:"職務経歴書", en:"Resume" },
+  "lib.tag.chart":   { ja:"グラフ候補", en:"Chart candidate" },
+  "lib.tag.metrics": { ja:"指標", en:"Metrics " },
+  "lib.edit": { ja:"編集", en:"Edit" },
+  "lib.card": { ja:"実績", en:"Achievement" },
+
+  "lib.name.label": { ja:"名称（一覧で見分けるための短い名前）", en:"Name (a short label to find it in the list)" },
+  "lib.name.ph":    { ja:"例：新人研修の標準化", en:"e.g. Standardizing new-hire training" },
+  "lib.whichjob":    { ja:"どの職歴のことか", en:"Which job is this?" },
+  "lib.select.none": { ja:"（選択なし）", en:"(none selected)" },
+  "lib.action":    { ja:"実行したこと", en:"What you did" },
+  "lib.action.ph": { ja:"例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した", en:"e.g. Created a customer-service manual for new hires and rolled it out store-wide to unify operations" },
+  "lib.result":      { ja:"何が変わったか（結果）", en:"What changed (the result)" },
+  "lib.result.ph":   { ja:"例：新人が独り立ちするまでの期間が、平均2か月から3週間に短くなった", en:"e.g. Time for new hires to become independent fell from about 2 months to 3 weeks" },
+  "lib.result.hint": { ja:"「やったこと」と「その結果」を分けておくと、面接で使い分けられます。", en:"Keeping what you did separate from the result lets you use each one as needed in interviews." },
+
+  "lib.metrics.head": { ja:"数字（指標）", en:"Numbers (metrics)" },
+  "lib.metrics.note": { ja:"ここに入れた数字が、グラフの材料にもなります（第3段階で連携します）。", en:"Numbers you enter here also become the material for charts." },
+  "lib.metric": { ja:"指標", en:"Metric" },
+  "lib.metric.name":    { ja:"指標名", en:"Metric name" },
+  "lib.metric.name.ph": { ja:"例：独り立ちまでの日数", en:"e.g. Days to independence" },
+  "lib.metric.unit":    { ja:"単位", en:"Unit" },
+  "lib.metric.unit.ph": { ja:"件", en:"e.g. days" },
+  "lib.metric.labels":    { ja:"期間のラベル", en:"Period labels" },
+  "lib.metric.labels.ph": { ja:"例：2023, 2024, 2025", en:"e.g. 2023, 2024, 2025" },
+  "lib.metric.values":    { ja:"数値（ラベルと同じ順）", en:"Values (same order as labels)" },
+  "lib.metric.values.ph": { ja:"例：60、45、21", en:"e.g. 60, 45, 21" },
+  "lib.metric.source":    { ja:"出典（任意）", en:"Source (optional)" },
+  "lib.metric.source.ph": { ja:"例：店舗の勤怠記録", en:"e.g. Store attendance records" },
+  "lib.metric.add": { ja:"＋ 数字を追加", en:"＋ Add a number" },
+
+  "lib.use.resume": { ja:"職務経歴書に載せる", en:"Include in resume" },
+  "lib.use.chart":  { ja:"グラフの候補にする", en:"Make a chart candidate" },
+  "lib.use.hint":   { ja:"「面接で使うか」は応募先ごとに変わるので、面接の準備の画面で選びます。", en:"Whether to use it in an interview depends on the employer, so you choose that on the Interview Prep screen." },
+
+  "lib.del.confirm":  { ja:"この実績を削除します。よろしいですか？", en:"Delete this achievement. Continue?" },
+  "lib.impall.pre":   { ja:"", en:"Import all " },
+  "lib.impall.suf":   { ja:"件をまとめて取り込みます。あとから編集・削除できます。よろしいですか？", en:" items at once. You can edit or delete them later. Continue?" },
+  "lib.bk.none":      { ja:"控えが見つかりませんでした。", en:"No backup was found." },
+  "lib.bk.confirm.a": { ja:"取り込みを行う前の状態に戻します。", en:"This restores the state from before importing." },
+  "lib.bk.confirm.b": { ja:"今の内容は失われます。よろしいですか？", en:"Your current content will be lost. Continue?" },
+  "lib.bk.fail":      { ja:"戻せませんでした。", en:"Could not restore." }
 };
 function t(key){ const e=T[key]; if(!e) return key; return e[S.ui] || e.ja || key; }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1916,17 +1994,17 @@ function hasBackup(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){
 function restoreBackup(){
   try{
     const b=JSON.parse(localStorage.getItem(BACKUP_KEY)||"null");
-    if(!b || !b.raw){ alert("控えが見つかりませんでした。"); return; }
-    if(!confirm("取り込みを行う前の状態に戻します。\n\n今の内容は失われます。よろしいですか？")) return;
+    if(!b || !b.raw){ alert(t("lib.bk.none")); return; }
+    if(!confirm(t("lib.bk.confirm.a")+"\n\n"+t("lib.bk.confirm.b"))) return;
     localStorage.setItem(STORE_KEY, b.raw);
     location.reload();
-  }catch(e){ alert("戻せませんでした。"); }
+  }catch(e){ alert(t("lib.bk.fail")); }
 }
 
 /* ---- 実績カードの表示 ---- */
 function jobName(jobId){
   const j=(S.jobs||[]).find(x=>x.id===jobId);
-  return j ? (j.company||"（会社名未入力）") : "";
+  return j ? (j.company||t("lib.co.unset")) : "";
 }
 function jobNameTr(jobId){
   const j=(S.jobs||[]).find(x=>x.id===jobId);
@@ -1976,77 +2054,77 @@ function achvCardHTML(a,i){
     return `<div class="acard">
       <div class="acardtop" onclick="toggleAch(${i})">
         <div class="aleft">
-          <div class="atitle">${esc(a.title|| (a.action||"").slice(0,24) || "（名称未設定）")}</div>
+          <div class="atitle">${esc(a.title|| (a.action||"").slice(0,24) || t("lib.title.unset"))}</div>
           ${co?`<div class="ameta">${esc(co)}</div>`:""}
           ${ms?`<div class="anum">${esc(ms)}</div>`:""}
           <div class="atags">
-            ${a.usage&&a.usage.resume?`<span class="atag">職務経歴書</span>`:""}
-            ${a.usage&&a.usage.chart?`<span class="atag chart">グラフ候補</span>`:""}
-            ${(a.metrics||[]).length?`<span class="atag num">指標${a.metrics.length}</span>`:""}
+            ${a.usage&&a.usage.resume?`<span class="atag">${t("lib.tag.resume")}</span>`:""}
+            ${a.usage&&a.usage.chart?`<span class="atag chart">${t("lib.tag.chart")}</span>`:""}
+            ${(a.metrics||[]).length?`<span class="atag num">${t("lib.tag.metrics")}${a.metrics.length}</span>`:""}
           </div>
         </div>
-        <button class="aedit">編集</button>
+        <button class="aedit">${t("lib.edit")}</button>
       </div>
     </div>`;
   }
   return `<div class="acard open">
-    <div class="cardhead"><b>実績 ${i+1}</b>
-      <span><button class="del" onclick="delAch(${i})">削除</button>
-      <button class="aclose" onclick="toggleAch(${i})">閉じる</button></span></div>
+    <div class="cardhead"><b>${t("lib.card")} ${i+1}</b>
+      <span><button class="del" onclick="delAch(${i})">${t("del")}</button>
+      <button class="aclose" onclick="toggleAch(${i})">${t("close")}</button></span></div>
 
-    <label class="f"><span>名称（一覧で見分けるための短い名前）</span>
-      <input value="${esc(a.title)}" oninput="S.achievements[${i}].title=this.value;scheduleSave()" placeholder="例：新人研修の標準化"></label>
+    <label class="f"><span>${t("lib.name.label")}</span>
+      <input value="${esc(a.title)}" oninput="S.achievements[${i}].title=this.value;scheduleSave()" placeholder="${t("lib.name.ph")}"></label>
 
-    <label class="f"><span>どの職歴のことか</span>
+    <label class="f"><span>${t("lib.whichjob")}</span>
       <select onchange="S.achievements[${i}].jobId=this.value;saveNow()">
-        <option value="">（選択なし）</option>
+        <option value="">${t("lib.select.none")}</option>
         ${(S.jobs||[]).filter(j=>(j.company||"").trim()).map(j=>`<option value="${esc(j.id)}" ${a.jobId===j.id?"selected":""}>${esc(j.company)}</option>`).join("")}
       </select></label>
 
-    <label class="f"><span>実行したこと</span>
+    <label class="f"><span>${t("lib.action")}</span>
       <textarea oninput="S.achievements[${i}].action=this.value;grow(this);scheduleSave()"
-        placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した">${esc(a.action)}</textarea></label>
+        placeholder="${t("lib.action.ph")}">${esc(a.action)}</textarea></label>
 
-    <label class="f"><span>何が変わったか（結果）</span>
+    <label class="f"><span>${t("lib.result")}</span>
       <textarea oninput="S.achievements[${i}].result=this.value;grow(this);scheduleSave()"
-        placeholder="例：新人が独り立ちするまでの期間が、平均2か月から3週間に短くなった">${esc(a.result)}</textarea>
-      <div class="hint">「やったこと」と「その結果」を分けておくと、面接で使い分けられます。</div></label>
+        placeholder="${t("lib.result.ph")}">${esc(a.result)}</textarea>
+      <div class="hint">${t("lib.result.hint")}</div></label>
 
     <div class="msec">
-      <div class="msech">数字（指標）${(a.metrics||[]).length?`　${a.metrics.length}件`:""}</div>
-      <div class="secnote" style="margin-left:0">ここに入れた数字が、グラフの材料にもなります（第3段階で連携します）。</div>
+      <div class="msech">${t("lib.metrics.head")}${(a.metrics||[]).length?` (${a.metrics.length})`:""}</div>
+      <div class="secnote" style="margin-left:0">${t("lib.metrics.note")}</div>
       ${(a.metrics||[]).map((m,mi)=>`
         <div class="mcard">
-          <div class="mhead"><b>指標 ${mi+1}</b><button class="del" onclick="delMetric(${i},${mi})">削除</button></div>
+          <div class="mhead"><b>${t("lib.metric")} ${mi+1}</b><button class="del" onclick="delMetric(${i},${mi})">${t("del")}</button></div>
           <div class="row2">
-            <label class="f"><span>指標名</span>
-              <input value="${esc(m.name)}" oninput="S.achievements[${i}].metrics[${mi}].name=this.value;scheduleSave()" placeholder="例：独り立ちまでの日数"></label>
-            <label class="f"><span>単位</span>
-              <input value="${esc(m.unit)}" oninput="S.achievements[${i}].metrics[${mi}].unit=this.value;scheduleSave()" placeholder="件"></label>
+            <label class="f"><span>${t("lib.metric.name")}</span>
+              <input value="${esc(m.name)}" oninput="S.achievements[${i}].metrics[${mi}].name=this.value;scheduleSave()" placeholder="${t("lib.metric.name.ph")}"></label>
+            <label class="f"><span>${t("lib.metric.unit")}</span>
+              <input value="${esc(m.unit)}" oninput="S.achievements[${i}].metrics[${mi}].unit=this.value;scheduleSave()" placeholder="${t("lib.metric.unit.ph")}"></label>
           </div>
-          <label class="f"><span>期間のラベル</span>
-            <input value="${esc(m.labels)}" oninput="S.achievements[${i}].metrics[${mi}].labels=this.value;scheduleSave()" placeholder="例：2023, 2024, 2025"></label>
-          <label class="f"><span>数値（ラベルと同じ順）</span>
-            <input value="${esc(m.values)}" oninput="S.achievements[${i}].metrics[${mi}].values=this.value;scheduleSave()" placeholder="例：60、45、21"></label>
-          <label class="f"><span>出典（任意）</span>
-            <input value="${esc(m.source)}" oninput="S.achievements[${i}].metrics[${mi}].source=this.value;scheduleSave()" placeholder="例：店舗の勤怠記録"></label>
+          <label class="f"><span>${t("lib.metric.labels")}</span>
+            <input value="${esc(m.labels)}" oninput="S.achievements[${i}].metrics[${mi}].labels=this.value;scheduleSave()" placeholder="${t("lib.metric.labels.ph")}"></label>
+          <label class="f"><span>${t("lib.metric.values")}</span>
+            <input value="${esc(m.values)}" oninput="S.achievements[${i}].metrics[${mi}].values=this.value;scheduleSave()" placeholder="${t("lib.metric.values.ph")}"></label>
+          <label class="f"><span>${t("lib.metric.source")}</span>
+            <input value="${esc(m.source)}" oninput="S.achievements[${i}].metrics[${mi}].source=this.value;scheduleSave()" placeholder="${t("lib.metric.source.ph")}"></label>
         </div>`).join("")}
-      <button class="addbtn" onclick="addMetric(${i})">＋ 数字を追加</button>
+      <button class="addbtn" onclick="addMetric(${i})">${t("lib.metric.add")}</button>
     </div>
 
     <div class="usebox">
       <label class="fchkitem"><input type="checkbox" ${a.usage&&a.usage.resume?"checked":""}
-        onchange="S.achievements[${i}].usage.resume=this.checked;render(true);saveNow()"><span>職務経歴書に載せる</span></label>
+        onchange="S.achievements[${i}].usage.resume=this.checked;render(true);saveNow()"><span>${t("lib.use.resume")}</span></label>
       <label class="fchkitem"><input type="checkbox" ${a.usage&&a.usage.chart?"checked":""}
-        onchange="S.achievements[${i}].usage.chart=this.checked;render(true);saveNow()"><span>グラフの候補にする</span></label>
-      <div class="hint">「面接で使うか」は応募先ごとに変わるので、面接の準備の画面で選びます。</div>
+        onchange="S.achievements[${i}].usage.chart=this.checked;render(true);saveNow()"><span>${t("lib.use.chart")}</span></label>
+      <div class="hint">${t("lib.use.hint")}</div>
     </div>
   </div>`;
 }
 
 function toggleAch(i){ S.achievements[i].open=!S.achievements[i].open; render(true); saveNow(); }
 function delAch(i){
-  if(!confirm("この実績を削除します。よろしいですか？")) return;
+  if(!confirm(t("lib.del.confirm"))) return;
   S.achievements.splice(i,1); render(true); saveNow();
 }
 function addAch(){
@@ -2062,21 +2140,21 @@ function delMetric(i,mi){ S.achievements[i].metrics.splice(mi,1); render(true); 
 function buildCandidates(){
   const out=[];
   (S.jobs||[]).forEach(j=>{
-    const t=(j.achv||"").trim();
-    if(t) out.push({ key:"job:"+j.id, from:`職務経歴：${j.company||"（会社名未入力）"}`, jobId:j.id, text:t });
+    const txt=(j.achv||"").trim();
+    if(txt) out.push({ key:"job:"+j.id, from:t("lib.from.job")+(j.company||t("lib.co.unset")), jobId:j.id, text:txt });
   });
   (S.skills||[]).forEach((s,si)=>{
-    const t=(s.achv||"").trim();
-    if(t) out.push({ key:"skill:"+si, from:`スキル：${s.name||"（名称未入力）"}`, jobId:"", text:t });
+    const txt=(s.achv||"").trim();
+    if(txt) out.push({ key:"skill:"+si, from:t("lib.from.skill")+(s.name||t("lib.name.unset")), jobId:"", text:txt });
   });
   ((S.story&&S.story.achv)||[]).forEach((a,ai)=>{
-    const t=(a.what||"").trim();
-    if(t) out.push({ key:"story:"+ai, from:"面接の準備：語りたい実績", jobId:"", text:t, num:(a.num||"").trim() });
+    const txt=(a.what||"").trim();
+    if(txt) out.push({ key:"story:"+ai, from:t("lib.from.story"), jobId:"", text:txt, num:(a.num||"").trim() });
   });
   (S.charts||[]).forEach((c,ci)=>{
     const {labels,series}=chartData(c);
     if(!labels.length || !series.length) return;
-    out.push({ key:"chart:"+ci, from:`実績グラフ：${c.title||"（タイトル未設定）"}`, jobId:(c.section==="job"?c.jobId:"")||"",
+    out.push({ key:"chart:"+ci, from:t("lib.from.chart")+(c.title||t("lib.title.unset2")), jobId:(c.section==="job"?c.jobId:"")||"",
       text:"", chart:c, chartIdx:ci });
   });
   /* すでに取り込んだものは出さない */
@@ -2124,7 +2202,7 @@ function skipCandidate(key){
 function importAllCandidates(){
   const list=buildCandidates();
   if(!list.length) return;
-  if(!confirm(`${list.length}件をまとめて取り込みます。あとから編集・削除できます。よろしいですか？`)) return;
+  if(!confirm(t("lib.impall.pre")+list.length+t("lib.impall.suf"))) return;
   list.forEach(c=>importCandidate(c.key));
   render(true); saveNow();
 }
@@ -2136,39 +2214,39 @@ function viewLibrary(){
   const cands=buildCandidates();
   const skipped=(S.importSkipped||[]).length;
   return `
-  <div class="h2">実績ライブラリ</div>
-  <div class="lede">あなたの実績を、ここに一度だけ登録します。これから、職務経歴書・グラフ・面接シートが、すべてここを見るようになります。</div>
-  <div class="note"><b>この段階では、出力はまだ変わりません。</b>まずデータを作るだけです。今までの入力欄もそのまま残っているので、何も失われません。</div>
+  <div class="h2">${t("lib.h2")}</div>
+  <div class="lede">${t("lib.lede")}</div>
+  <div class="note">${t("lib.note")}</div>
 
   ${cands.length?`
   <div class="impbox">
-    <div class="impboxh">これまでの入力から取り込めます（${cands.length}件）</div>
-    <div class="hint" style="margin-bottom:11px">同じことを書き直す必要はありません。1件ずつ確認して登録してください。勝手にまとめたりはしません。</div>
-    <button class="ai" onclick="importAllCandidates()">まとめて取り込む（${cands.length}件）</button>
+    <div class="impboxh">${t("lib.imp.head")} (${cands.length})</div>
+    <div class="hint" style="margin-bottom:11px">${t("lib.imp.hint")}</div>
+    <button class="ai" onclick="importAllCandidates()">${t("lib.imp.all")} (${cands.length})</button>
     ${cands.map(c=>`
       <div class="cand">
         <div class="candfrom">${esc(c.from)}</div>
-        <div class="candtext">${c.chart?`（グラフの数値 ${chartData(c.chart).series.length}系列）`:esc((c.text||"").slice(0,140))}${(!c.chart&&(c.text||"").length>140)?"…":""}</div>
-        ${c.num?`<div class="candnum">数字：${esc(c.num.slice(0,80))}</div>`:""}
+        <div class="candtext">${c.chart?`${t("lib.cand.chart.pre")}${chartData(c.chart).series.length}${t("lib.cand.chart.suf")}`:esc((c.text||"").slice(0,140))}${(!c.chart&&(c.text||"").length>140)?"…":""}</div>
+        ${c.num?`<div class="candnum">${t("lib.cand.num")}${esc(c.num.slice(0,80))}</div>`:""}
         <div class="candbtns">
-          <button class="ai" onclick="importCandidate('${esc(c.key)}')">登録する</button>
-          <button class="ai sub" onclick="skipCandidate('${esc(c.key)}')">取り込まない</button>
+          <button class="ai" onclick="importCandidate('${esc(c.key)}')">${t("lib.cand.import")}</button>
+          <button class="ai sub" onclick="skipCandidate('${esc(c.key)}')">${t("lib.cand.skip")}</button>
         </div>
       </div>`).join("")}
   </div>`:`
   <div class="impdone">
-    ${list.length?`取り込める候補はありません。${skipped?`（${skipped}件を「取り込まない」にしています）`:""}`:`取り込める候補はまだありません。下の「＋ 実績を追加」から登録できます。`}
-    ${skipped?`<button class="ai sub" style="margin-top:9px" onclick="resetSkipped()">「取り込まない」を取り消して、もう一度候補を見る</button>`:""}
+    ${list.length?`${t("lib.done.none")}${skipped?`${t("lib.done.skipped.pre")}${skipped}${t("lib.done.skipped.suf")}`:""}`:`${t("lib.done.none2")}`}
+    ${skipped?`<button class="ai sub" style="margin-top:9px" onclick="resetSkipped()">${t("lib.done.reset")}</button>`:""}
   </div>`}
 
-  <div class="sechead">登録済みの実績（${list.length}件）</div>
+  <div class="sechead">${t("lib.registered")} (${list.length})</div>
   ${list.length? list.map((a,i)=>achvCardHTML(a,i)).join("")
-    : `<div class="hint">まだ登録がありません。</div>`}
-  <button class="addbtn" onclick="addAch()">＋ 実績を追加</button>
+    : `<div class="hint">${t("lib.empty")}</div>`}
+  <button class="addbtn" onclick="addAch()">${t("lib.add")}</button>
 
   ${hasBackup()?`<div class="bkline">
-    取り込み前の状態は控えてあります。
-    <button onclick="restoreBackup()">その状態に戻す</button>
+    ${t("lib.bk.line")}
+    <button onclick="restoreBackup()">${t("lib.bk.btn")}</button>
   </div>`:""}`;
 }
 
