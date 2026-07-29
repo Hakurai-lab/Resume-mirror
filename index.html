@@ -282,7 +282,8 @@
   /* BLOCK 2-c: 保存バー・利用規約モーダル */
   .savebar{position:sticky;top:0;z-index:18;background:var(--ice-soft);border-bottom:1px solid var(--line);
     padding:8px 16px 10px;font-size:11px;color:var(--muted)}
-  .savebar .st{display:block;margin-bottom:7px}
+  .savebar .st{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:7px}
+  .savebar .ver{flex:0 0 auto;font-weight:700;color:var(--navy);background:#fff;border-radius:99px;padding:1px 9px;font-size:10.5px}
   .sbbtns{display:flex;gap:7px;flex-wrap:wrap}
   .savebar button{background:#fff;border:1.5px solid var(--line);color:var(--navy);
     font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12px;cursor:pointer;
@@ -295,6 +296,22 @@
   .axisrow input{flex:1;min-width:70px;font-size:14px;padding:8px 10px}
   .axistil{color:var(--muted)}
   .lgax{font-size:10.5px;color:var(--navy);background:var(--ice-soft);border-radius:99px;padding:1px 8px}
+  /* 第3段階：参照表示 */
+  .achi{margin-bottom:9px}
+  .acta{font-size:13px;line-height:1.85;white-space:pre-wrap}
+  .actr{font-size:12.5px;line-height:1.8;color:#333;white-space:pre-wrap;margin-top:2px}
+  .actm{font-size:12px;color:var(--navy);font-weight:700;margin-top:3px}
+  .linkedval{background:var(--ice-soft);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--navy);font-weight:700}
+  .pickach{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);
+    border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer}
+  .pickach.on{border-color:var(--accent);border-width:2.5px;background:#F4FBF7}
+  .pkchk{flex:0 0 22px;height:22px;border-radius:6px;border:1.5px solid var(--line);display:flex;
+    align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:13px;margin-top:2px}
+  .pickach.on .pkchk{background:var(--accent);border-color:var(--accent)}
+  .pkbody{flex:1;min-width:0}
+  .pktitle{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13.5px;line-height:1.5}
+  .pkmeta{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .pknum{font-size:12px;color:var(--navy);font-weight:700;margin-top:3px}
 
   /* BLOCK 2-h: 実績ライブラリ */
   .acard{background:#fff;border:1.5px solid var(--line);border-radius:15px;margin-bottom:11px;box-shadow:var(--shadow);overflow:hidden}
@@ -373,7 +390,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st" id="savedAt">この端末に自動保存されます</span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v24</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -383,7 +400,6 @@
     </div>
   </div>
   <main id="main"></main>
-  <div class="verline"><span id="verTag">v23</span></div>
   <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importData(this)">
   <nav class="nav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
@@ -514,7 +530,7 @@ const S = {
   charts:[],
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
-    achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}],
+    achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}], useAch:[],
     patterns:[], chosen:-1, ranked:[], sheet:{}, sheetSig:"", checks:[], sheetTab:"sheet", cheatMode:"full", sheetKey:""
   },
   date:new Date().toISOString().slice(0,10)
@@ -930,8 +946,23 @@ function viewPrep(){
   <div id="jdMsg"></div>
   ${jdDigestBox()}
 
-  <div class="sechead">② 語りたい実績（2〜3件）</div>
-  <div class="secnote">面接で話したい経験を書き出します（最大10件・保存されます）。<b>実際に語るのは2〜3件</b>なので、まずは自信のあるものから。数字が思いつかないときは、ボタンで一緒に探します。<br>※面接シート作成時は、各実績の<b>先頭400字まで</b>を使用します。重要な内容は前半に書いてください。</div>
+  <div class="sechead">② 今回の面接で使う実績</div>
+  ${(S.achievements||[]).length?`
+  <div class="secnote">STEP4 の実績ライブラリから選ぶだけです。同じことを書き直す必要はありません。<b>2〜3件</b>が目安です。内容を直したいときは STEP4 で直すと、職務経歴書・グラフ・面接シートのすべてに反映されます。</div>
+  ${(S.achievements||[]).map(a=>{
+    const on=(S.story.useAch||[]).includes(a.id);
+    const ms=metricSummary(a);
+    return `<div class="pickach ${on?"on":""}" onclick="toggleUseAch('${esc(a.id)}')">
+      <div class="pkchk">${on?"✓":""}</div>
+      <div class="pkbody">
+        <div class="pktitle">${esc(a.title||(a.action||"").slice(0,24)||"（名称未設定）")}</div>
+        ${a.jobId?`<div class="pkmeta">${esc(jobName(a.jobId))}</div>`:""}
+        ${ms?`<div class="pknum">${esc(ms)}</div>`:""}
+      </div>
+    </div>`;}).join("")}
+  <div class="hint" style="margin-top:8px">選択：${(S.story.useAch||[]).length}件${(S.story.useAch||[]).length>4?"　※4件以内が目安です":""}</div>
+  `:`
+  <div class="impdone">STEP4「実績ライブラリ」に実績がまだありません。<br>先にそちらで登録するか、これまでどおり下の欄に直接書くこともできます。</div>
   ${st.achv.map((a,i)=>`
     <div class="card">
       <div class="cardhead">
@@ -941,20 +972,19 @@ function viewPrep(){
       </div>
       <label class="f"><span>実績として実行したこと</span>
         <textarea oninput="S.story.achv[${i}].what=this.value;grow(this);scheduleSave()"
-          placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した。">${esc(a.what)}</textarea>
-        <div class="hint">背景や事情は書かず、<b>あなたが実行したこと</b>を書いてください。短く具体的なほど、精度が上がります。
-        ${((a.what||"").length>ACHV_CHARS)?`<div style="color:var(--warn);font-weight:700;margin-top:5px">${(a.what||"").length}字あります。面接シートでは先頭${ACHV_CHARS}字までが使われます。</div>`:""}</div></label>
+          placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した。">${esc(a.what)}</textarea></label>
       <label class="f"><span>数字（分かる範囲で）</span>
         <textarea id="anum${i}" oninput="S.story.achv[${i}].num=this.value;grow(this);scheduleSave()"
           placeholder="例：対象スタッフ15名／新人が独り立ちするまで 2か月→3週間">${esc(a.num)}</textarea></label>
       <button class="ai sub" onclick="findNumbers(${i},this)">この経験で数字にできる点を探す</button>
       <div id="hint${i}">${(a.hints&&a.hints.length)?`
         <div class="chips">
-          <div class="chiplbl">これらは数字にできそうな観点です。心当たりのあるものをタップすると、下の数字欄に項目が入ります。覚えている範囲で数字を書き添えてください。</div>
+          <div class="chiplbl">これらは数字にできそうな観点です。心当たりのあるものをタップすると、下の数字欄に項目が入ります。</div>
           ${a.hints.map((h,hi)=>`<span class="chip" onclick="addHintByIndex(${i},${hi})">${esc(h)}</span>`).join("")}
         </div>`:""}</div>
     </div>`).join("")}
-  ${st.achv.length<MAX_ACHV?`<button class="addbtn" onclick="addAchv()">＋ 実績を追加（${st.achv.length} / ${MAX_ACHV}）</button>`:`<div class="hint">実績は最大${MAX_ACHV}件までです。</div>`}
+  ${st.achv.length<MAX_ACHV?`<button class="addbtn" onclick="addAchv()">＋ 実績を追加（${st.achv.length} / ${MAX_ACHV}）</button>`:""}
+  `}
 
   <div class="sechead">③ 語り口を選ぶ</div>
   <div class="secnote">面接での語り方の候補を作ります。<b>複数選んでも構いません。</b>タップした順に優先順位がつき、1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。<b>推奨は1〜2件</b>（多く選ぶほど、シートの情報量が増えます）。順位を変えたいときは、一度タップして解除してから選び直してください。</div>
@@ -994,6 +1024,7 @@ function clearApplication(){
   S.story.patterns=[]; S.story.chosen=-1; S.story.ranked=[];
   S.story.sheet={}; S.story.sheetSig=""; S.story.sheetKey=""; S.story.cheatMode="full"; S.story.checks=[];
   (S.story.achv||[]).forEach(a=>{ a.use=true; });   /* 実績の内容は残し、選択だけ戻す */
+  S.story.useAch=[];
   render(); window.scrollTo(0,0); saveNow();
 }
 function addAchv(){ S.story.achv.push({what:"",num:"",hints:[],use:true}); render(); saveNow();
@@ -1020,6 +1051,12 @@ function moveRank(pos,dir){
   S.story.ranked=r;
   S.story.chosen=r.length?r[0]:-1;
   render(true); updateNav(); saveNow();
+}
+function toggleUseAch(id){
+  if(!Array.isArray(S.story.useAch)) S.story.useAch=[];
+  const i=S.story.useAch.indexOf(id);
+  if(i>=0) S.story.useAch.splice(i,1); else S.story.useAch.push(id);
+  render(true); saveNow();
 }
 function pickPattern(i){
   const r=Array.isArray(S.story.ranked)?S.story.ranked.slice():[];
@@ -1105,7 +1142,35 @@ ${what}`,1000);
 
 /* AIに送る実績テキスト。1件あたりを刻み、根拠になった実績を優先して並べる（打ち切り防止） */
 function usedAchv(){ return S.story.achv.filter(a=>a.use!==false && (a.what||"").trim()); }
+/* 今回の面接で使う実績（ライブラリ優先。未登録なら旧来の入力にフォールバック） */
+function selectedAch(){
+  const lib=S.achievements||[];
+  if(!lib.length) return null;
+  const ids=S.story.useAch||[];
+  const picked=ids.map(id=>lib.find(a=>a.id===id)).filter(Boolean);
+  return picked.length?picked:lib;      /* 1件も選ばれていなければ全件 */
+}
+/* AIへ渡す実績テキスト。ライブラリがあればそこから組み立てる（数字の二重入力をなくす） */
 function achvText(priorityIdx){
+  const lib=selectedAch();
+  if(lib){
+    const clip=(t)=>{ t=(t||"").trim(); return t.length>ACHV_CHARS ? t.slice(0,ACHV_CHARS)+"…" : t; };
+    let ordered=lib;
+    if(Array.isArray(priorityIdx) && priorityIdx.length){
+      const pri=new Set(priorityIdx.map(n=>Number(n)-1));
+      ordered=[...lib.filter((_,i)=>pri.has(i)), ...lib.filter((_,i)=>!pri.has(i))];
+    }
+    return ordered.map((a,i)=>{
+      const ms=(a.metrics||[]).map(metricLine).filter(Boolean);
+      return `実績${i+1}：${clip(a.action)||"（未記入）"}`
+        + (a.result?`\n結果：${clip(a.result)}`:"")
+        + (ms.length?`\n数字：${ms.join(" ／ ")}`:"")
+        + (a.jobId?`\n所属：${jobName(a.jobId)}`:"");
+    }).join("\n\n") || "（未記入）";
+  }
+  return achvTextLegacy(priorityIdx);
+}
+function achvTextLegacy(priorityIdx){
   /* 「今回使う」に絞る。1件も選ばれていなければ、全件を対象にする */
   const anyUsed=S.story.achv.some(a=>a.use!==false && (a.what||"").trim());
   const items=S.story.achv
@@ -1121,6 +1186,14 @@ function achvText(priorityIdx){
   return ordered.map(x=>`実績${x.i+1}：${clip(x.a.what)}\n数字：${clip(x.a.num)||"（未記入）"}`).join("\n\n");
 }
 function achvSummary(){
+  const lib=selectedAch();
+  if(lib){
+    const total=(S.achievements||[]).length;
+    const picked=(S.story.useAch||[]).length;
+    return `<div class="asum"><div class="asumh">今回使う実績（${lib.length}件 / 登録${total}件）${lib.length>4?" ※4件以内が目安です":""}</div>
+      ${!picked?`<div class="asumi">※1件も選ばれていないので、登録済みの全${total}件を対象にします</div>`:""}
+      ${lib.map((a,i)=>`<div class="asumi"><b>実績${i+1}</b>${esc((a.title||a.action||"").trim().slice(0,60))}</div>`).join("")}</div>`;
+  }
   const all=S.story.achv.map((a,i)=>({i,a})).filter(x=>(x.a.what||"").trim());
   const items=all.filter(x=>x.a.use!==false);
   if(!all.length) return "";
@@ -1138,7 +1211,8 @@ function jdText(){
 
 /* AIが返した語り口を検証・正規化する。AI出力は未信頼データとして扱う。 */
 function normalizePatterns(arr){
-  const maxIdx=S.story.achv.length;
+  const lib=selectedAch();
+  const maxIdx=lib?lib.length:S.story.achv.length;
   const seen=new Set();
   return (arr||[]).map(p=>{
     if(!p || typeof p!=="object") return null;
@@ -1223,9 +1297,9 @@ function ensureJobIds(){
 }
 function newChart(){
   return { title:"", place:"jobs", section:"job", jobId:"", position:"after", labels:"", normalize:false, source:"",
-    series:[{name:"",type:"bar",values:"",amin:"",amax:""},
-            {name:"",type:"line",values:"",amin:"",amax:""},
-            {name:"",type:"line",values:"",amin:"",amax:""}] };
+    series:[{name:"",type:"bar",values:"",amin:"",amax:"",metricId:""},
+            {name:"",type:"line",values:"",amin:"",amax:"",metricId:""},
+            {name:"",type:"line",values:"",amin:"",amax:"",metricId:""}] };
 }
 /* 軸の下限・上限。1つだけ数値を取り出す（空なら null） */
 function oneNum(v){
@@ -1251,11 +1325,38 @@ function parseNums(str, expect){
   }
   return b.length?b:a;
 }
+/* 実績ライブラリの指標を引く。グラフはこれを参照するだけにして、数字の二重入力をなくす */
+function findMetric(id){
+  for(const a of (S.achievements||[])){
+    for(const m of (a.metrics||[])){ if(m.id===id) return {ach:a, met:m}; }
+  }
+  return null;
+}
+function allMetrics(){
+  const out=[];
+  (S.achievements||[]).forEach(a=>(a.metrics||[]).forEach(m=>{
+    if((m.name||"").trim() || (m.values||"").trim()) out.push({ach:a, met:m});
+  }));
+  return out;
+}
 function chartData(c){
-  const labels=parseLabels(c.labels);
-  const series=(c.series||[]).map(s=>({name:(s.name||"").trim(), type:s.type==="line"?"line":"bar",
-      vals:parseNums(s.values, labels.length), amin:oneNum(s.amin), amax:oneNum(s.amax)}))
-    .filter(s=>s.vals.length>0);
+  /* 期間ラベルは、指定がなければ参照先の指標のものを使う */
+  let labelSrc=(c.labels||"").trim();
+  if(!labelSrc){
+    for(const s of (c.series||[])){
+      const f=s.metricId?findMetric(s.metricId):null;
+      if(f && (f.met.labels||"").trim()){ labelSrc=f.met.labels; break; }
+    }
+  }
+  const labels=parseLabels(labelSrc);
+  const series=(c.series||[]).map(s=>{
+    const f=s.metricId?findMetric(s.metricId):null;
+    const name=(s.name||"").trim() || (f?(f.met.name||"").trim():"");
+    const rawVals=f ? f.met.values : s.values;
+    return { name, type:s.type==="line"?"line":"bar",
+      vals:parseNums(rawVals, labels.length), amin:oneNum(s.amin), amax:oneNum(s.amax),
+      unit:f?(f.met.unit||""):"", linked:!!f };
+  }).filter(s=>s.vals.length>0);
   return {labels, series};
 }
 function fmtNum(n){ return n.toLocaleString("ja-JP"); }
@@ -1419,14 +1520,24 @@ function viewCharts(){
       ${c.series.map((s,si)=>`
         <div class="serieRow">
           <div class="serieHead"><span class="cdot" style="background:${CHART_COLORS[si%3]}"></span>系列 ${si+1}${si>0?"（任意）":""}</div>
+          ${allMetrics().length?`
+          <label class="f" style="margin-bottom:8px"><span>実績ライブラリの数字を使う</span>
+            <select onchange="S.charts[${i}].series[${si}].metricId=this.value;render(true);saveNow()">
+              <option value="">（使わない・自分で入力する）</option>
+              ${allMetrics().map(x=>`<option value="${esc(x.met.id)}" ${s.metricId===x.met.id?"selected":""}>${esc(x.met.name||"（指標名なし）")}${x.ach.title?`／${esc(x.ach.title)}`:""}</option>`).join("")}
+            </select>
+            ${s.metricId?`<div class="hint" style="color:var(--accent);font-weight:700">✓ 実績ライブラリと連動しています。数字を直すときは STEP4 で。</div>`:""}
+          </label>`:""}
           <div class="row3s">
-            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="例：問い合わせ件数">
+            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${s.metricId?"（指標名を引き継ぎます）":"例：問い合わせ件数"}">
             <select onchange="S.charts[${i}].series[${si}].type=this.value;updateChartPreview(${i});saveNow()">
               <option value="bar" ${s.type!=="line"?"selected":""}>棒</option>
               <option value="line" ${s.type==="line"?"selected":""}>折れ線</option>
             </select>
           </div>
-          <input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">
+          ${s.metricId
+            ? `<div class="linkedval">数値：${esc((findMetric(s.metricId)||{met:{}}).met.values||"（未入力）")}</div>`
+            : `<input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">`}
           <div class="axisrow">
             <span class="axislbl">縦軸の範囲（任意）</span>
             <input value="${esc(s.amin)}" oninput="S.charts[${i}].series[${si}].amin=this.value;updateChartPreview(${i});scheduleSave()" placeholder="下限">
@@ -1506,6 +1617,34 @@ function metricSummary(a){
   const head=v.length>1 ? `${fmtNum(v[0])} → ${fmtNum(v[v.length-1])}` : fmtNum(v[0]);
   return `${m.name}：${head}${m.unit||""}`;
 }
+/* ---- 第3段階：出力が実績ライブラリを参照する ----
+   実績が未登録なら、これまでの自由記述にそのまま戻る（フォールバック）。 */
+function achForJob(jobId){
+  return (S.achievements||[]).filter(a=>a.jobId===jobId && a.usage && a.usage.resume);
+}
+function metricLine(m){
+  const labels=parseLabels(m.labels), vals=parseNums(m.values, labels.length);
+  if(!vals.length) return "";
+  const nm=(m.name||"").trim();
+  const body = vals.length>1 ? `${fmtNum(vals[0])} → ${fmtNum(vals[vals.length-1])}` : fmtNum(vals[0]);
+  return `${nm?nm+"：":""}${body}${m.unit||""}`;
+}
+/* 職務経歴書に載せる、1件分の実績 */
+function achDocHTML(a){
+  const ms=(a.metrics||[]).map(metricLine).filter(Boolean);
+  return `<div class="achi">
+    ${a.action?`<div class="acta">${esc(a.action)}</div>`:""}
+    ${a.result?`<div class="actr">${esc(a.result)}</div>`:""}
+    ${ms.length?`<div class="actm">${ms.map(esc).join("　／　")}</div>`:""}
+  </div>`;
+}
+/* 職歴1件分の実績表示。登録があればそちらを、なければ旧来の自由記述を出す */
+function jobAchHTML(j){
+  const list=achForJob(j.id);
+  if(list.length) return list.map(achDocHTML).join("");
+  return j.achv ? `<div class="ac">${esc(j.achv)}</div>` : "";
+}
+
 function achvCardHTML(a,i){
   if(!a.open){
     const co=jobName(a.jobId);
@@ -2084,7 +2223,7 @@ function docHTML(){
   const name=[p.lastName,p.firstName].filter(Boolean).join(" ")||"氏名未入力";
   const skills=S.skills.filter(s=>s.name.trim());
   const certs=S.certs.filter(c=>c.name.trim());
-  const jobs=S.jobs.filter(j=>j.company.trim()||j.achv.trim());
+  const jobs=S.jobs.filter(j=>j.company.trim()||j.achv.trim()||achForJob(j.id).length);
   return `<div class="doc">
     <h1>職務経歴書</h1>
     <div class="meta">${fmtDate(S.date)} 現在</div>
@@ -2114,7 +2253,7 @@ function docHTML(){
       <div class="co">${esc(j.company||"（会社名）")}${j.client?` <span style="font-weight:400;color:var(--muted)">→ ${esc(j.client)}</span>`:""}</div>
       <div class="rl">${[j.role,j.employment].filter(Boolean).map(esc).join("　|　")}</div>
       <div class="rl">${esc(period(j))}${d?`（${esc(d)}）`:""}${j.users?`　|　対象ユーザー ${esc(j.users)}`:""}</div>
-      <div class="ac">${esc(j.achv)}</div></div>${chartsAt("job","after",j.id)}`}).join("")}`:""}
+      ${jobAchHTML(j)}</div>${chartsAt("job","after",j.id)}`}).join("")}`:""}
     ${chartsAt("pr","before")}
     ${S.pr.trim()?`<h2>自己PR</h2><p>${esc(S.pr)}</p>`:""}
     ${chartsAt("pr","after")}
@@ -2189,7 +2328,7 @@ function migrateState(){
       if(d.position!=="before") d.position="after";
       d.series=(Array.isArray(c&&c.series)?c.series:[]).slice(0,3);
       while(d.series.length<3) d.series.push({name:"",type:d.series.length?"line":"bar",values:""});
-      d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:"",amin:"",amax:""}, x||{}));
+      d.series=d.series.map(x=>Object.assign({name:"",type:"bar",values:"",amin:"",amax:"",metricId:""}, x||{}));
       return d;
     });
     if(typeof S.story.sheetSig!=="string") S.story.sheetSig="";
