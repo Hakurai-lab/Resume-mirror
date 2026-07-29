@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v34</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v35</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -787,7 +787,55 @@ const T = {
   "tr.unconfirm": { ja:"確認を外す", en:"Unconfirm" },
   "tr.empty":       { ja:"翻訳できる内容がまだありません。", en:"There's nothing to translate yet." },
   "tr.empty.sheet": { ja:"先に面接シートを作成してください。", en:"Create the interview sheet first." },
-  "tr.empty.doc":   { ja:"職務経歴書を先に作ってください。", en:"Create the resume first." }
+  "tr.empty.doc":   { ja:"職務経歴書を先に作ってください。", en:"Create the resume first." },
+
+  "chart.sec.summary": { ja:"職務要約", en:"Professional Summary" },
+  "chart.sec.skills":  { ja:"スキル・経験", en:"Skills & Experience" },
+  "chart.sec.job":     { ja:"職務経歴（特定の1社）", en:"Work History (one company)" },
+  "chart.sec.pr":      { ja:"自己PR", en:"About You" },
+
+  "chart.lede": { ja:"数字の変化を1枚の図にすると、採用担当の理解が一気に速くなります。任意です。作らなくても先へ進めます。作ったグラフは「プレビュー」タブで位置を確認できます。", en:"Turning changes in your numbers into a single figure helps recruiters grasp them much faster. This is optional — you can move on without it. You can check placement of any chart you make in the Preview tab." },
+  "chart.note": { ja:"<b>盛らないための約束。</b>グラフの下には、必ず実数の表と出典が出ます。図の印象だけで判断させず、根拠を一緒に示すためです。", en:"<b>A promise against overselling.</b> A table of the actual figures and the source always appears below each chart, so the reader judges on evidence rather than the visual impression alone." },
+  "chart.card": { ja:"グラフ", en:"Chart" },
+  "chart.warn.title": { ja:"このグラフは実績ライブラリと連動していません。", en:"This chart is not linked to the Achievements library." },
+  "chart.warn.body":  { ja:"数値がグラフ側にも書かれているため、STEP4で実績の数字を直しても、このグラフは変わりません。", en:"The numbers are also written on the chart itself, so editing the achievement's numbers in STEP 4 won't update this chart." },
+  "chart.warn.btn":   { ja:"実績ライブラリの数字につなぐ", en:"Link to the Achievements library numbers" },
+  "chart.title":    { ja:"タイトル", en:"Title" },
+  "chart.title.ph": { ja:"例：新人が独り立ちするまでの日数の推移", en:"e.g. Trend in days for new hires to become independent" },
+  "chart.place":    { ja:"職務経歴書のどこに置くか", en:"Where to place it in the resume" },
+  "chart.pos.before": { ja:"の上", en:"Above" },
+  "chart.pos.after":  { ja:"の下", en:"Below" },
+  "chart.job.choose": { ja:"どの職歴か選んでください", en:"Choose which job" },
+  "chart.xlabels":      { ja:"横軸のラベル（読点かカンマで区切る）", en:"X-axis labels (separate with commas)" },
+  "chart.xlabels.ph":   { ja:"例：2023, 2024, 2025", en:"e.g. 2023, 2024, 2025" },
+  "chart.xlabels.hint": { ja:"年度・四半期・施策の前後など。3〜6個が読みやすいです。", en:"Years, quarters, before/after a change, etc. 3–6 is easiest to read." },
+  "chart.series":   { ja:"系列", en:"Series" },
+  "chart.optional": { ja:"（任意）", en:" (optional)" },
+  "chart.usemetric":   { ja:"実績ライブラリの数字を使う", en:"Use a number from the Achievements library" },
+  "chart.metric.none": { ja:"（使わない・自分で入力する）", en:"(don't use — enter it myself)" },
+  "chart.metric.noname": { ja:"（指標名なし）", en:"(no metric name)" },
+  "chart.linked":      { ja:"✓ 実績ライブラリと連動しています。数字を直すときは STEP4 で。", en:"✓ Linked to the Achievements library. Edit the numbers in STEP 4." },
+  "chart.name.inherit": { ja:"（指標名を引き継ぎます）", en:"(inherits the metric name)" },
+  "chart.name.ph":      { ja:"例：独り立ちまでの日数", en:"e.g. Days to independence" },
+  "chart.type.bar":  { ja:"棒", en:"Bar" },
+  "chart.type.line": { ja:"折れ線", en:"Line" },
+  "chart.values.label": { ja:"数値：", en:"Values: " },
+  "chart.values.none":  { ja:"（未入力）", en:"(not entered)" },
+  "chart.values.ph":    { ja:"ラベルと同じ順に：60、45、21", en:"Same order as the labels: 60, 45, 21" },
+  "chart.axis":     { ja:"縦軸の範囲（任意）", en:"Y-axis range (optional)" },
+  "chart.axis.min": { ja:"下限", en:"Min" },
+  "chart.axis.max": { ja:"上限", en:"Max" },
+  "chart.normalize":       { ja:"系列ごとに目盛りを揃える（桁が大きく違うときに使う）", en:"Scale each series to its own axis (use when magnitudes differ greatly)" },
+  "chart.normalize.help1": { ja:"例：対象人数15名と対応件数1,200件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。", en:"e.g. when magnitudes differ (15 people vs. 1,200 cases), turning this on lets you compare the shapes of the trends. The actual figures always appear in the table below." },
+  "chart.normalize.help2": { ja:"<b>見せたい変化が埋もれるときは、その系列の「縦軸の範囲」を指定してください。</b>例：独り立ちまでの日数を 0〜70 にすると、短縮の幅が大きく見えます。指定した範囲は凡例に表示されるので、読み手にも基準が伝わります。", en:"<b>If the change you want to show gets buried, set that series' Y-axis range.</b> e.g. setting days-to-independence to 0–70 makes the reduction look larger. The range you set is shown in the legend, so the reader understands the baseline." },
+  "chart.source":      { ja:"出典・対象期間", en:"Source / period covered" },
+  "chart.source.ph":   { ja:"例：出典 店舗の勤怠記録（2年間の比較）", en:"e.g. Source: store attendance records (2-year comparison)" },
+  "chart.source.hint": { ja:"面接では「その数字はどこから？」が必ず来ます。ここを書いておくと強いです。", en:"In interviews, the question 'where did that number come from?' always comes up. Noting it here makes your case stronger." },
+  "chart.add":     { ja:"＋ グラフを追加", en:"＋ Add a chart" },
+  "chart.max.pre": { ja:"グラフは最大", en:"Up to " },
+  "chart.max.suf": { ja:"枚までです。", en:" charts maximum." },
+  "chart.empty.hint": { ja:"数字がまだ揃っていなくても大丈夫です。あとから戻って追加できます。", en:"It's fine if your numbers aren't ready yet. You can come back and add them later." },
+  "chart.link.alert": { ja:"同じ名前の指標が見つかりませんでした。各系列の「実績ライブラリの数字を使う」から選んでください。", en:"No metric with the same name was found. Pick one from 'Use a number from the Achievements library' on each series." }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1902,7 +1950,7 @@ function linkChartToLibrary(i){
     const f=mets.find(x=>(x.met.name||"").trim()===nm);
     if(f){ sr.metricId=f.met.id; sr.values=""; hit++; }
   });
-  if(!hit){ alert("同じ名前の指標が見つかりませんでした。各系列の「実績ライブラリの数字を使う」から選んでください。"); return; }
+  if(!hit){ alert(t("chart.link.alert")); return; }
   render(true); saveNow();
 }
 /* 連動していない系列があるか */
@@ -1943,66 +1991,66 @@ function viewDoc(){
 function viewCharts(){
   const list=S.charts||[];
   return `
-  <div class="lede">数字の変化を1枚の図にすると、採用担当の理解が一気に速くなります。任意です。作らなくても先へ進めます。作ったグラフは「プレビュー」タブで位置を確認できます。</div>
-  <div class="note"><b>盛らないための約束。</b>グラフの下には、必ず実数の表と出典が出ます。図の印象だけで判断させず、根拠を一緒に示すためです。</div>
+  <div class="lede">${t("chart.lede")}</div>
+  <div class="note">${t("chart.note")}</div>
 
   ${list.map((c,i)=>`
     <div class="card">
-      <div class="cardhead"><b>グラフ ${i+1}</b><button class="del" onclick="delChart(${i})">削除</button></div>
+      <div class="cardhead"><b>${t("chart.card")} ${i+1}</b><button class="del" onclick="delChart(${i})">${t("del")}</button></div>
       ${(chartHasUnlinked(c) && allMetrics().length)?`
         <div class="linkwarn">
-          <b>このグラフは実績ライブラリと連動していません。</b>
-          数値がグラフ側にも書かれているため、STEP4で実績の数字を直しても、このグラフは変わりません。
-          <button onclick="linkChartToLibrary(${i})">実績ライブラリの数字につなぐ</button>
+          <b>${t("chart.warn.title")}</b>
+          ${t("chart.warn.body")}
+          <button onclick="linkChartToLibrary(${i})">${t("chart.warn.btn")}</button>
         </div>`:""}
-      <label class="f"><span>タイトル</span>
-        <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="例：新人が独り立ちするまでの日数の推移"></label>
-      <label class="f"><span>職務経歴書のどこに置くか</span>
+      <label class="f"><span>${t("chart.title")}</span>
+        <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="${t("chart.title.ph")}"></label>
+      <label class="f"><span>${t("chart.place")}</span>
         <div class="row2">
           <select onchange="S.charts[${i}].section=this.value;render(true);saveNow()">
-            ${CHART_SECTIONS.map(p=>`<option value="${p.v}" ${(c.section||"job")===p.v?"selected":""}>${p.label}</option>`).join("")}
+            ${CHART_SECTIONS.map(p=>`<option value="${p.v}" ${(c.section||"job")===p.v?"selected":""}>${t("chart.sec."+p.v)}</option>`).join("")}
           </select>
           <select onchange="S.charts[${i}].position=this.value;saveNow()">
-            <option value="before" ${c.position==="before"?"selected":""}>の上</option>
-            <option value="after" ${c.position!=="before"?"selected":""}>の下</option>
+            <option value="before" ${c.position==="before"?"selected":""}>${t("chart.pos.before")}</option>
+            <option value="after" ${c.position!=="before"?"selected":""}>${t("chart.pos.after")}</option>
           </select>
         </div>
         ${(c.section||"job")==="job"?`
         <select style="margin-top:8px" onchange="S.charts[${i}].jobId=this.value;saveNow()">
-          <option value="">どの職歴か選んでください</option>
+          <option value="">${t("chart.job.choose")}</option>
           ${(S.jobs||[]).filter(j=>(j.company||"").trim()).map(j=>`<option value="${esc(j.id)}" ${c.jobId===j.id?"selected":""}>${esc(j.company)}${j.role?`（${esc(j.role)}）`:""}</option>`).join("")}
         </select>`:""}
       </label>
-      <label class="f"><span>横軸のラベル（読点かカンマで区切る）</span>
-        <input value="${esc(c.labels)}" oninput="S.charts[${i}].labels=this.value;updateChartPreview(${i});scheduleSave()" placeholder="例：2023, 2024, 2025">
-        <div class="hint">年度・四半期・施策の前後など。3〜6個が読みやすいです。</div></label>
+      <label class="f"><span>${t("chart.xlabels")}</span>
+        <input value="${esc(c.labels)}" oninput="S.charts[${i}].labels=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${t("chart.xlabels.ph")}">
+        <div class="hint">${t("chart.xlabels.hint")}</div></label>
 
       ${c.series.map((s,si)=>`
         <div class="serieRow">
-          <div class="serieHead"><span class="cdot" style="background:${CHART_COLORS[si%3]}"></span>系列 ${si+1}${si>0?"（任意）":""}</div>
+          <div class="serieHead"><span class="cdot" style="background:${CHART_COLORS[si%3]}"></span>${t("chart.series")} ${si+1}${si>0?t("chart.optional"):""}</div>
           ${allMetrics().length?`
-          <label class="f" style="margin-bottom:8px"><span>実績ライブラリの数字を使う</span>
+          <label class="f" style="margin-bottom:8px"><span>${t("chart.usemetric")}</span>
             <select onchange="S.charts[${i}].series[${si}].metricId=this.value;render(true);saveNow()">
-              <option value="">（使わない・自分で入力する）</option>
-              ${allMetrics().map(x=>`<option value="${esc(x.met.id)}" ${s.metricId===x.met.id?"selected":""}>${esc(x.met.name||"（指標名なし）")}${x.ach.title?`／${esc(x.ach.title)}`:""}</option>`).join("")}
+              <option value="">${t("chart.metric.none")}</option>
+              ${allMetrics().map(x=>`<option value="${esc(x.met.id)}" ${s.metricId===x.met.id?"selected":""}>${esc(x.met.name||t("chart.metric.noname"))}${x.ach.title?`／${esc(x.ach.title)}`:""}</option>`).join("")}
             </select>
-            ${s.metricId?`<div class="hint" style="color:var(--accent);font-weight:700">✓ 実績ライブラリと連動しています。数字を直すときは STEP4 で。</div>`:""}
+            ${s.metricId?`<div class="hint" style="color:var(--accent);font-weight:700">${t("chart.linked")}</div>`:""}
           </label>`:""}
           <div class="row3s">
-            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${s.metricId?"（指標名を引き継ぎます）":"例：独り立ちまでの日数"}">
+            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${s.metricId?t("chart.name.inherit"):t("chart.name.ph")}">
             <select onchange="S.charts[${i}].series[${si}].type=this.value;updateChartPreview(${i});saveNow()">
-              <option value="bar" ${s.type!=="line"?"selected":""}>棒</option>
-              <option value="line" ${s.type==="line"?"selected":""}>折れ線</option>
+              <option value="bar" ${s.type!=="line"?"selected":""}>${t("chart.type.bar")}</option>
+              <option value="line" ${s.type==="line"?"selected":""}>${t("chart.type.line")}</option>
             </select>
           </div>
           ${s.metricId
-            ? `<div class="linkedval">数値：${esc((findMetric(s.metricId)||{met:{}}).met.values||"（未入力）")}</div>`
-            : `<input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：60、45、21">`}
+            ? `<div class="linkedval">${t("chart.values.label")}${esc((findMetric(s.metricId)||{met:{}}).met.values||t("chart.values.none"))}</div>`
+            : `<input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${t("chart.values.ph")}">`}
           <div class="axisrow">
-            <span class="axislbl">縦軸の範囲（任意）</span>
-            <input value="${esc(s.amin)}" oninput="S.charts[${i}].series[${si}].amin=this.value;updateChartPreview(${i});scheduleSave()" placeholder="下限">
+            <span class="axislbl">${t("chart.axis")}</span>
+            <input value="${esc(s.amin)}" oninput="S.charts[${i}].series[${si}].amin=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${t("chart.axis.min")}">
             <span class="axistil">〜</span>
-            <input value="${esc(s.amax)}" oninput="S.charts[${i}].series[${si}].amax=this.value;updateChartPreview(${i});scheduleSave()" placeholder="上限">
+            <input value="${esc(s.amax)}" oninput="S.charts[${i}].series[${si}].amax=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${t("chart.axis.max")}">
           </div>
         </div>`).join("")}
 
@@ -2010,26 +2058,26 @@ function viewCharts(){
         <div class="hint">
           <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
             <input type="checkbox" style="width:auto" ${c.normalize?"checked":""}
-              onchange="S.charts[${i}].normalize=this.checked;updateChartPreview(${i});saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
+              onchange="S.charts[${i}].normalize=this.checked;updateChartPreview(${i});saveNow()"> ${t("chart.normalize")}
           </label>
-          <div style="margin-top:4px">例：対象人数15名と対応件数1,200件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
-          <div style="margin-top:8px"><b>見せたい変化が埋もれるときは、その系列の「縦軸の範囲」を指定してください。</b>例：独り立ちまでの日数を 0〜70 にすると、短縮の幅が大きく見えます。指定した範囲は凡例に表示されるので、読み手にも基準が伝わります。</div>
+          <div style="margin-top:4px">${t("chart.normalize.help1")}</div>
+          <div style="margin-top:8px">${t("chart.normalize.help2")}</div>
         </div></label>
 
-      <label class="f"><span>出典・対象期間</span>
-        <input value="${esc(c.source)}" oninput="S.charts[${i}].source=this.value;scheduleSave()" placeholder="例：出典 店舗の勤怠記録（2年間の比較）">
-        <div class="hint">面接では「その数字はどこから？」が必ず来ます。ここを書いておくと強いです。</div></label>
+      <label class="f"><span>${t("chart.source")}</span>
+        <input value="${esc(c.source)}" oninput="S.charts[${i}].source=this.value;scheduleSave()" placeholder="${t("chart.source.ph")}">
+        <div class="hint">${t("chart.source.hint")}</div></label>
 
       <div class="chartprev">
-        <div class="chartprevh">プレビュー</div>
+        <div class="chartprevh">${t("doc.tab.preview")}</div>
         <div id="cprev${i}">${chartLegend(c)}${chartSVG(c)}${chartTable(c)}</div>
       </div>
     </div>`).join("")}
 
   ${list.length<MAX_CHARTS
-    ? `<button class="addbtn" onclick="addChart()">＋ グラフを追加（${list.length} / ${MAX_CHARTS}）</button>`
-    : `<div class="hint">グラフは最大${MAX_CHARTS}枚までです。</div>`}
-  ${!list.length?`<div class="hint" style="margin-top:10px">数字がまだ揃っていなくても大丈夫です。あとから戻って追加できます。</div>`:""}`;
+    ? `<button class="addbtn" onclick="addChart()">${t("chart.add")}（${list.length} / ${MAX_CHARTS}）</button>`
+    : `<div class="hint">${t("chart.max.pre")}${MAX_CHARTS}${t("chart.max.suf")}</div>`}
+  ${!list.length?`<div class="hint" style="margin-top:10px">${t("chart.empty.hint")}</div>`:""}`;
 }
 
 /* ============ BLOCK 13: 実績ライブラリ（第2段階／STEP4） ============
