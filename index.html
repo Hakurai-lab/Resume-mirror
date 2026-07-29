@@ -307,6 +307,30 @@
   .linkwarn b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:3px}
   .linkwarn button{width:100%;margin-top:9px;background:var(--navy);color:#fff;border:none;border-radius:10px;
     padding:11px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;cursor:pointer}
+
+  /* BLOCK 2-i: 翻訳と逆翻訳 */
+  .langbox{background:var(--ice-soft);border-radius:14px;padding:14px 15px 6px;margin-bottom:14px}
+  .langbox select{background:#fff}
+  .trstat{display:flex;gap:7px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-bottom:12px}
+  .trstat span{background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+  .trstat .okc{color:var(--accent);border-color:var(--accent);font-weight:700}
+  .trstat .stc{color:var(--warn);border-color:var(--warn);font-weight:700}
+  .trprev{margin-bottom:22px}
+  .trcard{background:#fff;border:1.5px solid var(--line);border-radius:15px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .trcard.okd{border-color:var(--accent);background:#F7FCF9}
+  .trhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+  .trlabel{font-family:"Zen Kaku Gothic New";font-weight:700;font-size:12.5px;color:var(--navy)}
+  .trstale{font-size:10.5px;font-weight:700;color:var(--warn);background:#FDF3F4;border-radius:99px;padding:2px 9px}
+  .trok{font-size:10.5px;font-weight:700;color:var(--accent);background:#EAF6EF;border-radius:99px;padding:2px 9px}
+  .trlbl{font-size:11px;font-weight:700;color:var(--muted);margin:9px 0 3px}
+  .trlbl.tgt{color:var(--navy)}
+  .trlbl.back{color:var(--accent)}
+  .trbox{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font-size:12.5px;line-height:1.8;white-space:pre-wrap}
+  .trbox.back{background:#F1F8F3;border-color:#CBE7D6}
+  .trnone{font-size:12px;color:var(--muted);padding:8px 0}
+  .trbtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+  .trbtns .ai{flex:1;justify-content:center;margin-top:0;min-width:96px}
   .pickach{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);
     border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer}
   .pickach.on{border-color:var(--accent);border-width:2.5px;background:#F4FBF7}
@@ -377,7 +401,7 @@
   .agree input{width:auto;flex:0 0 auto;margin-top:4px}
   .agree a{color:var(--navy);font-weight:700;cursor:pointer;text-decoration:underline}
 
-  @media print{header,.nav,.savebar,.verline,.modal,.toolbar,.safe,details,.hint,.count,.note,.fchk,.stepjump,.asum{display:none!important}
+  @media print{header,.nav,.savebar,.verline,.modal,.toolbar,.safe,details,.hint,.count,.note,.fchk,.stepjump,.asum,.langbox,.trstat,.trcard,.tabs,.sechead,.secnote,#trMsg{display:none!important}
     main{padding:0}.doc{border:none;box-shadow:none;padding:0}body{background:#fff}
     .h2,.lede,#sheetMsg,.redo{display:none!important}
     .sheetdoc{border:none;box-shadow:none;padding:0;border-radius:0}
@@ -395,7 +419,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v25</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v26</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -534,6 +558,8 @@ const S = {
   importSkipped:[],
   charts:[],
   docTab:"preview",
+  lang:{ doc:"ja", target:"en" },
+  tr:{},
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
     achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}], useAch:[],
@@ -1529,19 +1555,21 @@ function delChart(i){ S.charts.splice(i,1); render(true); saveNow(); }
 /* 第4段階：職務経歴書のワークスペース。プレビューとグラフをタブで行き来する */
 function setDocTab(t){ S.docTab=t; render(); window.scrollTo(0,0); saveNow(); }
 function viewDoc(){
-  const tab = S.docTab==="charts" ? "charts" : "preview";
+  const tab = ["charts","trans"].includes(S.docTab) ? S.docTab : "preview";
   const n=(S.charts||[]).length;
+  const tst=trStats();
   return `
   <div class="h2">職務経歴書</div>
   <div class="lede">仕上がりを確認して、PDFで保存できます。グラフはタブで行き来しながら作れます。</div>
   <div class="tabs">
     <button class="tab ${tab==="preview"?"on":""}" onclick="setDocTab('preview')">プレビュー</button>
-    <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">実績グラフ${n?`（${n}）`:""}</button>
+    <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">グラフ${n?`（${n}）`:""}</button>
+    <button class="tab ${tab==="trans"?"on":""}" onclick="setDocTab('trans')">翻訳版${tst.done?`（${tst.done}）`:""}</button>
   </div>
   ${tab==="preview"
     ? `<div class="toolbar"><button class="primary" onclick="printDoc()">PDFで保存・印刷</button></div>
        <div id="docWrap">${docHTML()}</div>`
-    : viewCharts()}`;
+    : (tab==="charts" ? viewCharts() : viewTrans())}`;
 }
 
 function viewCharts(){
@@ -1910,6 +1938,326 @@ function viewLibrary(){
     取り込み前の状態は控えてあります。
     <button onclick="restoreBackup()">その状態に戻す</button>
   </div>`:""}`;
+}
+
+/* ============ BLOCK 14: 翻訳と逆翻訳（第5段階） ============
+   考え方：
+   ・原文の言語を「正本」とする。翻訳を直しても原文は自動で変えない。
+   ・確認は「原文 ／ 翻訳 ／ 逆翻訳」を並べて、母国語だけで判断できるようにする。
+   ・APIは3〜5ブロックまとめて呼ぶが、保存はブロック単位。1つ失敗しても他は残る。
+   ・原文が変わったら、その翻訳は「古い」と表示する（消さない）。 */
+
+const TR_BATCH = 4;                     /* 1回のAI呼び出しで扱うブロック数 */
+const LANG_LABEL = { ja:"日本語", en:"English" };
+function otherLang(l){ return l==="ja" ? "en" : "ja"; }
+
+/* 翻訳対象のブロックを、いまの内容から組み立てる */
+function trBlocks(){
+  const out=[];
+  const push=(id,label,text)=>{ const t=String(text==null?"":text).trim(); if(t) out.push({id,label,text:t}); };
+  push("summary","職務要約",S.summary);
+  (S.skills||[]).forEach((s,i)=>{
+    push(`skill${i}_n`,`スキル名：${s.name||i+1}`,s.name);
+    push(`skill${i}_a`,`スキルの実績：${s.name||i+1}`,s.achv);
+  });
+  (S.certs||[]).forEach((c,i)=>{ push(`cert${i}_n`,`資格名：${c.name||i+1}`,c.name); });
+  (S.jobs||[]).forEach(j=>{
+    push(`job_${j.id}_r`,`役職：${j.company||""}`,j.role);
+    push(`job_${j.id}_a`,`職歴の実績：${j.company||""}`,j.achv);
+  });
+  (S.achievements||[]).forEach(a=>{
+    const nm=a.title||"実績";
+    push(`ach_${a.id}_a`,`${nm}（実行したこと）`,a.action);
+    push(`ach_${a.id}_r`,`${nm}（結果）`,a.result);
+    (a.metrics||[]).forEach(m=>{ push(`met_${m.id}_n`,`指標名：${m.name||""}`,m.name); });
+  });
+  (S.charts||[]).forEach((c,i)=>{
+    push(`chart${i}_t`,`グラフのタイトル`,c.title);
+    push(`chart${i}_s`,`グラフの出典`,c.source);
+  });
+  push("pr","自己PR",S.pr);
+  return out;
+}
+function hashText(t){
+  const s=String(t==null?"":t); let h=0;
+  for(let i=0;i<s.length;i++) h=((h*31)+s.charCodeAt(i))|0;
+  return String(h);
+}
+function trRec(id){ return (S.tr||{})[id] || null; }
+/* 翻訳文を引く。無ければ原文をそのまま返す（未翻訳でも書類は成立させる） */
+function trOut(id, fallback){
+  const r=trRec(id);
+  return (r && r.out) ? r.out : fallback;
+}
+function trStale(b){
+  const r=trRec(b.id);
+  return !!(r && r.out && r.hash!==hashText(b.text));
+}
+function trStats(){
+  const bs=trBlocks();
+  let done=0, stale=0, ok=0, back=0;
+  bs.forEach(b=>{
+    const r=trRec(b.id);
+    if(r && r.out){ done++; if(r.back) back++; if(r.ok) ok++; if(r.hash!==hashText(b.text)) stale++; }
+  });
+  return { total:bs.length, done, stale, ok, back };
+}
+
+/* ---- AIとのやりとり（IDタグ付きプレーンテキスト。JSONは使わない） ---- */
+function packBlocks(items){
+  return items.map(x=>`[[BLOCK:${x.id}]]\n${x.text}\n[[/BLOCK]]`).join("\n\n");
+}
+function unpackBlocks(text){
+  const map={};
+  const re=/\[\[BLOCK:([^\]\n]+)\]\]([\s\S]*?)\[\[\/BLOCK\]\]/g;
+  let m;
+  while((m=re.exec(String(text||"")))){ map[m[1].trim()]=m[2].trim(); }
+  return map;
+}
+
+async function runTranslate(mode, only){
+  /* mode: "fwd"（原文→翻訳）／"back"（翻訳→原文の言語） */
+  const zone=document.getElementById("trMsg");
+  const from = mode==="fwd" ? S.lang.doc : S.lang.target;
+  const to   = mode==="fwd" ? S.lang.target : S.lang.doc;
+  const all=trBlocks();
+  let targets;
+  if(Array.isArray(only) && only.length){
+    targets=all.filter(b=>only.includes(b.id));
+  }else if(mode==="fwd"){
+    targets=all.filter(b=>{ const r=trRec(b.id); return !r || !r.out || r.hash!==hashText(b.text); });
+  }else{
+    targets=all.filter(b=>{ const r=trRec(b.id); return r && r.out && !r.back; });
+  }
+  if(!targets.length){
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"未翻訳の項目はありません。":"逆翻訳が必要な項目はありません。"}</div>`;
+    return;
+  }
+  const fail=[];
+  for(let i=0;i<targets.length;i+=TR_BATCH){
+    const group=targets.slice(i,i+TR_BATCH);
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"翻訳中":"逆翻訳中"}…（${Math.min(i+TR_BATCH,targets.length)} / ${targets.length}）</div>`;
+    const items = group.map(b=>{
+      if(mode==="fwd") return { id:b.id, text:b.text };
+      const r=trRec(b.id);
+      return { id:b.id, text:(r&&r.out)||"" };
+    });
+    const prompt = mode==="fwd"
+      ? `次の各ブロックを、応募書類（履歴書・職務経歴書）として自然な${LANG_LABEL[to]}に翻訳してください。
+
+厳守：
+・意味を変えない。情報を足さない。落とさない。
+・数字・固有名詞・単位はそのまま保つ。
+・直訳ではなく、応募書類として自然な表現にする。
+・各ブロックの先頭と末尾にある区切り行は、記号もIDも一字一句そのまま残す。
+・出力はブロックのみ。前置き・解説は書かない。
+
+${packBlocks(items)}`
+      : `次の各ブロックを、意味の検算のために${LANG_LABEL[to]}へ訳し戻してください。
+
+厳守：
+・意訳しない。元の文が何を言っているかが分かるよう、できるだけ忠実に訳す。
+・情報を足さない。落とさない。整えない。
+・各ブロックの先頭と末尾にある区切り行は、記号もIDも一字一句そのまま残す。
+・出力はブロックのみ。前置き・解説は書かない。
+
+${packBlocks(items)}`;
+    try{
+      const res=await callAI(prompt, 3000);
+      const map=unpackBlocks(res);
+      let got=0;
+      group.forEach(b=>{
+        const v=map[b.id];
+        if(!v) return;
+        got++;
+        S.tr[b.id]=S.tr[b.id]||{};
+        if(mode==="fwd"){
+          S.tr[b.id].out=v;
+          S.tr[b.id].hash=hashText(b.text);
+          S.tr[b.id].back="";       /* 原文が変わったので逆翻訳はやり直し */
+          S.tr[b.id].ok=false;
+        }else{
+          S.tr[b.id].back=v;
+        }
+      });
+      if(!got) fail.push(group.map(b=>b.label).join("、"));
+    }catch(err){
+      fail.push(group.map(b=>b.label).join("、")+"（"+humanError(err)+"）");
+    }
+    saveNow();
+  }
+  render(true);
+  const z=document.getElementById("trMsg");
+  if(z) z.innerHTML = fail.length
+    ? `<div class="ng">一部できませんでした。できた分は残っています。<br>${esc(fail.join(" ／ "))}</div>`
+    : `<div class="ok">✓ ${mode==="fwd"?"翻訳":"逆翻訳"}が終わりました。</div>`;
+}
+
+function trApprove(id){
+  S.tr[id]=S.tr[id]||{}; S.tr[id].ok=!S.tr[id].ok;
+  render(true); saveNow();
+}
+function trRedo(id){ runTranslate("fwd",[id]); }
+function trRedoBack(id){ runTranslate("back",[id]); }
+function setLangDoc(v){ S.lang.doc=v; if(S.lang.target===v) S.lang.target=otherLang(v); render(); saveNow(); }
+function setLangTarget(v){ S.lang.target=v; if(S.lang.doc===v) S.lang.doc=otherLang(v); render(); saveNow(); }
+
+/* ---- 翻訳版の職務経歴書 ---- */
+const EN_H = { resume:"Resume", summary:"Professional Summary", skills:"Skills & Experience",
+  certs:"Certifications", overview:"Career Overview", work:"Work Experience", about:"About Me" };
+const EN_EMP = { "正社員":"Full-time","契約社員":"Contract","派遣社員":"Temporary / Dispatch",
+  "業務委託・個人事業主":"Freelance / Contractor","パート・アルバイト":"Part-time","出向":"Secondment","その他":"Other" };
+const EN_MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function periodEn(j){
+  const f = (j.fromY&&j.fromM) ? `${EN_MON[Number(j.fromM)-1]} ${j.fromY}` : (j.fromY||"");
+  const t = j.current ? "Present" : ((j.toY&&j.toM) ? `${EN_MON[Number(j.toM)-1]} ${j.toY}` : (j.toY||""));
+  return [f,t].filter(Boolean).join(" – ");
+}
+function durationEn(j){
+  const d=duration(j); if(!d) return "";
+  const y=(d.match(/(\d+)年/)||[])[1], m=(d.match(/(\d+)ヶ月/)||[])[1];
+  return [y?`${y} yr${y>1?"s":""}`:"", m?`${m} mo${m>1?"s":""}`:""].filter(Boolean).join(" ");
+}
+function fmtDateEn(iso){
+  const d=new Date(iso);
+  return `${EN_MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+/* 翻訳版の職務経歴書（原文が日本語なら英語版、原文が英語なら日本語版） */
+function docTransHTML(){
+  const en = S.lang.target==="en";
+  const H = en ? EN_H : { resume:"職務経歴書", summary:"職務要約", skills:"活かせるスキル・経験",
+    certs:"資格", overview:"略歴", work:"職務経歴（詳細）", about:"自己PR" };
+  const p=S.profile;
+  const name=[p.lastName,p.firstName].filter(Boolean).join(" ")||"—";
+  const skills=(S.skills||[]).filter(s=>(s.name||"").trim());
+  const certs=(S.certs||[]).filter(c=>(c.name||"").trim());
+  const jobs=(S.jobs||[]).filter(j=>(j.company||"").trim()||(j.achv||"").trim()||achForJob(j.id).length);
+  const per = en ? periodEn : period;
+  const dur = en ? durationEn : duration;
+  const emp = (e)=> en ? (EN_EMP[e]||e||"—") : (e||"—");
+
+  const achBlock=(a)=>{
+    const ms=(a.metrics||[]).map(m=>{
+      const labels=parseLabels(m.labels), vals=parseNums(m.values, labels.length);
+      if(!vals.length) return "";
+      const nm=trOut(`met_${m.id}_n`, m.name||"");
+      const body = vals.length>1 ? `${fmtNum(vals[0])} → ${fmtNum(vals[vals.length-1])}` : fmtNum(vals[0]);
+      return `${nm?nm+"："+"":""}${body}${m.unit||""}`.replace("：","：");
+    }).filter(Boolean);
+    return `<div class="achi">
+      ${a.action?`<div class="acta">${esc(trOut(`ach_${a.id}_a`, a.action))}</div>`:""}
+      ${a.result?`<div class="actr">${esc(trOut(`ach_${a.id}_r`, a.result))}</div>`:""}
+      ${ms.length?`<div class="actm">${ms.map(esc).join("　／　")}</div>`:""}
+    </div>`;
+  };
+  const jobBody=(j)=>{
+    const list=achForJob(j.id);
+    if(list.length) return list.map(achBlock).join("");
+    return j.achv ? `<div class="ac">${esc(trOut(`job_${j.id}_a`, j.achv))}</div>` : "";
+  };
+
+  return `<div class="doc">
+    <h1>${H.resume}</h1>
+    <div class="meta">${en?fmtDateEn(S.date):fmtDate(S.date)}</div>
+    <div class="who">
+      <div class="nm">${esc(name)}</div>
+      ${p.email?`<div>${en?"Email":"Mail"}：${esc(p.email)}</div>`:""}
+      ${p.tel?`<div>${en?"Phone":"電話"}：${esc(p.tel)}</div>`:""}
+    </div>
+    ${S.summary.trim()?`<h2>${H.summary}</h2><p>${esc(trOut("summary",S.summary))}</p>`:""}
+    ${skills.length?`<h2>${H.skills}</h2>${skills.map((s,i)=>`<div class="sk">
+      <div class="n">${esc(trOut(`skill${i}_n`, s.name))}${s.years?`（${esc(s.years)}）`:""}</div>
+      ${s.achv?`<div class="a">${esc(trOut(`skill${i}_a`, s.achv))}</div>`:""}</div>`).join("")}`:""}
+    ${certs.length?`<h2>${H.certs}</h2>${certs.map((c,i)=>`<div class="kv"><span>${esc(trOut(`cert${i}_n`, c.name))}</span>
+      <span class="r">${esc([c.y?`${c.y}${en?"":"年"}${c.m?(en?"/"+c.m:c.m+"月"):""}`:"",c.expiry||""].filter(Boolean).join(" / "))}</span></div>`).join("")}`:""}
+    ${jobs.length?`<h2>${H.overview}</h2>
+      <table class="hist"><thead><tr>
+        <th>${en?"Period":"期間"}</th><th>${en?"Company":"会社名"}</th><th>${en?"Client":"就業先"}</th><th>${en?"Type":"雇用形態"}</th></tr></thead>
+      <tbody>${jobs.map(j=>{const d=dur(j);return `<tr>
+        <td>${esc(per(j))}${d?`<br><span class="dur">（${esc(d)}）</span>`:""}</td>
+        <td>${esc(j.company||"—")}</td><td>${esc(j.client||"—")}</td><td>${esc(emp(j.employment))}</td></tr>`}).join("")}</tbody></table>`:""}
+    ${jobs.length?`<h2>${H.work}</h2>${jobs.map(j=>{const d=dur(j);return `<div class="exp">
+      <div class="co">${esc(j.company||"—")}${j.client?` <span style="font-weight:400;color:var(--muted)">→ ${esc(j.client)}</span>`:""}</div>
+      <div class="rl">${[trOut(`job_${j.id}_r`, j.role), emp(j.employment)].filter(Boolean).map(esc).join("　|　")}</div>
+      <div class="rl">${esc(per(j))}${d?`（${esc(d)}）`:""}</div>
+      ${jobBody(j)}</div>`}).join("")}`:""}
+    ${S.pr.trim()?`<h2>${H.about}</h2><p>${esc(trOut("pr",S.pr))}</p>`:""}
+  </div>`;
+}
+function printTrans(){
+  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"Resume";
+  document.title = S.lang.target==="en" ? `Resume_${nm}` : `職務経歴書_${nm}`;
+  document.body.classList.add("printtrans");
+  setTimeout(()=>{ window.print(); setTimeout(()=>document.body.classList.remove("printtrans"),800); },60);
+}
+
+/* ---- 画面 ---- */
+function viewTrans(){
+  const st=trStats();
+  const bs=trBlocks();
+  const doc=S.lang.doc, tgt=S.lang.target;
+  return `
+  <div class="lede">原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>訳し戻して並べるので、母国語だけで内容を確認できます。</div>
+
+  <div class="langbox">
+    <div class="row2">
+      <label class="f"><span>作成した言語（正本）</span>
+        <select onchange="setLangDoc(this.value)">
+          ${Object.keys(LANG_LABEL).map(k=>`<option value="${k}" ${doc===k?"selected":""}>${LANG_LABEL[k]}</option>`).join("")}
+        </select></label>
+      <label class="f"><span>翻訳する言語</span>
+        <select onchange="setLangTarget(this.value)">
+          ${Object.keys(LANG_LABEL).map(k=>`<option value="${k}" ${tgt===k?"selected":""}>${LANG_LABEL[k]}</option>`).join("")}
+        </select></label>
+    </div>
+    <div class="hint">${LANG_LABEL[doc]}で書いた内容を${LANG_LABEL[tgt]}にし、それを${LANG_LABEL[doc]}へ訳し戻して見くらべます。</div>
+  </div>
+
+  <div class="trstat">
+    <span>対象 ${st.total}</span><span>翻訳済み ${st.done}</span><span>訳し戻し ${st.back}</span>
+    <span class="okc">確認済み ${st.ok}</span>${st.stale?`<span class="stc">古い ${st.stale}</span>`:""}
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" onclick="runTranslate('fwd')">${st.done?"未翻訳・古いものを翻訳":"翻訳する"}</button>
+    ${st.done?`<button onclick="runTranslate('back')">訳し戻して確認する</button>`:""}
+    ${st.done?`<button onclick="printTrans()">${tgt==="en"?"英語版":"日本語版"}をPDFで保存</button>`:""}
+  </div>
+  <div class="hint" style="margin-bottom:12px">${TR_BATCH}項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。</div>
+  <div id="trMsg"></div>
+
+  ${st.done?`<div class="trprev">${docTransHTML()}</div>`:""}
+
+  <div class="sechead">1項目ずつ確認する</div>
+  <div class="secnote">原文と「訳し戻し」を見くらべてください。意味がずれていなければ確認済みにします。</div>
+
+  ${bs.map(b=>{
+    const r=trRec(b.id)||{};
+    const stale=trStale(b);
+    return `<div class="trcard ${r.ok?"okd":""}">
+      <div class="trhead">
+        <span class="trlabel">${esc(b.label)}</span>
+        ${stale?`<span class="trstale">原文が変わっています</span>`:""}
+        ${r.ok?`<span class="trok">確認済み</span>`:""}
+      </div>
+      <div class="trlbl">原文（${LANG_LABEL[doc]}）</div>
+      <div class="trbox">${esc(b.text)}</div>
+      ${r.out?`
+        <div class="trlbl tgt">翻訳（${LANG_LABEL[tgt]}）</div>
+        <div class="trbox">${esc(r.out)}</div>`:`<div class="trnone">まだ翻訳していません</div>`}
+      ${r.back?`
+        <div class="trlbl back">訳し戻し（${LANG_LABEL[doc]}）— 原文と見くらべてください</div>
+        <div class="trbox back">${esc(r.back)}</div>`:""}
+      ${r.out?`
+      <div class="trbtns">
+        <button class="ai sub" onclick="trRedo('${esc(b.id)}')">ここだけ訳し直す</button>
+        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}')">ここだけ訳し戻す</button>`:""}
+        <button class="ai ${r.ok?"sub":""}" onclick="trApprove('${esc(b.id)}')">${r.ok?"確認を外す":"確認した"}</button>
+      </div>`:""}
+    </div>`;}).join("")}
+
+  ${!bs.length?`<div class="impdone">翻訳できる内容がまだありません。職務経歴書を先に作ってください。</div>`:""}`;
 }
 
 /* ============ BLOCK 11: 面接シート（Step8） ============ */
@@ -2385,7 +2733,11 @@ function migrateState(){
       return d;
     });
     if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
-    if(S.docTab!=="charts") S.docTab="preview";
+    if(!["charts","trans"].includes(S.docTab)) S.docTab="preview";
+    S.lang=Object.assign({doc:"ja",target:"en"}, S.lang||{});
+    if(!LANG_LABEL[S.lang.doc]) S.lang.doc="ja";
+    if(!LANG_LABEL[S.lang.target] || S.lang.target===S.lang.doc) S.lang.target=otherLang(S.lang.doc);
+    if(!S.tr || typeof S.tr!=="object") S.tr={};
     if(!Array.isArray(S.charts)) S.charts=[];
     S.charts=S.charts.slice(0,MAX_CHARTS).map(c=>{
       const d=Object.assign(newChart(), c||{});
