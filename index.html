@@ -308,7 +308,7 @@
   .linkwarn button{width:100%;margin-top:9px;background:var(--navy);color:#fff;border:none;border-radius:10px;
     padding:11px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;cursor:pointer}
 
-  /* BLOCK 2-i: 翻訳と逆翻訳 */
+  /* BLOCK 2-i: 翻訳と再翻訳 */
   .langbox{background:var(--ice-soft);border-radius:14px;padding:14px 15px 6px;margin-bottom:14px}
   .langbox select{background:#fff}
   .trstat{display:flex;gap:7px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-bottom:12px}
@@ -432,7 +432,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v27</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v28</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -560,10 +560,10 @@ const EMPLOYMENTS = ["正社員","契約社員","派遣社員","業務委託・�
 
 const S = {
   apiKey:"", model:"balanced", keyVerified:false, agreed:false, saveKey:false, aiSkipped:false,
-  profile:{ lastName:"", firstName:"", kana:"", email:"", tel:"" },
+  profile:{ lastName:"", firstName:"", kana:"", nameEn:"", email:"", tel:"" },
   certs:[{y:"",m:"",name:"",expiry:""}],
   skills:[{name:"",years:"",achv:""}],
-  jobs:[{company:"",client:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
+  jobs:[{company:"",companyEn:"",client:"",clientEn:"",role:"",employment:"",users:"",fromY:"",fromM:"",toY:"",toM:"",current:false,achv:"",achvOrig:""}],
   summaryValues:"", summary:"", summaryOrig:"",
   pr:"", prOrig:"",
   schemaVersion:SCHEMA_VERSION,
@@ -753,6 +753,9 @@ const VIEWS = [
     </div>
     <label class="f"><span>ふりがな</span>
       <input value="${esc(S.profile.kana)}" oninput="S.profile.kana=this.value" placeholder="りれきしょ かくたろう"></label>
+    <label class="f"><span>氏名（英語表記）</span>
+      <input value="${esc(S.profile.nameEn)}" oninput="S.profile.nameEn=this.value" placeholder="Kakutaro Rirekisho">
+      <div class="hint">英語版の書類で使います。空欄なら日本語の氏名がそのまま出ます。パスポートと同じ綴りにしておくと安心です。</div></label>
     <label class="f"><span>メールアドレス</span>
       <input type="email" inputmode="email" value="${esc(S.profile.email)}" oninput="S.profile.email=this.value" placeholder="you@example.com"></label>
     <label class="f"><span>電話番号</span>
@@ -804,11 +807,19 @@ const VIEWS = [
     ${S.jobs.map((j,i)=>`
       <div class="card">
         <div class="cardhead"><b>職歴 ${i+1}</b>${S.jobs.length>1?`<button class="del" onclick="delItem('jobs',${i})">削除</button>`:""}</div>
-        <label class="f"><span>会社名</span>
-          <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
-        <label class="f"><span>出向先・常駐先（任意）</span>
-          <input value="${esc(j.client)}" oninput="S.jobs[${i}].client=this.value" placeholder="例：◯◯株式会社（客先常駐の場合）">
-          <div class="hint">派遣・SES・出向などで、実際の勤務先が所属会社と異なる場合に記入します。</div></label>
+        <div class="row2">
+          <label class="f"><span>会社名</span>
+            <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
+          <label class="f"><span>会社名（英語表記）</span>
+            <input value="${esc(j.companyEn)}" oninput="S.jobs[${i}].companyEn=this.value" placeholder="◯◯ Co., Ltd."></label>
+        </div>
+        <div class="row2">
+          <label class="f"><span>出向先・常駐先（任意）</span>
+            <input value="${esc(j.client)}" oninput="S.jobs[${i}].client=this.value" placeholder="例：◯◯株式会社"></label>
+          <label class="f"><span>出向先（英語表記）</span>
+            <input value="${esc(j.clientEn)}" oninput="S.jobs[${i}].clientEn=this.value" placeholder="◯◯ K.K."></label>
+        </div>
+        <div class="hint" style="margin:-6px 0 15px">会社名は翻訳せず、公式の英語表記をそのまま使います。空欄なら日本語のまま出ます。派遣・SES・出向で勤務先が所属会社と異なる場合は、出向先も記入してください。</div>
         <label class="f"><span>ロール（職務名／部署／担当範囲）</span>
           <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="ITサポート リード / 情報システム部"></label>
         <div class="row2">
@@ -836,7 +847,7 @@ const VIEWS = [
         <button class="ai" onclick="brushAchv(${i},this)">✦ この実績をAIで整える</button>
         <div id="aiz${i}">${cmpHTML(j.achvOrig, j.achv, `undoJob(${i})`)}</div>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('jobs',{company:'',client:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
+    <button class="addbtn" onclick="addItem('jobs',{company:'',companyEn:'',client:'',clientEn:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
 
   /* 4 実績ライブラリ */ ()=>viewLibrary(),
 
@@ -1714,6 +1725,11 @@ function jobName(jobId){
   const j=(S.jobs||[]).find(x=>x.id===jobId);
   return j ? (j.company||"（会社名未入力）") : "";
 }
+function jobNameTr(jobId){
+  const j=(S.jobs||[]).find(x=>x.id===jobId);
+  if(!j) return "";
+  return (S.lang && S.lang.target==="en") ? (String(j.companyEn||"").trim() || j.company || "") : (j.company||"");
+}
 function metricSummary(a){
   const m=(a.metrics||[]).find(x=>(x.name||"").trim() && parseNums(x.values, parseLabels(x.labels).length).length);
   if(!m) return "";
@@ -1953,10 +1969,10 @@ function viewLibrary(){
   </div>`:""}`;
 }
 
-/* ============ BLOCK 14: 翻訳と逆翻訳（第5段階） ============
+/* ============ BLOCK 14: 翻訳と再翻訳（第5段階） ============
    考え方：
    ・原文の言語を「正本」とする。翻訳を直しても原文は自動で変えない。
-   ・確認は「原文 ／ 翻訳 ／ 逆翻訳」を並べて、母国語だけで判断できるようにする。
+   ・確認は「原文 ／ 翻訳 ／ 作成言語に再翻訳」を並べて、母国語だけで判断できるようにする。
    ・APIは3〜5ブロックまとめて呼ぶが、保存はブロック単位。1つ失敗しても他は残る。
    ・原文が変わったら、その翻訳は「古い」と表示する（消さない）。 */
 
@@ -1969,6 +1985,9 @@ function otherLang(l){ return l==="ja" ? "en" : "ja"; }
 function trBlocks(scope){
   if(scope==="sheet"){
     const out=[]; const sh=S.story.sheet||{};
+    const jd=S.story.jd||{};
+    if((jd.company||"").trim()) out.push({id:"jd_company", label:"応募先の会社名", text:jd.company.trim()});
+    if((jd.position||"").trim()) out.push({id:"jd_position", label:"応募ポジション", text:jd.position.trim()});
     SHEET_BLOCKS.forEach(b=>{
       const t=String(sh[b.key]||"").trim();
       if(t) out.push({id:`sheet_${b.key}`, label:b.label, text:t});
@@ -2052,13 +2071,13 @@ async function runTranslate(mode, only, scope){
     targets=all.filter(b=>{ const r=trRec(b.id); return r && r.out && !r.back; });
   }
   if(!targets.length){
-    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"未翻訳の項目はありません。":"逆翻訳が必要な項目はありません。"}</div>`;
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"未翻訳の項目はありません。":"再翻訳が必要な項目はありません。"}</div>`;
     return;
   }
   const fail=[];
   for(let i=0;i<targets.length;i+=TR_BATCH){
     const group=targets.slice(i,i+TR_BATCH);
-    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"翻訳中":"逆翻訳中"}…（${Math.min(i+TR_BATCH,targets.length)} / ${targets.length}）</div>`;
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"翻訳中":"再翻訳中"}…（${Math.min(i+TR_BATCH,targets.length)} / ${targets.length}）</div>`;
     const items = group.map(b=>{
       if(mode==="fwd") return { id:b.id, text:b.text };
       const r=trRec(b.id);
@@ -2069,13 +2088,14 @@ async function runTranslate(mode, only, scope){
 
 厳守：
 ・意味を変えない。情報を足さない。落とさない。
-・数字・固有名詞・単位はそのまま保つ。
+・数字・単位はそのまま保つ。
+・会社名・製品名・人名などの固有名詞は、原則そのまま残す。ただし「株式会社◯◯」のような法人格の表記だけは、その言語の慣用（例：◯◯ Co., Ltd.）に合わせてよい。
 ・直訳ではなく、応募書類として自然な表現にする。
 ・各ブロックの先頭と末尾にある区切り行は、記号もIDも一字一句そのまま残す。
 ・出力はブロックのみ。前置き・解説は書かない。
 
 ${packBlocks(items)}`
-      : `次の各ブロックを、意味の検算のために${LANG_LABEL[to]}へ訳し戻してください。
+      : `次の各ブロックを、意味の検算のために${LANG_LABEL[to]}へ再翻訳してください。
 
 厳守：
 ・意訳しない。元の文が何を言っているかが分かるよう、できるだけ忠実に訳す。
@@ -2088,7 +2108,7 @@ ${packBlocks(items)}`;
       S.tr[id]=S.tr[id]||{};
       if(mode==="fwd"){
         S.tr[id].out=v; S.tr[id].hash=hashText(srcText);
-        S.tr[id].back=""; S.tr[id].ok=false;   /* 原文が変わったので訳し戻しはやり直し */
+        S.tr[id].back=""; S.tr[id].ok=false;   /* 原文が変わったので再翻訳はやり直し */
       }else{
         S.tr[id].back=v;
       }
@@ -2105,10 +2125,10 @@ ${packBlocks(items)}`;
     }
     /* まとめて取れなかった分は、1件ずつ取り直す（区切り記号の崩れに強い） */
     for(const b of missing){
-      if(zone) zone.innerHTML=`<div class="ok">${esc(b.label)} を1件ずつ${mode==="fwd"?"翻訳":"訳し戻し"}中…</div>`;
+      if(zone) zone.innerHTML=`<div class="ok">${esc(b.label)} を1件ずつ${mode==="fwd"?"翻訳":"再翻訳"}中…</div>`;
       const one = (mode==="fwd")
         ? `次の文章を、応募書類（履歴書・職務経歴書）として自然な${LANG_LABEL[to]}に翻訳してください。\n\n厳守：意味を変えない。情報を足さない・落とさない。数字と固有名詞はそのまま。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${(mode==="fwd"?b.text:"")}`
-        : `次の文章を、意味の検算のために${LANG_LABEL[to]}へ忠実に訳し戻してください。\n\n厳守：意訳しない。情報を足さない・落とさない。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${((trRec(b.id)||{}).out)||""}`;
+        : `次の文章を、意味の検算のために${LANG_LABEL[to]}へ忠実に再翻訳してください。\n\n厳守：意訳しない。情報を足さない・落とさない。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${((trRec(b.id)||{}).out)||""}`;
       try{
         const v=(await callAI(one, 1500)).replace(/\[\[\/?BLOCK[^\]]*\]\]/g,"").trim();
         if(v) apply(b.id, v, b.text); else fail.push(b.label);
@@ -2123,13 +2143,13 @@ ${packBlocks(items)}`;
   const z=document.getElementById("trMsg");
   if(z) z.innerHTML = fail.length
     ? `<div class="ng">一部できませんでした。できた分は残っています。<br>${esc(fail.join(" ／ "))}</div>`
-    : `<div class="ok">✓ ${mode==="fwd"?"翻訳":"逆翻訳"}が終わりました。</div>`;
+    : `<div class="ok">✓ ${mode==="fwd"?"翻訳":"再翻訳"}が終わりました。</div>`;
 }
 
-/* ---- 原文と訳し戻しの差分 ----
+/* ---- 原文と再翻訳の差分 ----
    人が全文を読み比べる負担を減らすため、違う箇所だけを色で示す。
-   赤＝原文にあるのに訳し戻しに無い（訳で落ちた可能性）
-   青＝訳し戻しにあるのに原文に無い（訳で足された可能性） */
+   赤＝原文にあるのに再翻訳に無い（訳で落ちた可能性）
+   青＝再翻訳にあるのに原文に無い（訳で足された可能性） */
 const DIFF_MAX = 1200;              /* 長すぎる文章は比較を打ち切る */
 function diffSeq(a, b){
   const n=a.length, m=b.length;
@@ -2175,8 +2195,8 @@ function diffHTML(src, back){
     : `<span class="d${x.t}">${esc(x.s)}</span>`).join("");
   return `<div class="difftop">
       <span class="rate ${rate>=95?"good":(rate>=85?"mid":"bad")}">一致 ${rate}%</span>
-      <span class="dlg"><i class="ddel"></i>原文にあるが訳し戻しに無い</span>
-      <span class="dlg"><i class="dins"></i>訳し戻しで増えた</span>
+      <span class="dlg"><i class="ddel"></i>原文にあるが再翻訳に無い</span>
+      <span class="dlg"><i class="dins"></i>再翻訳で増えた</span>
     </div>
     <div class="diffbox">${body}</div>
     ${rate>=95?`<div class="hint">大きなずれは見当たりません。</div>`:`<div class="hint">色の付いた箇所を確認してください。言い回しの違いなら問題ありません。<b>数字・固有名詞・否定表現</b>が変わっていたら訳し直してください。</div>`}`;
@@ -2213,18 +2233,23 @@ function fmtDateEn(iso){
 }
 
 /* 翻訳版の職務経歴書（原文が日本語なら英語版、原文が英語なら日本語版） */
+/* 固有名詞（氏名・会社名）は機械翻訳させない。英語表記の入力があればそれを使う */
+function nameEnOr(en, base){ const t=String(en==null?"":en).trim(); return t || base; }
 function docTransHTML(){
   const en = S.lang.target==="en";
   const H = en ? EN_H : { resume:"職務経歴書", summary:"職務要約", skills:"活かせるスキル・経験",
     certs:"資格", overview:"略歴", work:"職務経歴（詳細）", about:"自己PR" };
   const p=S.profile;
-  const name=[p.lastName,p.firstName].filter(Boolean).join(" ")||"—";
+  const name = en ? (nameEnOr(p.nameEn, [p.lastName,p.firstName].filter(Boolean).join(" "))||"—")
+                  : ([p.lastName,p.firstName].filter(Boolean).join(" ")||"—");
   const skills=(S.skills||[]).filter(s=>(s.name||"").trim());
   const certs=(S.certs||[]).filter(c=>(c.name||"").trim());
   const jobs=(S.jobs||[]).filter(j=>(j.company||"").trim()||(j.achv||"").trim()||achForJob(j.id).length);
   const per = en ? periodEn : period;
   const dur = en ? durationEn : duration;
   const emp = (e)=> en ? (EN_EMP[e]||e||"—") : (e||"—");
+  const co  = (j)=> en ? nameEnOr(j.companyEn, j.company) : j.company;
+  const cli = (j)=> en ? nameEnOr(j.clientEn, j.client) : j.client;
 
   const achBlock=(a)=>{
     const ms=(a.metrics||[]).map(m=>{
@@ -2265,9 +2290,9 @@ function docTransHTML(){
         <th>${en?"Period":"期間"}</th><th>${en?"Company":"会社名"}</th><th>${en?"Client":"就業先"}</th><th>${en?"Type":"雇用形態"}</th></tr></thead>
       <tbody>${jobs.map(j=>{const d=dur(j);return `<tr>
         <td>${esc(per(j))}${d?`<br><span class="dur">（${esc(d)}）</span>`:""}</td>
-        <td>${esc(j.company||"—")}</td><td>${esc(j.client||"—")}</td><td>${esc(emp(j.employment))}</td></tr>`}).join("")}</tbody></table>`:""}
+        <td>${esc(co(j)||"—")}</td><td>${esc(cli(j)||"—")}</td><td>${esc(emp(j.employment))}</td></tr>`}).join("")}</tbody></table>`:""}
     ${jobs.length?`<h2>${H.work}</h2>${jobs.map(j=>{const d=dur(j);return `<div class="exp">
-      <div class="co">${esc(j.company||"—")}${j.client?` <span style="font-weight:400;color:var(--muted)">→ ${esc(j.client)}</span>`:""}</div>
+      <div class="co">${esc(co(j)||"—")}${cli(j)?` <span style="font-weight:400;color:var(--muted)">→ ${esc(cli(j))}</span>`:""}</div>
       <div class="rl">${[trOut(`job_${j.id}_r`, j.role), emp(j.employment)].filter(Boolean).map(esc).join("　|　")}</div>
       <div class="rl">${esc(per(j))}${d?`（${esc(d)}）`:""}</div>
       ${jobBody(j)}</div>`}).join("")}`:""}
@@ -2276,15 +2301,17 @@ function docTransHTML(){
 }
 /* 面接シートの翻訳版 */
 function sheetTransHTML(){
-  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join(" ");
-  const head=[S.story.jd.company,S.story.jd.position].filter(Boolean).join("／");
+  const en=S.lang.target==="en";
+  const nm = en ? nameEnOr(S.profile.nameEn, [S.profile.lastName,S.profile.firstName].filter(Boolean).join(" "))
+                : [S.profile.lastName,S.profile.firstName].filter(Boolean).join(" ");
+  const head=[trOut("jd_company", S.story.jd.company), trOut("jd_position", S.story.jd.position)].filter(Boolean).join(en?" / ":"／");
   const sh=S.story.sheet||{};
   return `<div class="sheetdoc">
     <h1>${S.lang.target==="en"?"Interview Notes":"面接シート"}</h1>
     <div class="smeta">${esc(head||"—")}${nm?`　／　${esc(nm)}`:""}</div>
     ${SHEET_BLOCKS.filter(b=>sh[b.key]).map(b=>`
       <div class="sblock">
-        <div class="sbh">${esc(b.label)}</div>
+        <div class="sbh">${esc(sheetLabel(b))}</div>
         <div class="sbody">${renderSheetText(trOut(`sheet_${b.key}`, sh[b.key]))}</div>
       </div>`).join("")}
   </div>`;
@@ -2308,7 +2335,7 @@ function viewTrans(scope){
   const bs=trBlocks(sc);
   const doc=S.lang.doc, tgt=S.lang.target;
   return `
-  <div class="lede">原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>訳し戻して並べるので、母国語だけで内容を確認できます。</div>
+  <div class="lede">原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>作成言語に再翻訳して並べるので、母国語だけで内容を確認できます。</div>
 
   <div class="langbox">
     <div class="row2">
@@ -2321,17 +2348,17 @@ function viewTrans(scope){
           ${Object.keys(LANG_LABEL).map(k=>`<option value="${k}" ${tgt===k?"selected":""}>${LANG_LABEL[k]}</option>`).join("")}
         </select></label>
     </div>
-    <div class="hint">${LANG_LABEL[doc]}で書いた内容を${LANG_LABEL[tgt]}にし、それを${LANG_LABEL[doc]}へ訳し戻して見くらべます。</div>
+    <div class="hint">${LANG_LABEL[doc]}で書いた内容を${LANG_LABEL[tgt]}にし、それを${LANG_LABEL[doc]}へ再翻訳して見くらべます。</div>
   </div>
 
   <div class="trstat">
-    <span>対象 ${st.total}</span><span>翻訳済み ${st.done}</span><span>訳し戻し ${st.back}</span>
+    <span>対象 ${st.total}</span><span>翻訳済み ${st.done}</span><span>再翻訳 ${st.back}</span>
     <span class="okc">確認済み ${st.ok}</span>${st.stale?`<span class="stc">古い ${st.stale}</span>`:""}
   </div>
 
   <div class="toolbar">
     <button class="primary" onclick="runTranslate('fwd',null,'${sc}')">${st.done?"未翻訳・古いものを翻訳":"翻訳する"}</button>
-    ${st.done?`<button onclick="runTranslate('back',null,'${sc}')">訳し戻して確認する</button>`:""}
+    ${st.done?`<button onclick="runTranslate('back',null,'${sc}')">作成言語に再翻訳して確認する</button>`:""}
     ${st.done?`<button onclick="${sc==="sheet"?"printSheetTrans()":"printTrans()"}">${tgt==="en"?"英語版":"日本語版"}をPDFで保存</button>`:""}
   </div>
   <div class="hint" style="margin-bottom:12px">${TR_BATCH}項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。</div>
@@ -2340,7 +2367,7 @@ function viewTrans(scope){
   ${st.done?`<div class="trprev">${sc==="sheet"?sheetTransHTML():docTransHTML()}</div>`:""}
 
   <div class="sechead">1項目ずつ確認する</div>
-  <div class="secnote">原文と「訳し戻し」を見くらべてください。意味がずれていなければ確認済みにします。</div>
+  <div class="secnote">原文と「作成言語に再翻訳」を見くらべてください。意味がずれていなければ確認済みにします。</div>
 
   ${bs.map(b=>{
     const r=trRec(b.id)||{};
@@ -2357,14 +2384,14 @@ function viewTrans(scope){
         <div class="trlbl tgt">② 翻訳（${LANG_LABEL[tgt]}）</div>
         <div class="trbox">${esc(r.out)}</div>`:`<div class="trnone">まだ翻訳していません</div>`}
       ${r.back?`
-        <div class="trlbl back">③ 訳し戻し（${LANG_LABEL[doc]}）</div>
+        <div class="trlbl back">③ 作成言語に再翻訳（${LANG_LABEL[doc]}）</div>
         <div class="trbox back">${esc(r.back)}</div>
         <div class="trlbl diff">①と③の違い（自動比較）</div>
         ${diffHTML(b.text, r.back)}`:""}
       ${r.out?`
       <div class="trbtns">
         <button class="ai sub" onclick="trRedo('${esc(b.id)}','${sc}')">ここだけ訳し直す</button>
-        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}','${sc}')">ここだけ訳し戻す</button>`:""}
+        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}','${sc}')">ここだけ再翻訳</button>`:""}
         <button class="ai ${r.ok?"sub":""}" onclick="trApprove('${esc(b.id)}')">${r.ok?"確認を外す":"確認した"}</button>
       </div>`:""}
     </div>`;}).join("")}
@@ -2392,15 +2419,16 @@ function sheetIsStale(){
 }
 /* maxTokens はブロックごとに設定する。短い出力に大きな上限を与えると、指示を外れて長文化する余地が増えるため。 */
 const SHEET_BLOCKS = [
-  { key:"policy",   label:"1. 面談での方針",            max:700 },
-  { key:"stance",   label:"2. 自分の立ち位置",          max:1300 },
-  { key:"intro",    label:"3. 簡単な自己紹介",          max:700 },
-  { key:"opening",  label:"4. 入り口の一本",            max:700 },
-  { key:"deepdive", label:"5. 掘られたら話すこと",      max:2200 },
-  { key:"gap",      label:"6. 弱み・ギャップを聞かれたら", max:900 },
-  { key:"questions",label:"7. 相手への質問",            max:800 },
-  { key:"lens",     label:"8. あなたの実績につく名前",    max:1800 }
+  { key:"policy",   label:"1. 面談での方針",            en:"1. Approach for the Interview",     max:700 },
+  { key:"stance",   label:"2. 自分の立ち位置",          en:"2. Where I Stand",                  max:1300 },
+  { key:"intro",    label:"3. 簡単な自己紹介",          en:"3. Short Self-Introduction",        max:700 },
+  { key:"opening",  label:"4. 入り口の一本",            en:"4. The Opening Story",              max:700 },
+  { key:"deepdive", label:"5. 掘られたら話すこと",      en:"5. If They Dig Deeper",             max:2200 },
+  { key:"gap",      label:"6. 弱み・ギャップを聞かれたら", en:"6. If Asked About Gaps",            max:900 },
+  { key:"questions",label:"7. 相手への質問",            en:"7. Questions for Them",             max:800 },
+  { key:"lens",     label:"8. あなたの実績につく名前",    en:"8. What Your Work Is Called",       max:1800 }
 ];
+function sheetLabel(b){ return (S.lang && S.lang.target==="en" && b.en) ? b.en : b.label; }
 function blockMax(key){ const b=SHEET_BLOCKS.find(x=>x.key===key); return b&&b.max?b.max:1200; }
 
 function renderSheetText(t){
@@ -2834,6 +2862,8 @@ function migrateState(){
     if(!Array.isArray(S.story.ranked)) S.story.ranked = (S.story.chosen>=0?[S.story.chosen]:[]);
     if(!Array.isArray(S.story.checks)) S.story.checks=[];
     ensureJobIds();
+    S.profile=Object.assign({lastName:"",firstName:"",kana:"",nameEn:"",email:"",tel:""}, S.profile||{});
+    S.jobs=(S.jobs||[]).map(j=>Object.assign({companyEn:"",clientEn:""}, j||{}));
     /* 実績ライブラリ（第2段階）。旧データを読み込んだ初回に、控えを取る */
     if(!S.schemaVersion || S.schemaVersion < SCHEMA_VERSION){ backupOnce(); S.schemaVersion=SCHEMA_VERSION; }
     if(!Array.isArray(S.achievements)) S.achievements=[];
