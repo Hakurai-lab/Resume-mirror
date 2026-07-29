@@ -210,6 +210,7 @@
   .asumi{font-size:12.5px;line-height:1.7;color:#333;margin-bottom:3px}
   .asumi b{color:var(--navy);margin-right:7px}
   .tabs{display:flex;gap:8px;margin:14px 0 12px}
+  .tabs.prep .tab{font-size:12.5px;padding:11px 6px}
   .tab{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--muted);
     font-family:"Zen Kaku Gothic New";font-weight:700;font-size:14px;cursor:pointer}
   .tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
@@ -302,6 +303,10 @@
   .actr{font-size:12.5px;line-height:1.8;color:#333;white-space:pre-wrap;margin-top:2px}
   .actm{font-size:12px;color:var(--navy);font-weight:700;margin-top:3px}
   .linkedval{background:var(--ice-soft);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--navy);font-weight:700}
+  .linkwarn{border:2px solid var(--warn);background:#FDF3F4;border-radius:13px;padding:13px 15px;margin-bottom:14px;font-size:12.5px;line-height:1.75}
+  .linkwarn b{display:block;font-family:"Zen Kaku Gothic New";color:var(--warn);margin-bottom:3px}
+  .linkwarn button{width:100%;margin-top:9px;background:var(--navy);color:#fff;border:none;border-radius:10px;
+    padding:11px;font-family:"Zen Kaku Gothic New";font-weight:700;font-size:13px;cursor:pointer}
   .pickach{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);
     border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer}
   .pickach.on{border-color:var(--accent);border-width:2.5px;background:#F4FBF7}
@@ -390,7 +395,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v24</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v25</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -528,6 +533,7 @@ const S = {
   achievements:[],
   importSkipped:[],
   charts:[],
+  docTab:"preview",
   story:{
     jd:{ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null },
     achv:[{what:"",num:"",hints:[],use:true},{what:"",num:"",hints:[],use:true}], useAch:[],
@@ -536,7 +542,7 @@ const S = {
   date:new Date().toISOString().slice(0,10)
 };
 let step = 0;
-const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","実績ライブラリ","職務要約","自己PR","実績グラフ","確認・出力","面接の準備","面接シート"];
+const STEPS = ["はじめの設定","プロフィール","スキル・資格","職務経歴","実績ライブラリ","職務要約","自己PR","職務経歴書","面接の準備","面接シート"];
 const TOTAL = STEPS.length;
 
 /* ============ BLOCK 4: AI呼び出し・エラー文言 ============ */
@@ -823,18 +829,9 @@ const VIEWS = [
     <div id="cmpPR">${cmpHTML(S.prOrig, S.pr, "undoPR()")}</div>
     <div class="note"><b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。</div>`,
 
-  /* 7 実績グラフ */ ()=>viewCharts(),
-
-  /* 8 確認・出力 */ ()=>`
-    <div class="h2">確認・出力</div>
-    <div class="lede">仕上がりを確認して、PDFで保存できます。</div>
-    <div class="toolbar">
-      <button class="primary" onclick="printDoc()">PDFで保存・印刷</button>
-    </div>
-    <div id="docWrap">${docHTML()}</div>`,
-
-  /* 9 面接の準備 */ ()=>viewPrep(),
-  /* 10 面接シート */ ()=>viewSheet()
+  /* 7 職務経歴書（プレビューとグラフをタブで行き来する） */ ()=>viewDoc(),
+  /* 8 面接の準備 */ ()=>viewPrep(),
+  /* 9 面接シート */ ()=>viewSheet()
 ];
 
 /* ガードレールは2種類。用途で使い分ける。※v12で「見捨てない」が脱落した。消さないこと。 */
@@ -910,20 +907,12 @@ function jdDigestBox(){
   </div>`;
 }
 
-function viewPrep(){
+function setPrepTab(t){ S.prepTab=t; render(); window.scrollTo(0,0); saveNow(); }
+
+/* 面接の準備は縦に長くなるため、3つのタブに分ける（モバイルで現在地を見失わないように） */
+function prepJD(){
   const st=S.story;
-  if(!Array.isArray(st.achv)) st.achv=[];
-  if(!Array.isArray(st.patterns)) st.patterns=[];
-
-  return `
-  <div class="slabor">
-    <div class="stitle">職務経歴書、完成しました。</div>
-    <div class="stext">おつかれさまでした。ここからは、面接で話す準備を一緒にします。全部を読み上げる必要はありません。あなたが一番語りたい経験を、相手が思わず聞きたくなる形に整えます。</div>
-  </div>
-  <div class="ssafe">ここで入力された内容は、運営者には一切届かず、運営者のサーバーに保存されることもありません。AI機能を使った部分だけは、あなた自身のAPIキーでAnthropicへ送信されます。安心して、正直に教えてください。</div>
-
-  <div class="sechead">① 応募先の情報</div>
-  ${(st.jd.company||st.jd.position||st.jd.raw||st.jd.digest||st.patterns.length||Object.keys(st.sheet||{}).length)?`
+  return `  ${(st.jd.company||st.jd.position||st.jd.raw||st.jd.digest||st.patterns.length||Object.keys(st.sheet||{}).length)?`
     <button class="clearapp" onclick="clearApplication()">別の応募先に切り替える（この応募先の情報を消す）</button>
     <div class="hint" style="margin-bottom:12px">職務経歴書・実績・グラフは残ります。消えるのは応募先情報・語り口・面接シートだけです。</div>`:""}
   <div class="secnote">求人票があると、シートの精度が大きく変わります。なければ空欄でも進めます。</div>
@@ -946,8 +935,11 @@ function viewPrep(){
   <div id="jdMsg"></div>
   ${jdDigestBox()}
 
-  <div class="sechead">② 今回の面接で使う実績</div>
-  ${(S.achievements||[]).length?`
+`;
+}
+function prepAch(){
+  const st=S.story;
+  return `  ${(S.achievements||[]).length?`
   <div class="secnote">STEP4 の実績ライブラリから選ぶだけです。同じことを書き直す必要はありません。<b>2〜3件</b>が目安です。内容を直したいときは STEP4 で直すと、職務経歴書・グラフ・面接シートのすべてに反映されます。</div>
   ${(S.achievements||[]).map(a=>{
     const on=(S.story.useAch||[]).includes(a.id);
@@ -986,8 +978,11 @@ function viewPrep(){
   ${st.achv.length<MAX_ACHV?`<button class="addbtn" onclick="addAchv()">＋ 実績を追加（${st.achv.length} / ${MAX_ACHV}）</button>`:""}
   `}
 
-  <div class="sechead">③ 語り口を選ぶ</div>
-  <div class="secnote">面接での語り方の候補を作ります。<b>複数選んでも構いません。</b>タップした順に優先順位がつき、1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。<b>推奨は1〜2件</b>（多く選ぶほど、シートの情報量が増えます）。順位を変えたいときは、一度タップして解除してから選び直してください。</div>
+`;
+}
+function prepAngle(){
+  const st=S.story;
+  return `  <div class="secnote">面接での語り方の候補を作ります。<b>複数選んでも構いません。</b>タップした順に優先順位がつき、1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。<b>推奨は1〜2件</b>（多く選ぶほど、シートの情報量が増えます）。順位を変えたいときは、一度タップして解除してから選び直してください。</div>
   ${achvSummary()}
   <button class="ai" onclick="makePatterns(this)">${st.patterns.length?"語り口を作り直す":"語り口を作る"}</button>
   <div id="patMsg"></div>
@@ -1027,6 +1022,32 @@ function clearApplication(){
   S.story.useAch=[];
   render(); window.scrollTo(0,0); saveNow();
 }
+
+function viewPrep(){
+  const st=S.story;
+  if(!Array.isArray(st.achv)) st.achv=[];
+  if(!Array.isArray(st.patterns)) st.patterns=[];
+  const tab = ["jd","ach","angle"].includes(S.prepTab) ? S.prepTab : "jd";
+  const nAch=(S.achievements||[]).length
+    ? ((st.useAch||[]).length || (S.achievements||[]).length)
+    : st.achv.filter(a=>a.use!==false && (a.what||"").trim()).length;
+  const nAngle=(st.ranked||[]).length;
+  const body = tab==="jd" ? prepJD() : (tab==="ach" ? prepAch() : prepAngle());
+  return `
+  <div class="slabor">
+    <div class="stitle">職務経歴書、完成しました。</div>
+    <div class="stext">おつかれさまでした。ここからは、面接で話す準備を一緒にします。全部を読み上げる必要はありません。あなたが一番語りたい経験を、相手が思わず聞きたくなる形に整えます。</div>
+  </div>
+  <div class="ssafe">ここで入力された内容は、運営者には一切届かず、運営者のサーバーに保存されることもありません。AI機能を使った部分だけは、あなた自身のAPIキーでAnthropicへ送信されます。安心して、正直に教えてください。</div>
+
+  <div class="tabs prep">
+    <button class="tab ${tab==="jd"?"on":""}" onclick="setPrepTab('jd')">①応募先${(st.jd.company||st.jd.digest)?" ✓":""}</button>
+    <button class="tab ${tab==="ach"?"on":""}" onclick="setPrepTab('ach')">②使う実績${nAch?`（${nAch}）`:""}</button>
+    <button class="tab ${tab==="angle"?"on":""}" onclick="setPrepTab('angle')">③語り口${nAngle?`（${nAngle}）`:""}</button>
+  </div>
+  ${body}`;
+}
+
 function addAchv(){ S.story.achv.push({what:"",num:"",hints:[],use:true}); render(); saveNow();
   requestAnimationFrame(()=>{const c=main.querySelectorAll('.card'); if(c.length) c[c.length-1].scrollIntoView({behavior:'smooth',block:'center'});}); }
 function delAchv(i){ S.story.achv.splice(i,1); render(true); saveNow(); }
@@ -1309,7 +1330,7 @@ function oneNum(v){
   return isFinite(n) ? n : null;
 }
 function parseLabels(str){ return String(str==null?"":str).split(/[,、]+/).map(x=>x.trim()).filter(Boolean); }
-/* 「25,512」のような桁区切りと、区切り文字としてのカンマは見分けがつかない。
+/* 「1,200」のような桁区切りと、区切り文字としてのカンマは見分けがつかない。
    そこで2通りに解釈し、期間ラベルの個数に合うほうを採用する。 */
 function parseNums(str, expect){
   const t=String(str==null?"":str).replace(/[，]/g,",").replace(/[　]/g," ").trim();
@@ -1317,7 +1338,7 @@ function parseNums(str, expect){
   const toNums=(arr)=>arr.map(x=>x.trim()).filter(Boolean).map(x=>Number(x)).filter(n=>isFinite(n));
   /* 解釈A：カンマも区切りとして扱う（例 "25512, 22678"） */
   const a=toNums(t.split(/[,、;\s]+/));
-  /* 解釈B：カンマは桁区切りとして扱う（例 "25,512、22,678"） */
+  /* 解釈B：カンマは桁区切りとして扱う（例 "1,200、1,131"） */
   const b=toNums(t.split(/[、;\s]+/).map(x=>x.replace(/,/g,"")));
   if(expect>0){
     if(a.length===expect && b.length!==expect) return a;
@@ -1474,6 +1495,26 @@ function chartsAt(section, position, jobId){
 
 /* 入力のたびに画面全体を作り直すと、入力欄が消えてキーボードが閉じる。
    プレビュー部分だけを差し替えること。 */
+/* すでにあるグラフを、実績ライブラリの指標へつなぎ直す。名前が一致するものを自動で当てる */
+function linkChartToLibrary(i){
+  const c=S.charts[i]; if(!c) return;
+  const mets=allMetrics();
+  if(!mets.length){ alert("実績ライブラリに数字が登録されていません。先に STEP4 で登録してください。"); return; }
+  let hit=0;
+  (c.series||[]).forEach(sr=>{
+    if(sr.metricId) return;
+    const nm=(sr.name||"").trim();
+    if(!nm) return;
+    const f=mets.find(x=>(x.met.name||"").trim()===nm);
+    if(f){ sr.metricId=f.met.id; sr.values=""; hit++; }
+  });
+  if(!hit){ alert("同じ名前の指標が見つかりませんでした。各系列の「実績ライブラリの数字を使う」から選んでください。"); return; }
+  render(true); saveNow();
+}
+/* 連動していない系列があるか */
+function chartHasUnlinked(c){
+  return (c.series||[]).some(sr=>!sr.metricId && (sr.values||"").trim());
+}
 function updateChartPreview(i){
   const el=document.getElementById("cprev"+i);
   if(el) el.innerHTML = chartLegend(S.charts[i]) + chartSVG(S.charts[i]) + chartTable(S.charts[i]);
@@ -1485,18 +1526,41 @@ function addChart(){
 }
 function delChart(i){ S.charts.splice(i,1); render(true); saveNow(); }
 
+/* 第4段階：職務経歴書のワークスペース。プレビューとグラフをタブで行き来する */
+function setDocTab(t){ S.docTab=t; render(); window.scrollTo(0,0); saveNow(); }
+function viewDoc(){
+  const tab = S.docTab==="charts" ? "charts" : "preview";
+  const n=(S.charts||[]).length;
+  return `
+  <div class="h2">職務経歴書</div>
+  <div class="lede">仕上がりを確認して、PDFで保存できます。グラフはタブで行き来しながら作れます。</div>
+  <div class="tabs">
+    <button class="tab ${tab==="preview"?"on":""}" onclick="setDocTab('preview')">プレビュー</button>
+    <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">実績グラフ${n?`（${n}）`:""}</button>
+  </div>
+  ${tab==="preview"
+    ? `<div class="toolbar"><button class="primary" onclick="printDoc()">PDFで保存・印刷</button></div>
+       <div id="docWrap">${docHTML()}</div>`
+    : viewCharts()}`;
+}
+
 function viewCharts(){
   const list=S.charts||[];
   return `
-  <div class="h2">実績グラフ</div>
-  <div class="lede">数字の変化を1枚の図にすると、採用担当の理解が一気に速くなります。任意です。作らなくても先へ進めます。</div>
+  <div class="lede">数字の変化を1枚の図にすると、採用担当の理解が一気に速くなります。任意です。作らなくても先へ進めます。作ったグラフは「プレビュー」タブで位置を確認できます。</div>
   <div class="note"><b>盛らないための約束。</b>グラフの下には、必ず実数の表と出典が出ます。図の印象だけで判断させず、根拠を一緒に示すためです。</div>
 
   ${list.map((c,i)=>`
     <div class="card">
       <div class="cardhead"><b>グラフ ${i+1}</b><button class="del" onclick="delChart(${i})">削除</button></div>
+      ${(chartHasUnlinked(c) && allMetrics().length)?`
+        <div class="linkwarn">
+          <b>このグラフは実績ライブラリと連動していません。</b>
+          数値がグラフ側にも書かれているため、STEP4で実績の数字を直しても、このグラフは変わりません。
+          <button onclick="linkChartToLibrary(${i})">実績ライブラリの数字につなぐ</button>
+        </div>`:""}
       <label class="f"><span>タイトル</span>
-        <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="例：ナレッジ整理と問い合わせ件数の推移"></label>
+        <input value="${esc(c.title)}" oninput="S.charts[${i}].title=this.value;scheduleSave()" placeholder="例：新人が独り立ちするまでの日数の推移"></label>
       <label class="f"><span>職務経歴書のどこに置くか</span>
         <div class="row2">
           <select onchange="S.charts[${i}].section=this.value;render(true);saveNow()">
@@ -1529,7 +1593,7 @@ function viewCharts(){
             ${s.metricId?`<div class="hint" style="color:var(--accent);font-weight:700">✓ 実績ライブラリと連動しています。数字を直すときは STEP4 で。</div>`:""}
           </label>`:""}
           <div class="row3s">
-            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${s.metricId?"（指標名を引き継ぎます）":"例：問い合わせ件数"}">
+            <input value="${esc(s.name)}" oninput="S.charts[${i}].series[${si}].name=this.value;updateChartPreview(${i});scheduleSave()" placeholder="${s.metricId?"（指標名を引き継ぎます）":"例：独り立ちまでの日数"}">
             <select onchange="S.charts[${i}].series[${si}].type=this.value;updateChartPreview(${i});saveNow()">
               <option value="bar" ${s.type!=="line"?"selected":""}>棒</option>
               <option value="line" ${s.type==="line"?"selected":""}>折れ線</option>
@@ -1537,7 +1601,7 @@ function viewCharts(){
           </div>
           ${s.metricId
             ? `<div class="linkedval">数値：${esc((findMetric(s.metricId)||{met:{}}).met.values||"（未入力）")}</div>`
-            : `<input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：25,512、22,678、20,121">`}
+            : `<input value="${esc(s.values)}" oninput="S.charts[${i}].series[${si}].values=this.value;updateChartPreview(${i});scheduleSave()" placeholder="ラベルと同じ順に：60、45、21">`}
           <div class="axisrow">
             <span class="axislbl">縦軸の範囲（任意）</span>
             <input value="${esc(s.amin)}" oninput="S.charts[${i}].series[${si}].amin=this.value;updateChartPreview(${i});scheduleSave()" placeholder="下限">
@@ -1552,12 +1616,12 @@ function viewCharts(){
             <input type="checkbox" style="width:auto" ${c.normalize?"checked":""}
               onchange="S.charts[${i}].normalize=this.checked;updateChartPreview(${i});saveNow()"> 系列ごとに目盛りを揃える（桁が大きく違うときに使う）
           </label>
-          <div style="margin-top:4px">例：記事数585件と問い合わせ25,512件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
-          <div style="margin-top:8px"><b>見せたい変化が埋もれるときは、その系列の「縦軸の範囲」を指定してください。</b>例：問い合わせ件数を 18,000〜27,000 にすると、減少の幅が大きく見えます。指定した範囲は凡例に表示されるので、読み手にも基準が伝わります。</div>
+          <div style="margin-top:4px">例：対象人数15名と対応件数1,200件のように桁が違う場合、これを入れると推移の形を比べられます。実数は必ず下の表に出ます。</div>
+          <div style="margin-top:8px"><b>見せたい変化が埋もれるときは、その系列の「縦軸の範囲」を指定してください。</b>例：独り立ちまでの日数を 0〜70 にすると、短縮の幅が大きく見えます。指定した範囲は凡例に表示されるので、読み手にも基準が伝わります。</div>
         </div></label>
 
       <label class="f"><span>出典・対象期間</span>
-        <input value="${esc(c.source)}" oninput="S.charts[${i}].source=this.value;scheduleSave()" placeholder="例：出典 社内ServiceNowデータ（在職期間 約2年の比較）">
+        <input value="${esc(c.source)}" oninput="S.charts[${i}].source=this.value;scheduleSave()" placeholder="例：出典 店舗の勤怠記録（2年間の比較）">
         <div class="hint">面接では「その数字はどこから？」が必ず来ます。ここを書いておくと強いです。</div></label>
 
       <div class="chartprev">
@@ -1671,7 +1735,7 @@ function achvCardHTML(a,i){
       <button class="aclose" onclick="toggleAch(${i})">閉じる</button></span></div>
 
     <label class="f"><span>名称（一覧で見分けるための短い名前）</span>
-      <input value="${esc(a.title)}" oninput="S.achievements[${i}].title=this.value;scheduleSave()" placeholder="例：ナレッジ統廃合"></label>
+      <input value="${esc(a.title)}" oninput="S.achievements[${i}].title=this.value;scheduleSave()" placeholder="例：新人研修の標準化"></label>
 
     <label class="f"><span>どの職歴のことか</span>
       <select onchange="S.achievements[${i}].jobId=this.value;saveNow()">
@@ -1681,11 +1745,11 @@ function achvCardHTML(a,i){
 
     <label class="f"><span>実行したこと</span>
       <textarea oninput="S.achievements[${i}].action=this.value;grow(this);scheduleSave()"
-        placeholder="例：利用状況をもとに、ナレッジを585件から108件へ整理した">${esc(a.action)}</textarea></label>
+        placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した">${esc(a.action)}</textarea></label>
 
     <label class="f"><span>何が変わったか（結果）</span>
       <textarea oninput="S.achievements[${i}].result=this.value;grow(this);scheduleSave()"
-        placeholder="例：自己解決が進み、問い合わせが年25,512件から20,121件に減った">${esc(a.result)}</textarea>
+        placeholder="例：新人が独り立ちするまでの期間が、平均2か月から3週間に短くなった">${esc(a.result)}</textarea>
       <div class="hint">「やったこと」と「その結果」を分けておくと、面接で使い分けられます。</div></label>
 
     <div class="msec">
@@ -1696,16 +1760,16 @@ function achvCardHTML(a,i){
           <div class="mhead"><b>指標 ${mi+1}</b><button class="del" onclick="delMetric(${i},${mi})">削除</button></div>
           <div class="row2">
             <label class="f"><span>指標名</span>
-              <input value="${esc(m.name)}" oninput="S.achievements[${i}].metrics[${mi}].name=this.value;scheduleSave()" placeholder="例：問い合わせ件数"></label>
+              <input value="${esc(m.name)}" oninput="S.achievements[${i}].metrics[${mi}].name=this.value;scheduleSave()" placeholder="例：独り立ちまでの日数"></label>
             <label class="f"><span>単位</span>
               <input value="${esc(m.unit)}" oninput="S.achievements[${i}].metrics[${mi}].unit=this.value;scheduleSave()" placeholder="件"></label>
           </div>
           <label class="f"><span>期間のラベル</span>
             <input value="${esc(m.labels)}" oninput="S.achievements[${i}].metrics[${mi}].labels=this.value;scheduleSave()" placeholder="例：2023, 2024, 2025"></label>
           <label class="f"><span>数値（ラベルと同じ順）</span>
-            <input value="${esc(m.values)}" oninput="S.achievements[${i}].metrics[${mi}].values=this.value;scheduleSave()" placeholder="例：25,512、22,678、20,121"></label>
+            <input value="${esc(m.values)}" oninput="S.achievements[${i}].metrics[${mi}].values=this.value;scheduleSave()" placeholder="例：60、45、21"></label>
           <label class="f"><span>出典（任意）</span>
-            <input value="${esc(m.source)}" oninput="S.achievements[${i}].metrics[${mi}].source=this.value;scheduleSave()" placeholder="例：社内ServiceNowデータ"></label>
+            <input value="${esc(m.source)}" oninput="S.achievements[${i}].metrics[${mi}].source=this.value;scheduleSave()" placeholder="例：店舗の勤怠記録"></label>
         </div>`).join("")}
       <button class="addbtn" onclick="addMetric(${i})">＋ 数字を追加</button>
     </div>
@@ -1767,10 +1831,19 @@ function importCandidate(key){
   a.source={ type:"import", from:c.key };
   if(c.chart){
     a.title=c.chart.title||"グラフから取り込み";
-    const {labels,series}=chartData(c.chart);
-    a.metrics=series.map(s=>({ id:newId("met"), name:s.name||"", unit:"",
-      labels:c.chart.labels, values:(c.chart.series.find(x=>(x.name||"").trim()===s.name)||{}).values||"",
-      source:c.chart.source||"" }));
+    const src=S.charts[c.chartIdx];
+    a.metrics=[];
+    (src.series||[]).forEach((sr,si)=>{
+      const vals=(sr.values||"").trim();
+      if(!vals && !sr.metricId) return;
+      if(sr.metricId) return;                       /* すでに連動済みの系列は触らない */
+      const met={ id:newId("met"), name:(sr.name||"").trim(), unit:"",
+        labels:(src.labels||"").trim(), values:vals, source:src.source||"" };
+      a.metrics.push(met);
+      /* 元のグラフを、いま作った指標へ向け直す＝数字の正本がライブラリ側になる */
+      src.series[si].metricId=met.id;
+      src.series[si].values="";
+    });
     a.usage.chart=true;
   }else{
     a.action=c.text;
@@ -2312,6 +2385,7 @@ function migrateState(){
       return d;
     });
     if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
+    if(S.docTab!=="charts") S.docTab="preview";
     if(!Array.isArray(S.charts)) S.charts=[];
     S.charts=S.charts.slice(0,MAX_CHARTS).map(c=>{
       const d=Object.assign(newChart(), c||{});
@@ -2458,7 +2532,7 @@ function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
   back.style.visibility = step===0 ? "hidden":"visible";
   if(step===TOTAL-1){ next.style.display="none"; }
-  else { next.style.display=""; next.textContent = step===8 ? "経験を伝わる強みに変える" : (step===9 ? "次へ：面接シートを作る" : "次へ"); }
+  else { next.style.display=""; next.textContent = step===7 ? "経験を伝わる強みに変える" : (step===8 ? "次へ：面接シートを作る" : "次へ"); }
   next.disabled = (step===0 && !(S.agreed && (S.keyVerified || S.aiSkipped)));
 }
 function go(dir){
