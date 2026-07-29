@@ -331,6 +331,19 @@
   .trnone{font-size:12px;color:var(--muted);padding:8px 0}
   .trbtns{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
   .trbtns .ai{flex:1;justify-content:center;margin-top:0;min-width:96px}
+  .trlbl.diff{color:var(--warn)}
+  .difftop{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:6px;font-size:10.5px;color:var(--muted)}
+  .rate{font-weight:700;border-radius:99px;padding:2px 10px}
+  .rate.good{color:var(--accent);background:#EAF6EF}
+  .rate.mid{color:#8a6d00;background:#FBF3DC}
+  .rate.bad{color:var(--warn);background:#FDF3F4}
+  .dlg{display:flex;align-items:center;gap:4px}
+  .dlg i{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .dlg i.ddel{background:#F6C9CE} .dlg i.dins{background:#C9DAF6}
+  .diffbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    font-size:12.5px;line-height:2;word-break:break-all}
+  .diffbox .ddel{background:#F6C9CE;color:#7a1d28;border-radius:3px;padding:1px 2px;text-decoration:line-through}
+  .diffbox .dins{background:#C9DAF6;color:#1a3a7a;border-radius:3px;padding:1px 2px}
   .pickach{display:flex;gap:11px;align-items:flex-start;background:#fff;border:1.5px solid var(--line);
     border-radius:13px;padding:13px;margin-bottom:9px;cursor:pointer}
   .pickach.on{border-color:var(--accent);border-width:2.5px;background:#F4FBF7}
@@ -419,7 +432,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v26</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v27</span></span>
     <div class="sbbtns">
       <button onclick="exportData()">書き出し</button>
       <button onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -1557,7 +1570,7 @@ function setDocTab(t){ S.docTab=t; render(); window.scrollTo(0,0); saveNow(); }
 function viewDoc(){
   const tab = ["charts","trans"].includes(S.docTab) ? S.docTab : "preview";
   const n=(S.charts||[]).length;
-  const tst=trStats();
+  const tst=trStats("doc");
   return `
   <div class="h2">職務経歴書</div>
   <div class="lede">仕上がりを確認して、PDFで保存できます。グラフはタブで行き来しながら作れます。</div>
@@ -1569,7 +1582,7 @@ function viewDoc(){
   ${tab==="preview"
     ? `<div class="toolbar"><button class="primary" onclick="printDoc()">PDFで保存・印刷</button></div>
        <div id="docWrap">${docHTML()}</div>`
-    : (tab==="charts" ? viewCharts() : viewTrans())}`;
+    : (tab==="charts" ? viewCharts() : viewTrans("doc"))}`;
 }
 
 function viewCharts(){
@@ -1951,8 +1964,17 @@ const TR_BATCH = 4;                     /* 1回のAI呼び出しで扱うブロ�
 const LANG_LABEL = { ja:"日本語", en:"English" };
 function otherLang(l){ return l==="ja" ? "en" : "ja"; }
 
-/* 翻訳対象のブロックを、いまの内容から組み立てる */
-function trBlocks(){
+/* 翻訳対象のブロックを、いまの内容から組み立てる。
+   scope: "doc"＝職務経歴書 ／ "sheet"＝面接シート */
+function trBlocks(scope){
+  if(scope==="sheet"){
+    const out=[]; const sh=S.story.sheet||{};
+    SHEET_BLOCKS.forEach(b=>{
+      const t=String(sh[b.key]||"").trim();
+      if(t) out.push({id:`sheet_${b.key}`, label:b.label, text:t});
+    });
+    return out;
+  }
   const out=[];
   const push=(id,label,text)=>{ const t=String(text==null?"":text).trim(); if(t) out.push({id,label,text:t}); };
   push("summary","職務要約",S.summary);
@@ -1993,8 +2015,8 @@ function trStale(b){
   const r=trRec(b.id);
   return !!(r && r.out && r.hash!==hashText(b.text));
 }
-function trStats(){
-  const bs=trBlocks();
+function trStats(scope){
+  const bs=trBlocks(scope);
   let done=0, stale=0, ok=0, back=0;
   bs.forEach(b=>{
     const r=trRec(b.id);
@@ -2015,12 +2037,12 @@ function unpackBlocks(text){
   return map;
 }
 
-async function runTranslate(mode, only){
+async function runTranslate(mode, only, scope){
   /* mode: "fwd"（原文→翻訳）／"back"（翻訳→原文の言語） */
   const zone=document.getElementById("trMsg");
   const from = mode==="fwd" ? S.lang.doc : S.lang.target;
   const to   = mode==="fwd" ? S.lang.target : S.lang.doc;
-  const all=trBlocks();
+  const all=trBlocks(scope);
   let targets;
   if(Array.isArray(only) && only.length){
     targets=all.filter(b=>only.includes(b.id));
@@ -2062,27 +2084,38 @@ ${packBlocks(items)}`
 ・出力はブロックのみ。前置き・解説は書かない。
 
 ${packBlocks(items)}`;
+    const apply=(id, v, srcText)=>{
+      S.tr[id]=S.tr[id]||{};
+      if(mode==="fwd"){
+        S.tr[id].out=v; S.tr[id].hash=hashText(srcText);
+        S.tr[id].back=""; S.tr[id].ok=false;   /* 原文が変わったので訳し戻しはやり直し */
+      }else{
+        S.tr[id].back=v;
+      }
+    };
+    let missing=[];
     try{
-      const res=await callAI(prompt, 3000);
-      const map=unpackBlocks(res);
-      let got=0;
+      const map=unpackBlocks(await callAI(prompt, 3000));
       group.forEach(b=>{
         const v=map[b.id];
-        if(!v) return;
-        got++;
-        S.tr[b.id]=S.tr[b.id]||{};
-        if(mode==="fwd"){
-          S.tr[b.id].out=v;
-          S.tr[b.id].hash=hashText(b.text);
-          S.tr[b.id].back="";       /* 原文が変わったので逆翻訳はやり直し */
-          S.tr[b.id].ok=false;
-        }else{
-          S.tr[b.id].back=v;
-        }
+        if(v) apply(b.id, v, b.text); else missing.push(b);
       });
-      if(!got) fail.push(group.map(b=>b.label).join("、"));
     }catch(err){
-      fail.push(group.map(b=>b.label).join("、")+"（"+humanError(err)+"）");
+      missing=group.slice();
+    }
+    /* まとめて取れなかった分は、1件ずつ取り直す（区切り記号の崩れに強い） */
+    for(const b of missing){
+      if(zone) zone.innerHTML=`<div class="ok">${esc(b.label)} を1件ずつ${mode==="fwd"?"翻訳":"訳し戻し"}中…</div>`;
+      const one = (mode==="fwd")
+        ? `次の文章を、応募書類（履歴書・職務経歴書）として自然な${LANG_LABEL[to]}に翻訳してください。\n\n厳守：意味を変えない。情報を足さない・落とさない。数字と固有名詞はそのまま。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${(mode==="fwd"?b.text:"")}`
+        : `次の文章を、意味の検算のために${LANG_LABEL[to]}へ忠実に訳し戻してください。\n\n厳守：意訳しない。情報を足さない・落とさない。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${((trRec(b.id)||{}).out)||""}`;
+      try{
+        const v=(await callAI(one, 1500)).replace(/\[\[\/?BLOCK[^\]]*\]\]/g,"").trim();
+        if(v) apply(b.id, v, b.text); else fail.push(b.label);
+      }catch(err){
+        fail.push(b.label+"（"+humanError(err)+"）");
+      }
+      saveNow();
     }
     saveNow();
   }
@@ -2093,12 +2126,68 @@ ${packBlocks(items)}`;
     : `<div class="ok">✓ ${mode==="fwd"?"翻訳":"逆翻訳"}が終わりました。</div>`;
 }
 
+/* ---- 原文と訳し戻しの差分 ----
+   人が全文を読み比べる負担を減らすため、違う箇所だけを色で示す。
+   赤＝原文にあるのに訳し戻しに無い（訳で落ちた可能性）
+   青＝訳し戻しにあるのに原文に無い（訳で足された可能性） */
+const DIFF_MAX = 1200;              /* 長すぎる文章は比較を打ち切る */
+function diffSeq(a, b){
+  const n=a.length, m=b.length;
+  if(n>DIFF_MAX || m>DIFF_MAX) return null;
+  /* 最長共通部分列（後ろから埋める） */
+  const dp=new Uint16Array((n+1)*(m+1));
+  for(let i=n-1;i>=0;i--){
+    for(let j=m-1;j>=0;j--){
+      dp[i*(m+1)+j] = (a[i]===b[j])
+        ? dp[(i+1)*(m+1)+(j+1)]+1
+        : Math.max(dp[(i+1)*(m+1)+j], dp[i*(m+1)+(j+1)]);
+    }
+  }
+  const out=[];
+  const push=(t,ch)=>{ const last=out[out.length-1];
+    if(last && last.t===t) last.s+=ch; else out.push({t,s:ch}); };
+  let i=0,j=0;
+  while(i<n && j<m){
+    if(a[i]===b[j]){ push("same",a[i]); i++; j++; }
+    else if(dp[(i+1)*(m+1)+j] >= dp[i*(m+1)+(j+1)]){ push("del",a[i]); i++; }
+    else { push("ins",b[j]); j++; }
+  }
+  while(i<n){ push("del",a[i]); i++; }
+  while(j<m){ push("ins",b[j]); j++; }
+  return out;
+}
+/* 比較しやすいよう、記号や空白の揺れをならす */
+function normForDiff(t){
+  return String(t==null?"":t)
+    .replace(/[\s\u3000]+/g,"")
+    .replace(/[、，]/g,"、").replace(/[。．]/g,"。")
+    .replace(/[（(]/g,"（").replace(/[）)]/g,"）");
+}
+function diffHTML(src, back){
+  const a=normForDiff(src), b=normForDiff(back);
+  if(!a || !b) return "";
+  const d=diffSeq([...a],[...b]);
+  if(!d) return `<div class="trnone">文章が長いため、差分の自動比較は省略しました。上の2つを見くらべてください。</div>`;
+  let same=0, diff=0;
+  d.forEach(x=>{ if(x.t==="same") same+=x.s.length; else diff+=x.s.length; });
+  const rate = same+diff ? Math.round(same/(same+diff)*100) : 100;
+  const body=d.map(x=> x.t==="same" ? esc(x.s)
+    : `<span class="d${x.t}">${esc(x.s)}</span>`).join("");
+  return `<div class="difftop">
+      <span class="rate ${rate>=95?"good":(rate>=85?"mid":"bad")}">一致 ${rate}%</span>
+      <span class="dlg"><i class="ddel"></i>原文にあるが訳し戻しに無い</span>
+      <span class="dlg"><i class="dins"></i>訳し戻しで増えた</span>
+    </div>
+    <div class="diffbox">${body}</div>
+    ${rate>=95?`<div class="hint">大きなずれは見当たりません。</div>`:`<div class="hint">色の付いた箇所を確認してください。言い回しの違いなら問題ありません。<b>数字・固有名詞・否定表現</b>が変わっていたら訳し直してください。</div>`}`;
+}
+
 function trApprove(id){
   S.tr[id]=S.tr[id]||{}; S.tr[id].ok=!S.tr[id].ok;
   render(true); saveNow();
 }
-function trRedo(id){ runTranslate("fwd",[id]); }
-function trRedoBack(id){ runTranslate("back",[id]); }
+function trRedo(id,scope){ runTranslate("fwd",[id],scope); }
+function trRedoBack(id,scope){ runTranslate("back",[id],scope); }
 function setLangDoc(v){ S.lang.doc=v; if(S.lang.target===v) S.lang.target=otherLang(v); render(); saveNow(); }
 function setLangTarget(v){ S.lang.target=v; if(S.lang.doc===v) S.lang.doc=otherLang(v); render(); saveNow(); }
 
@@ -2185,6 +2274,26 @@ function docTransHTML(){
     ${S.pr.trim()?`<h2>${H.about}</h2><p>${esc(trOut("pr",S.pr))}</p>`:""}
   </div>`;
 }
+/* 面接シートの翻訳版 */
+function sheetTransHTML(){
+  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join(" ");
+  const head=[S.story.jd.company,S.story.jd.position].filter(Boolean).join("／");
+  const sh=S.story.sheet||{};
+  return `<div class="sheetdoc">
+    <h1>${S.lang.target==="en"?"Interview Notes":"面接シート"}</h1>
+    <div class="smeta">${esc(head||"—")}${nm?`　／　${esc(nm)}`:""}</div>
+    ${SHEET_BLOCKS.filter(b=>sh[b.key]).map(b=>`
+      <div class="sblock">
+        <div class="sbh">${esc(b.label)}</div>
+        <div class="sbody">${renderSheetText(trOut(`sheet_${b.key}`, sh[b.key]))}</div>
+      </div>`).join("")}
+  </div>`;
+}
+function printSheetTrans(){
+  const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"Notes";
+  document.title = S.lang.target==="en" ? `InterviewNotes_${nm}` : `面接シート_${nm}`;
+  setTimeout(()=>window.print(),60);
+}
 function printTrans(){
   const nm=[S.profile.lastName,S.profile.firstName].filter(Boolean).join("")||"Resume";
   document.title = S.lang.target==="en" ? `Resume_${nm}` : `職務経歴書_${nm}`;
@@ -2193,9 +2302,10 @@ function printTrans(){
 }
 
 /* ---- 画面 ---- */
-function viewTrans(){
-  const st=trStats();
-  const bs=trBlocks();
+function viewTrans(scope){
+  const sc = scope==="sheet" ? "sheet" : "doc";
+  const st=trStats(sc);
+  const bs=trBlocks(sc);
   const doc=S.lang.doc, tgt=S.lang.target;
   return `
   <div class="lede">原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>訳し戻して並べるので、母国語だけで内容を確認できます。</div>
@@ -2220,14 +2330,14 @@ function viewTrans(){
   </div>
 
   <div class="toolbar">
-    <button class="primary" onclick="runTranslate('fwd')">${st.done?"未翻訳・古いものを翻訳":"翻訳する"}</button>
-    ${st.done?`<button onclick="runTranslate('back')">訳し戻して確認する</button>`:""}
-    ${st.done?`<button onclick="printTrans()">${tgt==="en"?"英語版":"日本語版"}をPDFで保存</button>`:""}
+    <button class="primary" onclick="runTranslate('fwd',null,'${sc}')">${st.done?"未翻訳・古いものを翻訳":"翻訳する"}</button>
+    ${st.done?`<button onclick="runTranslate('back',null,'${sc}')">訳し戻して確認する</button>`:""}
+    ${st.done?`<button onclick="${sc==="sheet"?"printSheetTrans()":"printTrans()"}">${tgt==="en"?"英語版":"日本語版"}をPDFで保存</button>`:""}
   </div>
   <div class="hint" style="margin-bottom:12px">${TR_BATCH}項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。</div>
   <div id="trMsg"></div>
 
-  ${st.done?`<div class="trprev">${docTransHTML()}</div>`:""}
+  ${st.done?`<div class="trprev">${sc==="sheet"?sheetTransHTML():docTransHTML()}</div>`:""}
 
   <div class="sechead">1項目ずつ確認する</div>
   <div class="secnote">原文と「訳し戻し」を見くらべてください。意味がずれていなければ確認済みにします。</div>
@@ -2241,23 +2351,25 @@ function viewTrans(){
         ${stale?`<span class="trstale">原文が変わっています</span>`:""}
         ${r.ok?`<span class="trok">確認済み</span>`:""}
       </div>
-      <div class="trlbl">原文（${LANG_LABEL[doc]}）</div>
+      <div class="trlbl">① 原文（${LANG_LABEL[doc]}）</div>
       <div class="trbox">${esc(b.text)}</div>
       ${r.out?`
-        <div class="trlbl tgt">翻訳（${LANG_LABEL[tgt]}）</div>
+        <div class="trlbl tgt">② 翻訳（${LANG_LABEL[tgt]}）</div>
         <div class="trbox">${esc(r.out)}</div>`:`<div class="trnone">まだ翻訳していません</div>`}
       ${r.back?`
-        <div class="trlbl back">訳し戻し（${LANG_LABEL[doc]}）— 原文と見くらべてください</div>
-        <div class="trbox back">${esc(r.back)}</div>`:""}
+        <div class="trlbl back">③ 訳し戻し（${LANG_LABEL[doc]}）</div>
+        <div class="trbox back">${esc(r.back)}</div>
+        <div class="trlbl diff">①と③の違い（自動比較）</div>
+        ${diffHTML(b.text, r.back)}`:""}
       ${r.out?`
       <div class="trbtns">
-        <button class="ai sub" onclick="trRedo('${esc(b.id)}')">ここだけ訳し直す</button>
-        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}')">ここだけ訳し戻す</button>`:""}
+        <button class="ai sub" onclick="trRedo('${esc(b.id)}','${sc}')">ここだけ訳し直す</button>
+        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}','${sc}')">ここだけ訳し戻す</button>`:""}
         <button class="ai ${r.ok?"sub":""}" onclick="trApprove('${esc(b.id)}')">${r.ok?"確認を外す":"確認した"}</button>
       </div>`:""}
     </div>`;}).join("")}
 
-  ${!bs.length?`<div class="impdone">翻訳できる内容がまだありません。職務経歴書を先に作ってください。</div>`:""}`;
+  ${!bs.length?`<div class="impdone">翻訳できる内容がまだありません。${sc==="sheet"?"先に面接シートを作成してください。":"職務経歴書を先に作ってください。"}</div>`:""}`;
 }
 
 /* ============ BLOCK 11: 面接シート（Step8） ============ */
@@ -2360,7 +2472,8 @@ ${body}`, 1800);
 
 function viewSheet(){
   const sh=S.story.sheet||{};
-  const tab=S.story.sheetTab==="resume"?"resume":"sheet";
+  const tab=["resume","trans"].includes(S.story.sheetTab)?S.story.sheetTab:"sheet";
+  const sst=trStats("sheet");
   const done=SHEET_BLOCKS.filter(b=>sh[b.key]).length;
   const r=Array.isArray(S.story.ranked)&&S.story.ranked.length ? S.story.ranked : (S.story.chosen>=0?[S.story.chosen]:[]);
   const pat=S.story.patterns[r[0]];
@@ -2371,8 +2484,9 @@ function viewSheet(){
   <div class="tabs">
     <button class="tab ${tab==="sheet"?"on":""}" onclick="setTab('sheet')">カンペ</button>
     <button class="tab ${tab==="resume"?"on":""}" onclick="setTab('resume')">職務経歴書</button>
+    <button class="tab ${tab==="trans"?"on":""}" onclick="setTab('trans')">翻訳版${sst.done?`（${sst.done}）`:""}</button>
   </div>
-  ${tab==="resume"?`
+  ${tab==="trans"?viewTrans("sheet"):(tab==="resume"?`
     <div class="hint" style="margin-bottom:12px">面接中、経歴を確認したいときはこちら。</div>
     <div class="toolbar"><button class="primary" onclick="printDoc()">職務経歴書をPDFで保存</button></div>
     <div id="docWrap">${docHTML()}</div>`:`
@@ -2403,7 +2517,7 @@ function viewSheet(){
       .map((t,i)=>`<label class="fchkitem"><input type="checkbox" ${S.story.checks&&S.story.checks[i]?"checked":""}
         onchange="S.story.checks=S.story.checks||[];S.story.checks[${i}]=this.checked;saveNow()"><span>${t}</span></label>`).join("")}
     <div class="hint" style="margin-top:8px">このツールは事実を作りません。最後に守るのは、あなた自身の確認です。</div>
-  </div>`:""}`}`;
+  </div>`:""}`)}`;
 }
 
 function sheetHTML(){
@@ -2758,7 +2872,7 @@ function migrateState(){
       return d;
     });
     if(typeof S.story.sheetSig!=="string") S.story.sheetSig="";
-    if(S.story.sheetTab!=="resume") S.story.sheetTab="sheet";
+    if(!["resume","trans"].includes(S.story.sheetTab)) S.story.sheetTab="sheet";
     if(S.story.cheatMode!=="key") S.story.cheatMode="full";
     if(typeof S.story.sheetKey!=="string") S.story.sheetKey="";
     if(S.story.jd.digest && typeof S.story.jd.digest==="object"){
