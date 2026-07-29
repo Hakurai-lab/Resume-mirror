@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v30</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v31</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -555,7 +555,82 @@ const T = {
                      en:"The AI request failed. Check your connection and try again." },
 
   "key.paste_first": { ja:"APIキーを貼り付けてください。", en:"Please paste your API key." },
-  "key.ok":          { ja:"✓ 接続できました。", en:"✓ Connected." }
+  "key.ok":          { ja:"✓ 接続できました。", en:"✓ Connected." },
+
+  "req": { ja:"必須", en:"required" },
+  "del": { ja:"削除", en:"Delete" },
+  "cnt.suffix": { ja:"文字", en:"chars" },
+  "sel.year":  { ja:"年", en:"Year" },
+  "sel.month": { ja:"月", en:"Month" },
+
+  "p.title": { ja:"プロフィール", en:"Profile" },
+  "p.lede":  { ja:"基本の連絡先だけ。住所や生年月日は必要ありません。", en:"Just basic contact details. No address or date of birth needed." },
+  "p.last":  { ja:"姓", en:"Last name" },
+  "p.first": { ja:"名", en:"First name" },
+  "p.last.ph":  { ja:"履歴書", en:"Yamada" },
+  "p.first.ph": { ja:"書太郎", en:"Taro" },
+  "p.kana":    { ja:"ふりがな", en:"Furigana (kana reading)" },
+  "p.kana.ph": { ja:"りれきしょ かくたろう", en:"yamada taro" },
+  "p.nameEn":    { ja:"氏名（英語表記）", en:"Full name (Latin alphabet)" },
+  "p.nameEn.ph": { ja:"Kakutaro Rirekisho", en:"Taro Yamada" },
+  "p.nameEn.hint": { ja:"英語版の書類で使います。空欄なら日本語の氏名がそのまま出ます。パスポートと同じ綴りにしておくと安心です。", en:"Used on the English version of your documents. If left blank, your Japanese name is used as-is. Matching your passport spelling is safest." },
+  "p.email": { ja:"メールアドレス", en:"Email" },
+  "p.tel":   { ja:"電話番号", en:"Phone" },
+
+  "s.title": { ja:"スキル・資格", en:"Skills & Certifications" },
+  "s.lede":  { ja:"スキルは「実績」で書くのがコツです。level（初級・上級）は人によって基準が違い、採用側に伝わりません。", en:"Describe skills as achievements. Vague levels (beginner/advanced) mean different things to different people and don't convey your real ability to recruiters." },
+  "s.sec.skills":      { ja:"スキル・経験", en:"Skills & Experience" },
+  "s.sec.skills.note": { ja:"何ができるかを、実績（数字・規模・結果）で示します。", en:"Show what you can do through achievements — numbers, scale, results." },
+  "s.card":    { ja:"スキル", en:"Skill" },
+  "s.name":    { ja:"名称", en:"Name" },
+  "s.name.ph": { ja:"例：スタッフ育成 / 販売企画", en:"e.g. Staff training / Sales planning" },
+  "s.years":   { ja:"経験年数", en:"Years of experience" },
+  "s.years.ph":{ ja:"2年", en:"2 years" },
+  "s.achv":    { ja:"実績（何をして、どうなったか）", en:"Achievement (what you did, and the result)" },
+  "s.achv.ph": { ja:"例：店舗スタッフ15名の育成を担当。接客マニュアルを整備し、新人が独り立ちするまでの期間を2か月→3週間に短縮。", en:"e.g. Trained 15 store staff. Built a customer-service manual and cut time-to-independence for new hires from 2 months to 3 weeks." },
+  "s.achv.hint": { ja:"初級・上級ではなく、回数・人数・結果で書くと、採用側に実力が伝わります。", en:"Instead of beginner/advanced, write counts, headcounts, and results — that conveys real ability." },
+  "s.add":     { ja:"＋ スキルを追加", en:"＋ Add a skill" },
+  "s.sec.certs":      { ja:"資格", en:"Certifications" },
+  "s.sec.certs.note": { ja:"取得年月・名称・有効期限（あれば）。", en:"Date obtained, name, and expiry (if any)." },
+  "s.cert.card":    { ja:"資格", en:"Certification" },
+  "s.cert.name":    { ja:"資格名", en:"Certification name" },
+  "s.cert.name.ph": { ja:"基本情報技術者試験", en:"e.g. AWS Certified Solutions Architect" },
+  "s.cert.date":    { ja:"取得年月", en:"Date obtained" },
+  "s.cert.expiry":    { ja:"有効期限（任意）", en:"Expiry (optional)" },
+  "s.cert.expiry.ph": { ja:"2028年3月 ／ 期限なし", en:"March 2028 / No expiry" },
+  "s.cert.expiry.hint": { ja:"期限のない資格は、空欄のままで構いません。", en:"For certifications with no expiry, leave this blank." },
+  "s.cert.add":     { ja:"＋ 資格を追加", en:"＋ Add a certification" },
+
+  "j.title": { ja:"職務経歴", en:"Work History" },
+  "j.lede":  { ja:"会社ごとに、担当と実績を。長文をそのまま貼り付けても構いません（欄は自動で広がります）。", en:"For each company, your role and achievements. You can paste long text as-is — the field expands automatically." },
+  "j.ordernote": { ja:"上から<b>新しい順</b>に入力してください（職歴1＝現職・直近）。職務経歴書でも、この順に上から並びます。", en:"Enter jobs <b>newest first</b> (Job 1 = current / most recent). Your resume lists them in this same order." },
+  "j.card":    { ja:"職歴", en:"Job" },
+  "j.company":    { ja:"会社名", en:"Company" },
+  "j.company.ph": { ja:"株式会社◯◯", en:"e.g. ABC Inc." },
+  "j.companyEn":  { ja:"会社名（英語表記）", en:"Company (English)" },
+  "j.client":    { ja:"出向先・常駐先（任意）", en:"Client / assignment site (optional)" },
+  "j.client.ph": { ja:"例：◯◯株式会社", en:"e.g. XYZ Co., Ltd." },
+  "j.clientEn":  { ja:"出向先（英語表記）", en:"Client (English)" },
+  "j.name.hint": { ja:"会社名は翻訳せず、公式の英語表記をそのまま使います。空欄なら日本語のまま出ます。派遣・SES・出向で勤務先が所属会社と異なる場合は、出向先も記入してください。", en:"Don't translate company names — use the official English spelling. If left blank, the Japanese name is used. If your workplace differs from your employer (dispatch/SES/secondment), also fill in the client." },
+  "j.role":    { ja:"ロール（職務名／部署／担当範囲）", en:"Role (title / department / scope)" },
+  "j.role.ph": { ja:"ITサポート リード / 情報システム部", en:"e.g. IT Support Lead / Information Systems" },
+  "j.emp":        { ja:"雇用形態", en:"Employment type" },
+  "j.emp.choose": { ja:"選択", en:"Select" },
+  "j.users":    { ja:"対象ユーザー数（任意）", en:"Users supported (optional)" },
+  "j.users.ph": { ja:"例：5,000名", en:"e.g. 5,000" },
+  "j.from":    { ja:"在籍期間（開始）", en:"Period (start)" },
+  "j.to":      { ja:"在籍期間（終了）", en:"Period (end)" },
+  "j.current": { ja:"現在も在籍中", en:"Currently employed here" },
+  "j.achv":    { ja:"主な実績", en:"Key achievements" },
+  "j.achv.ph": { ja:"担当した業務や成果を、思い出せる範囲で。長くて構いません。", en:"The work you handled and the results, as far as you can recall. Long is fine." },
+  "j.brush":   { ja:"✦ この実績をAIで整える", en:"✦ Polish this with AI" },
+  "j.add":     { ja:"＋ 職歴を追加", en:"＋ Add a job" },
+
+  "cmp.summary": { ja:"AIで整えました｜変更前と見くらべる", en:"Polished by AI｜compare with the original" },
+  "cmp.before":  { ja:"変更前（あなたが入力した原文）", en:"Before (your original input)" },
+  "cmp.after":   { ja:"変更後（AIが整えた文）", en:"After (AI-polished)" },
+  "cmp.undo":    { ja:"原文に戻す", en:"Revert to original" },
+  "cmp.hint":    { ja:"抜けや消えた情報がないか、必ず見くらべてください。", en:"Always compare to make sure nothing was dropped or lost." }
 };
 function t(key){ const e=T[key]; if(!e) return key; return e[S.ui] || e.ja || key; }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -833,120 +908,120 @@ async function testKey(btn){
 }
 
 /* ============ BLOCK 5: 入力ステップの画面 ============ */
-function ySel(val,onch){ return `<select onchange="${onch}">
-  <option value="">年</option>${YEARS.map(y=>`<option value="${y}" ${String(val)===String(y)?"selected":""}>${y}年</option>`).join("")}</select>`; }
-function mSel(val,onch){ return `<select onchange="${onch}">
-  <option value="">月</option>${MONTHS.map(m=>`<option value="${m}" ${String(val)===String(m)?"selected":""}>${m}月</option>`).join("")}</select>`; }
+function ySel(val,onch){ const en=S.ui==="en"; return `<select onchange="${onch}">
+  <option value="">${t("sel.year")}</option>${YEARS.map(y=>`<option value="${y}" ${String(val)===String(y)?"selected":""}>${en?y:y+"年"}</option>`).join("")}</select>`; }
+function mSel(val,onch){ const en=S.ui==="en"; return `<select onchange="${onch}">
+  <option value="">${t("sel.month")}</option>${MONTHS.map(m=>`<option value="${m}" ${String(val)===String(m)?"selected":""}>${en?m:m+"月"}</option>`).join("")}</select>`; }
 
 const VIEWS = [
   viewKey,
 
   /* 1 プロフィール */ ()=>`
-    <div class="h2">プロフィール</div>
-    <div class="lede">基本の連絡先だけ。住所や生年月日は必要ありません。</div>
+    <div class="h2">${t("p.title")}</div>
+    <div class="lede">${t("p.lede")}</div>
     <div class="row2">
-      <label class="f"><span>姓<i class="req">必須</i></span>
-        <input value="${esc(S.profile.lastName)}" oninput="S.profile.lastName=this.value" placeholder="履歴書"></label>
-      <label class="f"><span>名<i class="req">必須</i></span>
-        <input value="${esc(S.profile.firstName)}" oninput="S.profile.firstName=this.value" placeholder="書太郎"></label>
+      <label class="f"><span>${t("p.last")}<i class="req">${t("req")}</i></span>
+        <input value="${esc(S.profile.lastName)}" oninput="S.profile.lastName=this.value" placeholder="${t("p.last.ph")}"></label>
+      <label class="f"><span>${t("p.first")}<i class="req">${t("req")}</i></span>
+        <input value="${esc(S.profile.firstName)}" oninput="S.profile.firstName=this.value" placeholder="${t("p.first.ph")}"></label>
     </div>
-    <label class="f"><span>ふりがな</span>
-      <input value="${esc(S.profile.kana)}" oninput="S.profile.kana=this.value" placeholder="りれきしょ かくたろう"></label>
-    <label class="f"><span>氏名（英語表記）</span>
-      <input value="${esc(S.profile.nameEn)}" oninput="S.profile.nameEn=this.value" placeholder="Kakutaro Rirekisho">
-      <div class="hint">英語版の書類で使います。空欄なら日本語の氏名がそのまま出ます。パスポートと同じ綴りにしておくと安心です。</div></label>
-    <label class="f"><span>メールアドレス</span>
+    <label class="f"><span>${t("p.kana")}</span>
+      <input value="${esc(S.profile.kana)}" oninput="S.profile.kana=this.value" placeholder="${t("p.kana.ph")}"></label>
+    <label class="f"><span>${t("p.nameEn")}</span>
+      <input value="${esc(S.profile.nameEn)}" oninput="S.profile.nameEn=this.value" placeholder="${t("p.nameEn.ph")}">
+      <div class="hint">${t("p.nameEn.hint")}</div></label>
+    <label class="f"><span>${t("p.email")}</span>
       <input type="email" inputmode="email" value="${esc(S.profile.email)}" oninput="S.profile.email=this.value" placeholder="you@example.com"></label>
-    <label class="f"><span>電話番号</span>
+    <label class="f"><span>${t("p.tel")}</span>
       <input type="tel" inputmode="tel" value="${esc(S.profile.tel)}" oninput="S.profile.tel=this.value" placeholder="090-1234-5678"></label>`,
 
   /* 2 スキル・資格 */ ()=>`
-    <div class="h2">スキル・資格</div>
-    <div class="lede">スキルは「実績」で書くのがコツです。level（初級・上級）は人によって基準が違い、採用側に伝わりません。</div>
+    <div class="h2">${t("s.title")}</div>
+    <div class="lede">${t("s.lede")}</div>
 
-    <div class="sechead">スキル・経験</div>
-    <div class="secnote">何ができるかを、実績（数字・規模・結果）で示します。</div>
+    <div class="sechead">${t("s.sec.skills")}</div>
+    <div class="secnote">${t("s.sec.skills.note")}</div>
     ${S.skills.map((s,i)=>`
       <div class="card">
-        <div class="cardhead"><b>スキル ${i+1}</b>${S.skills.length>1?`<button class="del" onclick="delItem('skills',${i})">削除</button>`:""}</div>
+        <div class="cardhead"><b>${t("s.card")} ${i+1}</b>${S.skills.length>1?`<button class="del" onclick="delItem('skills',${i})">${t("del")}</button>`:""}</div>
         <div class="row2">
-          <label class="f"><span>名称</span>
-            <input value="${esc(s.name)}" oninput="S.skills[${i}].name=this.value" placeholder="例：スタッフ育成 / 販売企画"></label>
-          <label class="f"><span>経験年数</span>
-            <input value="${esc(s.years)}" oninput="S.skills[${i}].years=this.value" placeholder="2年"></label>
+          <label class="f"><span>${t("s.name")}</span>
+            <input value="${esc(s.name)}" oninput="S.skills[${i}].name=this.value" placeholder="${t("s.name.ph")}"></label>
+          <label class="f"><span>${t("s.years")}</span>
+            <input value="${esc(s.years)}" oninput="S.skills[${i}].years=this.value" placeholder="${t("s.years.ph")}"></label>
         </div>
-        <label class="f"><span>実績（何をして、どうなったか）</span>
+        <label class="f"><span>${t("s.achv")}</span>
           <textarea id="skv${i}" oninput="S.skills[${i}].achv=this.value;grow(this);cnt('skc${i}',this)"
-            placeholder="例：店舗スタッフ15名の育成を担当。接客マニュアルを整備し、新人が独り立ちするまでの期間を2か月→3週間に短縮。">${esc(s.achv)}</textarea>
+            placeholder="${t("s.achv.ph")}">${esc(s.achv)}</textarea>
           <div class="count" id="skc${i}"></div>
-          <div class="hint">初級・上級ではなく、回数・人数・結果で書くと、採用側に実力が伝わります。</div>
+          <div class="hint">${t("s.achv.hint")}</div>
         </label>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('skills',{name:'',years:'',achv:''})">＋ スキルを追加</button>
+    <button class="addbtn" onclick="addItem('skills',{name:'',years:'',achv:''})">${t("s.add")}</button>
 
-    <div class="sechead">資格</div>
-    <div class="secnote">取得年月・名称・有効期限（あれば）。</div>
+    <div class="sechead">${t("s.sec.certs")}</div>
+    <div class="secnote">${t("s.sec.certs.note")}</div>
     ${S.certs.map((c,i)=>`
       <div class="card">
-        <div class="cardhead"><b>資格 ${i+1}</b>${S.certs.length>1?`<button class="del" onclick="delItem('certs',${i})">削除</button>`:""}</div>
-        <label class="f"><span>資格名</span>
-          <input value="${esc(c.name)}" oninput="S.certs[${i}].name=this.value" placeholder="基本情報技術者試験"></label>
-        <label class="f"><span>取得年月</span>
+        <div class="cardhead"><b>${t("s.cert.card")} ${i+1}</b>${S.certs.length>1?`<button class="del" onclick="delItem('certs',${i})">${t("del")}</button>`:""}</div>
+        <label class="f"><span>${t("s.cert.name")}</span>
+          <input value="${esc(c.name)}" oninput="S.certs[${i}].name=this.value" placeholder="${t("s.cert.name.ph")}"></label>
+        <label class="f"><span>${t("s.cert.date")}</span>
           <div class="row2">${ySel(c.y,`S.certs[${i}].y=this.value`)}${mSel(c.m,`S.certs[${i}].m=this.value`)}</div></label>
-        <label class="f"><span>有効期限（任意）</span>
-          <input value="${esc(c.expiry)}" oninput="S.certs[${i}].expiry=this.value" placeholder="2028年3月 ／ 期限なし">
-          <div class="hint">期限のない資格は、空欄のままで構いません。</div></label>
+        <label class="f"><span>${t("s.cert.expiry")}</span>
+          <input value="${esc(c.expiry)}" oninput="S.certs[${i}].expiry=this.value" placeholder="${t("s.cert.expiry.ph")}">
+          <div class="hint">${t("s.cert.expiry.hint")}</div></label>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('certs',{y:'',m:'',name:'',expiry:''})">＋ 資格を追加</button>`,
+    <button class="addbtn" onclick="addItem('certs',{y:'',m:'',name:'',expiry:''})">${t("s.cert.add")}</button>`,
 
   /* 3 職務経歴 */ ()=>`
-    <div class="h2">職務経歴</div>
-    <div class="lede">会社ごとに、担当と実績を。長文をそのまま貼り付けても構いません（欄は自動で広がります）。</div>
-    <div class="ordernote">上から<b>新しい順</b>に入力してください（職歴1＝現職・直近）。職務経歴書でも、この順に上から並びます。</div>
+    <div class="h2">${t("j.title")}</div>
+    <div class="lede">${t("j.lede")}</div>
+    <div class="ordernote">${t("j.ordernote")}</div>
     ${S.jobs.map((j,i)=>`
       <div class="card">
-        <div class="cardhead"><b>職歴 ${i+1}</b>${S.jobs.length>1?`<button class="del" onclick="delItem('jobs',${i})">削除</button>`:""}</div>
+        <div class="cardhead"><b>${t("j.card")} ${i+1}</b>${S.jobs.length>1?`<button class="del" onclick="delItem('jobs',${i})">${t("del")}</button>`:""}</div>
         <div class="row2">
-          <label class="f"><span>会社名</span>
-            <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="株式会社◯◯"></label>
-          <label class="f"><span>会社名（英語表記）</span>
+          <label class="f"><span>${t("j.company")}</span>
+            <input value="${esc(j.company)}" oninput="S.jobs[${i}].company=this.value" placeholder="${t("j.company.ph")}"></label>
+          <label class="f"><span>${t("j.companyEn")}</span>
             <input value="${esc(j.companyEn)}" oninput="S.jobs[${i}].companyEn=this.value" placeholder="◯◯ Co., Ltd."></label>
         </div>
         <div class="row2">
-          <label class="f"><span>出向先・常駐先（任意）</span>
-            <input value="${esc(j.client)}" oninput="S.jobs[${i}].client=this.value" placeholder="例：◯◯株式会社"></label>
-          <label class="f"><span>出向先（英語表記）</span>
+          <label class="f"><span>${t("j.client")}</span>
+            <input value="${esc(j.client)}" oninput="S.jobs[${i}].client=this.value" placeholder="${t("j.client.ph")}"></label>
+          <label class="f"><span>${t("j.clientEn")}</span>
             <input value="${esc(j.clientEn)}" oninput="S.jobs[${i}].clientEn=this.value" placeholder="◯◯ K.K."></label>
         </div>
-        <div class="hint" style="margin:-6px 0 15px">会社名は翻訳せず、公式の英語表記をそのまま使います。空欄なら日本語のまま出ます。派遣・SES・出向で勤務先が所属会社と異なる場合は、出向先も記入してください。</div>
-        <label class="f"><span>ロール（職務名／部署／担当範囲）</span>
-          <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="ITサポート リード / 情報システム部"></label>
+        <div class="hint" style="margin:-6px 0 15px">${t("j.name.hint")}</div>
+        <label class="f"><span>${t("j.role")}</span>
+          <input value="${esc(j.role)}" oninput="S.jobs[${i}].role=this.value" placeholder="${t("j.role.ph")}"></label>
         <div class="row2">
-          <label class="f"><span>雇用形態</span>
+          <label class="f"><span>${t("j.emp")}</span>
             <select onchange="S.jobs[${i}].employment=this.value">
-              <option value="">選択</option>
-              ${EMPLOYMENTS.map(e=>`<option value="${e}" ${j.employment===e?"selected":""}>${e}</option>`).join("")}
+              <option value="">${t("j.emp.choose")}</option>
+              ${EMPLOYMENTS.map(e=>`<option value="${e}" ${j.employment===e?"selected":""}>${esc(empLabel(e))}</option>`).join("")}
             </select></label>
-          <label class="f"><span>対象ユーザー数（任意）</span>
-            <input value="${esc(j.users)}" oninput="S.jobs[${i}].users=this.value" placeholder="例：5,000名"></label>
+          <label class="f"><span>${t("j.users")}</span>
+            <input value="${esc(j.users)}" oninput="S.jobs[${i}].users=this.value" placeholder="${t("j.users.ph")}"></label>
         </div>
-        <label class="f"><span>在籍期間（開始）</span>
+        <label class="f"><span>${t("j.from")}</span>
           <div class="row2">${ySel(j.fromY,`S.jobs[${i}].fromY=this.value`)}${mSel(j.fromM,`S.jobs[${i}].fromM=this.value`)}</div></label>
-        <label class="f"><span>在籍期間（終了）</span>
+        <label class="f"><span>${t("j.to")}</span>
           <div class="row2">${ySel(j.toY,`S.jobs[${i}].toY=this.value`)}${mSel(j.toM,`S.jobs[${i}].toM=this.value`)}</div>
           <div class="hint" style="margin-top:8px">
             <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink)">
               <input type="checkbox" style="width:auto" ${j.current?"checked":""}
-                onchange="S.jobs[${i}].current=this.checked;render()"> 現在も在籍中
+                onchange="S.jobs[${i}].current=this.checked;render()"> ${t("j.current")}
             </label></div></label>
-        <label class="f"><span>主な実績</span>
+        <label class="f"><span>${t("j.achv")}</span>
           <textarea class="big" id="achv${i}" oninput="S.jobs[${i}].achv=this.value;grow(this);cnt('ac${i}',this)"
-            placeholder="担当した業務や成果を、思い出せる範囲で。長くて構いません。">${esc(j.achv)}</textarea>
+            placeholder="${t("j.achv.ph")}">${esc(j.achv)}</textarea>
           <div class="count" id="ac${i}"></div></label>
-        <button class="ai" onclick="brushAchv(${i},this)">✦ この実績をAIで整える</button>
+        <button class="ai" onclick="brushAchv(${i},this)">${t("j.brush")}</button>
         <div id="aiz${i}">${cmpHTML(j.achvOrig, j.achv, `undoJob(${i})`)}</div>
       </div>`).join("")}
-    <button class="addbtn" onclick="addItem('jobs',{company:'',companyEn:'',client:'',clientEn:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">＋ 職歴を追加</button>`,
+    <button class="addbtn" onclick="addItem('jobs',{company:'',companyEn:'',client:'',clientEn:'',role:'',employment:'',users:'',fromY:'',fromM:'',toY:'',toM:'',current:false,achv:'',achvOrig:''})">${t("j.add")}</button>`,
 
   /* 4 実績ライブラリ */ ()=>viewLibrary(),
 
@@ -2811,14 +2886,14 @@ const RULE = `・記載された事実だけを使い、新しい数字や成果
 function cmpHTML(before, after, undoFn){
   if(!before || before===after) return "";
   return `<details class="cmp">
-    <summary>AIで整えました｜変更前と見くらべる</summary>
+    <summary>${t("cmp.summary")}</summary>
     <div class="cmpbody">
-      <div class="cmplbl">変更前（あなたが入力した原文）</div>
+      <div class="cmplbl">${t("cmp.before")}</div>
       <div class="cmpbox">${esc(before)}</div>
-      <div class="cmplbl after">変更後（AIが整えた文）</div>
+      <div class="cmplbl after">${t("cmp.after")}</div>
       <div class="cmpbox">${esc(after)}</div>
-      <button class="undo" onclick="${undoFn}">原文に戻す</button>
-      <div class="hint" style="margin-top:8px">抜けや消えた情報がないか、必ず見くらべてください。</div>
+      <button class="undo" onclick="${undoFn}">${t("cmp.undo")}</button>
+      <div class="hint" style="margin-top:8px">${t("cmp.hint")}</div>
     </div></details>`;
 }
 
@@ -3246,12 +3321,13 @@ function termsSheetHTML(){
 /* ============ BLOCK 8: 画面制御・共通処理 ============ */
 const main=document.getElementById("main");
 function grow(el){ el.style.height="auto"; el.style.height=(el.scrollHeight+4)+"px"; }
-function cnt(id,el){ const e=document.getElementById(id); if(e) e.innerHTML=`<b>${el.value.length}</b> 文字`; }
+function cnt(id,el){ const e=document.getElementById(id); if(e) e.innerHTML=`<b>${el.value.length}</b> ${t("cnt.suffix")}`; }
 function growAll(){
-  main.querySelectorAll("textarea").forEach(t=>{
-    grow(t);
-    const c=t.parentElement.querySelector(".count");
-    if(c) c.innerHTML=`<b>${t.value.length}</b> 文字`;
+  const suf=t("cnt.suffix");
+  main.querySelectorAll("textarea").forEach(ta=>{
+    grow(ta);
+    const c=ta.parentElement.querySelector(".count");
+    if(c) c.innerHTML=`<b>${ta.value.length}</b> ${suf}`;
   });
 }
 function drawStepJump(){
