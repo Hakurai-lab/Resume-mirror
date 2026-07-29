@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v31</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v32</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -630,7 +630,23 @@ const T = {
   "cmp.before":  { ja:"変更前（あなたが入力した原文）", en:"Before (your original input)" },
   "cmp.after":   { ja:"変更後（AIが整えた文）", en:"After (AI-polished)" },
   "cmp.undo":    { ja:"原文に戻す", en:"Revert to original" },
-  "cmp.hint":    { ja:"抜けや消えた情報がないか、必ず見くらべてください。", en:"Always compare to make sure nothing was dropped or lost." }
+  "cmp.hint":    { ja:"抜けや消えた情報がないか、必ず見くらべてください。", en:"Always compare to make sure nothing was dropped or lost." },
+
+  "gen.zero":   { ja:"✦ ゼロから作成", en:"✦ Generate from scratch" },
+  "gen.polish": { ja:"✦ 自分で書いた文を整える", en:"✦ Polish what you wrote" },
+
+  "sum.title": { ja:"職務要約", en:"Professional Summary" },
+  "sum.lede":  { ja:"AIに作らせても、自分で書いてから整えてもらっても構いません。", en:"Let the AI draft it, or write it yourself and have the AI polish it." },
+  "sum.values":    { ja:"大切にしてきたこと（3つ、読点で区切る）", en:"What you've valued (3, comma-separated)" },
+  "sum.values.ph": { ja:"例：仕組み化、可視化、継続的改善", en:"e.g. systematizing, visualizing, continuous improvement" },
+  "sum.box":    { ja:"職務要約（編集できます）", en:"Professional summary (editable)" },
+  "sum.box.ph": { ja:"ここに書いてから「自分で書いた文を整える」を押すこともできます。", en:"You can write here first, then press 'Polish what you wrote'." },
+  "sum.note":   { ja:"<b>ここが大事です。</b>AIが作るのは下書きです。必ず読み返し、<b>あなた自身の言葉に直してください。</b>面接では、自分の言葉で語れることが何より効きます。", en:"<b>This matters.</b> What the AI produces is a draft. Always reread it and <b>put it into your own words.</b> In an interview, being able to speak in your own words is what counts most." },
+
+  "pr.title": { ja:"自己PR", en:"About You" },
+  "pr.lede":  { ja:"スキル・職歴・要約から作成できます。自分で書いた文を整えることもできます。", en:"Can be generated from your skills, work history, and summary. You can also polish text you wrote yourself." },
+  "pr.box":   { ja:"自己PR（編集できます）", en:"About you (editable)" },
+  "pr.note":  { ja:"<b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。", en:"<b>Use this as a starting point and make it your own.</b> Text that's too polished stands out when an interviewer asks 'Did you write this yourself?' Loosening it a little actually comes across better." }
 };
 function t(key){ const e=T[key]; if(!e) return key; return e[S.ui] || e.ja || key; }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1026,32 +1042,32 @@ const VIEWS = [
   /* 4 実績ライブラリ */ ()=>viewLibrary(),
 
   /* 5 職務要約 */ ()=>`
-    <div class="h2">職務要約</div>
-    <div class="lede">AIに作らせても、自分で書いてから整えてもらっても構いません。</div>
-    <label class="f"><span>大切にしてきたこと（3つ、読点で区切る）</span>
-      <input value="${esc(S.summaryValues)}" oninput="S.summaryValues=this.value" placeholder="例：仕組み化、可視化、継続的改善"></label>
-    <button class="ai" onclick="genSummary(this)">✦ ゼロから作成</button>
-    <button class="ai sub" onclick="polishSummary(this)">✦ 自分で書いた文を整える</button>
+    <div class="h2">${t("sum.title")}</div>
+    <div class="lede">${t("sum.lede")}</div>
+    <label class="f"><span>${t("sum.values")}</span>
+      <input value="${esc(S.summaryValues)}" oninput="S.summaryValues=this.value" placeholder="${t("sum.values.ph")}"></label>
+    <button class="ai" onclick="genSummary(this)">${t("gen.zero")}</button>
+    <button class="ai sub" onclick="polishSummary(this)">${t("gen.polish")}</button>
     <div id="aizSum"></div>
-    <label class="f" style="margin-top:14px"><span>職務要約（編集できます）</span>
+    <label class="f" style="margin-top:14px"><span>${t("sum.box")}</span>
       <textarea id="summaryBox" oninput="S.summary=this.value;grow(this);cnt('sumc',this)"
-        placeholder="ここに書いてから「自分で書いた文を整える」を押すこともできます。">${esc(S.summary)}</textarea>
+        placeholder="${t("sum.box.ph")}">${esc(S.summary)}</textarea>
       <div class="count" id="sumc"></div></label>
     <div id="cmpSum">${cmpHTML(S.summaryOrig, S.summary, "undoSummary()")}</div>
-    <div class="note"><b>ここが大事です。</b>AIが作るのは下書きです。必ず読み返し、<b>あなた自身の言葉に直してください。</b>面接では、自分の言葉で語れることが何より効きます。</div>`,
+    <div class="note">${t("sum.note")}</div>`,
 
   /* 6 自己PR */ ()=>`
-    <div class="h2">自己PR</div>
-    <div class="lede">スキル・職歴・要約から作成できます。自分で書いた文を整えることもできます。</div>
-    <button class="ai" onclick="genPR(this)">✦ ゼロから作成</button>
-    <button class="ai sub" onclick="polishPR(this)">✦ 自分で書いた文を整える</button>
+    <div class="h2">${t("pr.title")}</div>
+    <div class="lede">${t("pr.lede")}</div>
+    <button class="ai" onclick="genPR(this)">${t("gen.zero")}</button>
+    <button class="ai sub" onclick="polishPR(this)">${t("gen.polish")}</button>
     <div id="aizPR"></div>
-    <label class="f" style="margin-top:14px"><span>自己PR（編集できます）</span>
+    <label class="f" style="margin-top:14px"><span>${t("pr.box")}</span>
       <textarea class="big" id="prBox" oninput="S.pr=this.value;grow(this);cnt('prc',this)"
-        placeholder="ここに書いてから「自分で書いた文を整える」を押すこともできます。">${esc(S.pr)}</textarea>
+        placeholder="${t("sum.box.ph")}">${esc(S.pr)}</textarea>
       <div class="count" id="prc"></div></label>
     <div id="cmpPR">${cmpHTML(S.prOrig, S.pr, "undoPR()")}</div>
-    <div class="note"><b>これを叩き台に、あなたの言葉にしてください。</b>整いすぎた文章は、面接で「自分で書きましたか？」と聞かれたときに浮きます。少し崩すくらいが、ちょうどよく伝わります。</div>`,
+    <div class="note">${t("pr.note")}</div>`,
 
   /* 7 職務経歴書（プレビューとグラフをタブで行き来する） */ ()=>viewDoc(),
   /* 8 面接の準備 */ ()=>viewPrep(),
