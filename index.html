@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v33</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v34</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -724,9 +724,72 @@ const T = {
   "lib.bk.none":      { ja:"控えが見つかりませんでした。", en:"No backup was found." },
   "lib.bk.confirm.a": { ja:"取り込みを行う前の状態に戻します。", en:"This restores the state from before importing." },
   "lib.bk.confirm.b": { ja:"今の内容は失われます。よろしいですか？", en:"Your current content will be lost. Continue?" },
-  "lib.bk.fail":      { ja:"戻せませんでした。", en:"Could not restore." }
+  "lib.bk.fail":      { ja:"戻せませんでした。", en:"Could not restore." },
+
+  "lang.ja": { ja:"日本語", en:"Japanese" },
+  "lang.en": { ja:"英語", en:"English" },
+
+  "doc.h2":   { ja:"職務経歴書", en:"Resume" },
+  "doc.lede": { ja:"仕上がりを確認して、PDFで保存できます。グラフはタブで行き来しながら作れます。", en:"Review the finished document and save it as a PDF. You can build charts by switching tabs." },
+  "doc.tab.preview": { ja:"プレビュー", en:"Preview" },
+  "doc.tab.charts":  { ja:"グラフ", en:"Charts" },
+  "doc.tab.trans":   { ja:"翻訳版", en:"Translation" },
+  "doc.print": { ja:"PDFで保存・印刷", en:"Save / print as PDF" },
+
+  "tr.none.fwd":  { ja:"未翻訳の項目はありません。", en:"There are no untranslated items." },
+  "tr.none.back": { ja:"再翻訳が必要な項目はありません。", en:"There are no items that need back-translation." },
+  "tr.prog.fwd":  { ja:"翻訳中", en:"Translating" },
+  "tr.prog.back": { ja:"再翻訳中", en:"Back-translating" },
+  "tr.oneby.fwd":  { ja:"を1件ずつ翻訳中…", en:" — translating one by one…" },
+  "tr.oneby.back": { ja:"を1件ずつ再翻訳中…", en:" — back-translating one by one…" },
+  "tr.partial": { ja:"一部できませんでした。できた分は残っています。", en:"Some items couldn't be completed. What succeeded is kept." },
+  "tr.act.fwd":  { ja:"翻訳", en:"Translation" },
+  "tr.act.back": { ja:"再翻訳", en:"Back-translation" },
+  "tr.done": { ja:"が終わりました。", en:" finished." },
+
+  "diff.match": { ja:"一致", en:"Match" },
+  "diff.del":   { ja:"原文にあるが再翻訳に無い", en:"In the original but missing from the back-translation" },
+  "diff.ins":   { ja:"再翻訳で増えた", en:"Added in the back-translation" },
+  "diff.ok":    { ja:"大きなずれは見当たりません。", en:"No major discrepancies found." },
+  "diff.check": { ja:"色の付いた箇所を確認してください。言い回しの違いなら問題ありません。<b>数字・固有名詞・否定表現</b>が変わっていたら訳し直してください。", en:"Check the highlighted parts. Differences in wording are fine. If a <b>number, proper noun, or negation</b> changed, re-translate it." },
+
+  "tr.lede": { ja:"原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>作成言語に再翻訳して並べるので、母国語だけで内容を確認できます。", en:"Treat the original as the source of truth and translate it into the other language. <b>Editing the translation never changes the original.</b> It's also back-translated into the source language and shown side by side, so you can check the content in your native language alone." },
+  "tr.lang.doc":    { ja:"作成した言語（正本）", en:"Language you wrote in (source of truth)" },
+  "tr.lang.target": { ja:"翻訳する言語", en:"Language to translate into" },
+  "tr.flow.a": { ja:"", en:"Translate what you wrote in " },
+  "tr.flow.b": { ja:"で書いた内容を", en:" into " },
+  "tr.flow.c": { ja:"にし、それを", en:", then back-translate into " },
+  "tr.flow.d": { ja:"へ再翻訳して見くらべます。", en:" to compare." },
+  "tr.stat.total": { ja:"対象 ", en:"Total " },
+  "tr.stat.done":  { ja:"翻訳済み ", en:"Translated " },
+  "tr.stat.back":  { ja:"再翻訳 ", en:"Back-translated " },
+  "tr.stat.ok":    { ja:"確認済み ", en:"Confirmed " },
+  "tr.stat.stale": { ja:"古い ", en:"Stale " },
+  "tr.btn.fwd":      { ja:"翻訳する", en:"Translate" },
+  "tr.btn.fwd.more": { ja:"未翻訳・古いものを翻訳", en:"Translate untranslated / stale items" },
+  "tr.btn.back":     { ja:"作成言語に再翻訳して確認する", en:"Back-translate into the source language to check" },
+  "tr.pdf.pre": { ja:"", en:"Save the " },
+  "tr.pdf.suf": { ja:"版をPDFで保存", en:" version as PDF" },
+  "tr.batch.hint": { ja:"項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。", en:" items are sent to the AI at a time. If a call fails, what succeeded is kept." },
+  "tr.sec.check": { ja:"1項目ずつ確認する", en:"Check one item at a time" },
+  "tr.sec.note":  { ja:"原文と「作成言語に再翻訳」を見くらべてください。意味がずれていなければ確認済みにします。", en:"Compare the original with the back-translation. If the meaning hasn't drifted, mark it confirmed." },
+  "tr.stale.badge": { ja:"原文が変わっています", en:"The original has changed" },
+  "tr.ok.badge":    { ja:"確認済み", en:"Confirmed" },
+  "tr.l.orig":  { ja:"① 原文（", en:"① Original (" },
+  "tr.l.trans": { ja:"② 翻訳（", en:"② Translation (" },
+  "tr.l.back":  { ja:"③ 作成言語に再翻訳（", en:"③ Back-translation into the source language (" },
+  "tr.pc": { ja:"）", en:")" },
+  "tr.notyet": { ja:"まだ翻訳していません", en:"Not translated yet" },
+  "tr.diff.title": { ja:"①と③の違い（自動比較）", en:"Differences between ① and ③ (auto-compared)" },
+  "tr.redo":     { ja:"ここだけ訳し直す", en:"Re-translate just this" },
+  "tr.redoback": { ja:"ここだけ再翻訳", en:"Back-translate just this" },
+  "tr.confirm":   { ja:"確認した", en:"Mark confirmed" },
+  "tr.unconfirm": { ja:"確認を外す", en:"Unconfirm" },
+  "tr.empty":       { ja:"翻訳できる内容がまだありません。", en:"There's nothing to translate yet." },
+  "tr.empty.sheet": { ja:"先に面接シートを作成してください。", en:"Create the interview sheet first." },
+  "tr.empty.doc":   { ja:"職務経歴書を先に作ってください。", en:"Create the resume first." }
 };
-function t(key){ const e=T[key]; if(!e) return key; return e[S.ui] || e.ja || key; }
+function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
 
 const STEP_KEYS = ["set","profile","skills","jobs","achvlib","summary","pr","resume","prep","sheet"];
@@ -1864,15 +1927,15 @@ function viewDoc(){
   const n=(S.charts||[]).length;
   const tst=trStats("doc");
   return `
-  <div class="h2">職務経歴書</div>
-  <div class="lede">仕上がりを確認して、PDFで保存できます。グラフはタブで行き来しながら作れます。</div>
+  <div class="h2">${t("doc.h2")}</div>
+  <div class="lede">${t("doc.lede")}</div>
   <div class="tabs">
-    <button class="tab ${tab==="preview"?"on":""}" onclick="setDocTab('preview')">プレビュー</button>
-    <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">グラフ${n?`（${n}）`:""}</button>
-    <button class="tab ${tab==="trans"?"on":""}" onclick="setDocTab('trans')">翻訳版${tst.done?`（${tst.done}）`:""}</button>
+    <button class="tab ${tab==="preview"?"on":""}" onclick="setDocTab('preview')">${t("doc.tab.preview")}</button>
+    <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">${t("doc.tab.charts")}${n?`（${n}）`:""}</button>
+    <button class="tab ${tab==="trans"?"on":""}" onclick="setDocTab('trans')">${t("doc.tab.trans")}${tst.done?`（${tst.done}）`:""}</button>
   </div>
   ${tab==="preview"
-    ? `<div class="toolbar"><button class="primary" onclick="printDoc()">PDFで保存・印刷</button></div>
+    ? `<div class="toolbar"><button class="primary" onclick="printDoc()">${t("doc.print")}</button></div>
        <div id="docWrap">${docHTML()}</div>`
     : (tab==="charts" ? viewCharts() : viewTrans("doc"))}`;
 }
@@ -2352,13 +2415,13 @@ async function runTranslate(mode, only, scope){
     targets=all.filter(b=>{ const r=trRec(b.id); return r && r.out && !r.back; });
   }
   if(!targets.length){
-    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"未翻訳の項目はありません。":"再翻訳が必要な項目はありません。"}</div>`;
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?t("tr.none.fwd"):t("tr.none.back")}</div>`;
     return;
   }
   const fail=[];
   for(let i=0;i<targets.length;i+=TR_BATCH){
     const group=targets.slice(i,i+TR_BATCH);
-    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?"翻訳中":"再翻訳中"}…（${Math.min(i+TR_BATCH,targets.length)} / ${targets.length}）</div>`;
+    if(zone) zone.innerHTML=`<div class="ok">${mode==="fwd"?t("tr.prog.fwd"):t("tr.prog.back")}…（${Math.min(i+TR_BATCH,targets.length)} / ${targets.length}）</div>`;
     const items = group.map(b=>{
       if(mode==="fwd") return { id:b.id, text:b.text };
       const r=trRec(b.id);
@@ -2406,7 +2469,7 @@ ${packBlocks(items)}`;
     }
     /* まとめて取れなかった分は、1件ずつ取り直す（区切り記号の崩れに強い） */
     for(const b of missing){
-      if(zone) zone.innerHTML=`<div class="ok">${esc(b.label)} を1件ずつ${mode==="fwd"?"翻訳":"再翻訳"}中…</div>`;
+      if(zone) zone.innerHTML=`<div class="ok">${esc(b.label)} ${mode==="fwd"?t("tr.oneby.fwd"):t("tr.oneby.back")}</div>`;
       const one = (mode==="fwd")
         ? `次の文章を、応募書類（履歴書・職務経歴書）として自然な${LANG_LABEL[to]}に翻訳してください。\n\n厳守：意味を変えない。情報を足さない・落とさない。数字と固有名詞はそのまま。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${(mode==="fwd"?b.text:"")}`
         : `次の文章を、意味の検算のために${LANG_LABEL[to]}へ忠実に再翻訳してください。\n\n厳守：意訳しない。情報を足さない・落とさない。出力は訳文の本文のみ。前置き・解説・記号を書かない。\n\n${((trRec(b.id)||{}).out)||""}`;
@@ -2423,8 +2486,8 @@ ${packBlocks(items)}`;
   render(true);
   const z=document.getElementById("trMsg");
   if(z) z.innerHTML = fail.length
-    ? `<div class="ng">一部できませんでした。できた分は残っています。<br>${esc(fail.join(" ／ "))}</div>`
-    : `<div class="ok">✓ ${mode==="fwd"?"翻訳":"再翻訳"}が終わりました。</div>`;
+    ? `<div class="ng">${t("tr.partial")}<br>${esc(fail.join(" ／ "))}</div>`
+    : `<div class="ok">✓ ${mode==="fwd"?t("tr.act.fwd"):t("tr.act.back")}${t("tr.done")}</div>`;
 }
 
 /* ---- 原文と再翻訳の差分 ----
@@ -2475,12 +2538,12 @@ function diffHTML(src, back){
   const body=d.map(x=> x.t==="same" ? esc(x.s)
     : `<span class="d${x.t}">${esc(x.s)}</span>`).join("");
   return `<div class="difftop">
-      <span class="rate ${rate>=95?"good":(rate>=85?"mid":"bad")}">一致 ${rate}%</span>
-      <span class="dlg"><i class="ddel"></i>原文にあるが再翻訳に無い</span>
-      <span class="dlg"><i class="dins"></i>再翻訳で増えた</span>
+      <span class="rate ${rate>=95?"good":(rate>=85?"mid":"bad")}">${t("diff.match")} ${rate}%</span>
+      <span class="dlg"><i class="ddel"></i>${t("diff.del")}</span>
+      <span class="dlg"><i class="dins"></i>${t("diff.ins")}</span>
     </div>
     <div class="diffbox">${body}</div>
-    ${rate>=95?`<div class="hint">大きなずれは見当たりません。</div>`:`<div class="hint">色の付いた箇所を確認してください。言い回しの違いなら問題ありません。<b>数字・固有名詞・否定表現</b>が変わっていたら訳し直してください。</div>`}`;
+    ${rate>=95?`<div class="hint">${t("diff.ok")}</div>`:`<div class="hint">${t("diff.check")}</div>`}`;
 }
 
 function trApprove(id){
@@ -2624,39 +2687,39 @@ function viewTrans(scope){
   const bs=trBlocks(sc);
   const doc=S.lang.doc, tgt=S.lang.target;
   return `
-  <div class="lede">原文を「正本」として、もう一方の言語に翻訳します。<b>翻訳を直しても原文は変わりません。</b>作成言語に再翻訳して並べるので、母国語だけで内容を確認できます。</div>
+  <div class="lede">${t("tr.lede")}</div>
 
   <div class="langbox">
     <div class="row2">
-      <label class="f"><span>作成した言語（正本）</span>
+      <label class="f"><span>${t("tr.lang.doc")}</span>
         <select onchange="setLangDoc(this.value)">
           ${Object.keys(LANG_LABEL).map(k=>`<option value="${k}" ${doc===k?"selected":""}>${LANG_LABEL[k]}</option>`).join("")}
         </select></label>
-      <label class="f"><span>翻訳する言語</span>
+      <label class="f"><span>${t("tr.lang.target")}</span>
         <select onchange="setLangTarget(this.value)">
           ${Object.keys(LANG_LABEL).map(k=>`<option value="${k}" ${tgt===k?"selected":""}>${LANG_LABEL[k]}</option>`).join("")}
         </select></label>
     </div>
-    <div class="hint">${LANG_LABEL[doc]}で書いた内容を${LANG_LABEL[tgt]}にし、それを${LANG_LABEL[doc]}へ再翻訳して見くらべます。</div>
+    <div class="hint">${t("tr.flow.a")}${LANG_LABEL[doc]}${t("tr.flow.b")}${LANG_LABEL[tgt]}${t("tr.flow.c")}${LANG_LABEL[doc]}${t("tr.flow.d")}</div>
   </div>
 
   <div class="trstat">
-    <span>対象 ${st.total}</span><span>翻訳済み ${st.done}</span><span>再翻訳 ${st.back}</span>
-    <span class="okc">確認済み ${st.ok}</span>${st.stale?`<span class="stc">古い ${st.stale}</span>`:""}
+    <span>${t("tr.stat.total")}${st.total}</span><span>${t("tr.stat.done")}${st.done}</span><span>${t("tr.stat.back")}${st.back}</span>
+    <span class="okc">${t("tr.stat.ok")}${st.ok}</span>${st.stale?`<span class="stc">${t("tr.stat.stale")}${st.stale}</span>`:""}
   </div>
 
   <div class="toolbar">
-    <button class="primary" onclick="runTranslate('fwd',null,'${sc}')">${st.done?"未翻訳・古いものを翻訳":"翻訳する"}</button>
-    ${st.done?`<button onclick="runTranslate('back',null,'${sc}')">作成言語に再翻訳して確認する</button>`:""}
-    ${st.done?`<button onclick="${sc==="sheet"?"printSheetTrans()":"printTrans()"}">${tgt==="en"?"英語版":"日本語版"}をPDFで保存</button>`:""}
+    <button class="primary" onclick="runTranslate('fwd',null,'${sc}')">${st.done?t("tr.btn.fwd.more"):t("tr.btn.fwd")}</button>
+    ${st.done?`<button onclick="runTranslate('back',null,'${sc}')">${t("tr.btn.back")}</button>`:""}
+    ${st.done?`<button onclick="${sc==="sheet"?"printSheetTrans()":"printTrans()"}">${t("tr.pdf.pre")}${tgt==="en"?t("lang.en"):t("lang.ja")}${t("tr.pdf.suf")}</button>`:""}
   </div>
-  <div class="hint" style="margin-bottom:12px">${TR_BATCH}項目ずつまとめてAIを呼びます。1回失敗しても、できた分は残ります。</div>
+  <div class="hint" style="margin-bottom:12px">${TR_BATCH}${t("tr.batch.hint")}</div>
   <div id="trMsg"></div>
 
   ${st.done?`<div class="trprev" id="trPrevWrap">${sc==="sheet"?withTrRender(sheetTransHTML):withTrRender(docTransHTML)}</div>`:""}
 
-  <div class="sechead">1項目ずつ確認する</div>
-  <div class="secnote">原文と「作成言語に再翻訳」を見くらべてください。意味がずれていなければ確認済みにします。</div>
+  <div class="sechead">${t("tr.sec.check")}</div>
+  <div class="secnote">${t("tr.sec.note")}</div>
 
   ${bs.map(b=>{
     const r=trRec(b.id)||{};
@@ -2664,28 +2727,28 @@ function viewTrans(scope){
     return `<div class="trcard ${r.ok?"okd":""}">
       <div class="trhead">
         <span class="trlabel">${esc(b.label)}</span>
-        ${stale?`<span class="trstale">原文が変わっています</span>`:""}
-        ${r.ok?`<span class="trok">確認済み</span>`:""}
+        ${stale?`<span class="trstale">${t("tr.stale.badge")}</span>`:""}
+        ${r.ok?`<span class="trok">${t("tr.ok.badge")}</span>`:""}
       </div>
-      <div class="trlbl">① 原文（${LANG_LABEL[doc]}）</div>
+      <div class="trlbl">${t("tr.l.orig")}${LANG_LABEL[doc]}${t("tr.pc")}</div>
       <div class="trbox">${esc(b.text)}</div>
       ${r.out?`
-        <div class="trlbl tgt">② 翻訳（${LANG_LABEL[tgt]}）</div>
-        <div class="trbox">${esc(r.out)}</div>`:`<div class="trnone">まだ翻訳していません</div>`}
+        <div class="trlbl tgt">${t("tr.l.trans")}${LANG_LABEL[tgt]}${t("tr.pc")}</div>
+        <div class="trbox">${esc(r.out)}</div>`:`<div class="trnone">${t("tr.notyet")}</div>`}
       ${r.back?`
-        <div class="trlbl back">③ 作成言語に再翻訳（${LANG_LABEL[doc]}）</div>
+        <div class="trlbl back">${t("tr.l.back")}${LANG_LABEL[doc]}${t("tr.pc")}</div>
         <div class="trbox back">${esc(r.back)}</div>
-        <div class="trlbl diff">①と③の違い（自動比較）</div>
+        <div class="trlbl diff">${t("tr.diff.title")}</div>
         ${diffHTML(b.text, r.back)}`:""}
       ${r.out?`
       <div class="trbtns">
-        <button class="ai sub" onclick="trRedo('${esc(b.id)}','${sc}')">ここだけ訳し直す</button>
-        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}','${sc}')">ここだけ再翻訳</button>`:""}
-        <button class="ai ${r.ok?"sub":""}" onclick="trApprove('${esc(b.id)}')">${r.ok?"確認を外す":"確認した"}</button>
+        <button class="ai sub" onclick="trRedo('${esc(b.id)}','${sc}')">${t("tr.redo")}</button>
+        ${r.out?`<button class="ai sub" onclick="trRedoBack('${esc(b.id)}','${sc}')">${t("tr.redoback")}</button>`:""}
+        <button class="ai ${r.ok?"sub":""}" onclick="trApprove('${esc(b.id)}')">${r.ok?t("tr.unconfirm"):t("tr.confirm")}</button>
       </div>`:""}
     </div>`;}).join("")}
 
-  ${!bs.length?`<div class="impdone">翻訳できる内容がまだありません。${sc==="sheet"?"先に面接シートを作成してください。":"職務経歴書を先に作ってください。"}</div>`:""}`;
+  ${!bs.length?`<div class="impdone">${t("tr.empty")}${sc==="sheet"?t("tr.empty.sheet"):t("tr.empty.doc")}</div>`:""}`;
 }
 
 /* ============ BLOCK 11: 面接シート（Step8） ============ */
