@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v35</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v36</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -835,10 +835,54 @@ const T = {
   "chart.max.pre": { ja:"グラフは最大", en:"Up to " },
   "chart.max.suf": { ja:"枚までです。", en:" charts maximum." },
   "chart.empty.hint": { ja:"数字がまだ揃っていなくても大丈夫です。あとから戻って追加できます。", en:"It's fine if your numbers aren't ready yet. You can come back and add them later." },
-  "chart.link.alert": { ja:"同じ名前の指標が見つかりませんでした。各系列の「実績ライブラリの数字を使う」から選んでください。", en:"No metric with the same name was found. Pick one from 'Use a number from the Achievements library' on each series." }
+  "chart.link.alert": { ja:"同じ名前の指標が見つかりませんでした。各系列の「実績ライブラリの数字を使う」から選んでください。", en:"No metric with the same name was found. Pick one from 'Use a number from the Achievements library' on each series." },
+
+  "aud.不明 / 未定":         { ja:"不明 / 未定", en:"Unknown / TBD" },
+  "aud.人事・採用担当（HR）": { ja:"人事・採用担当（HR）", en:"HR / recruiter" },
+  "aud.現場マネージャー":     { ja:"現場マネージャー", en:"Line manager" },
+  "aud.現場メンバー":         { ja:"現場メンバー", en:"Team member" },
+  "aud.役員・経営層":         { ja:"役員・経営層", en:"Executive / leadership" },
+
+  "prep.title": { ja:"職務経歴書、完成しました。", en:"Your resume is complete." },
+  "prep.lede":  { ja:"おつかれさまでした。ここからは、面接で話す準備を一緒にします。全部を読み上げる必要はありません。あなたが一番語りたい経験を、相手が思わず聞きたくなる形に整えます。", en:"Nice work. From here, we'll prepare what you'll say in the interview together. You don't need to recite all of it — we'll shape the experience you most want to tell into something the interviewer can't help but ask about." },
+  "prep.safe":  { ja:"ここで入力された内容は、運営者には一切届かず、運営者のサーバーに保存されることもありません。AI機能を使った部分だけは、あなた自身のAPIキーでAnthropicへ送信されます。安心して、正直に教えてください。", en:"Nothing you enter here reaches the operator or is stored on the operator's server. Only the parts that use the AI are sent to Anthropic with your own API key. Answer freely and honestly." },
+  "prep.tab.jd":    { ja:"①応募先", en:"① Target job" },
+  "prep.tab.ach":   { ja:"②使う実績", en:"② Achievements" },
+  "prep.tab.angle": { ja:"③語り口", en:"③ Angle" },
+
+  "prep.clear.btn":  { ja:"別の応募先に切り替える（この応募先の情報を消す）", en:"Switch to a different job (clear this job's info)" },
+  "prep.clear.hint": { ja:"職務経歴書・実績・グラフは残ります。消えるのは応募先情報・語り口・面接シートだけです。", en:"Your resume, achievements, and charts are kept. Only the target-job info, angles, and interview sheet are cleared." },
+  "prep.clear.c1": { ja:"この応募先の情報を消して、別の応募先に切り替えます。", en:"This clears this job's info and switches to a different one." },
+  "prep.clear.c2": { ja:"消えるもの：会社名・ポジション・面談相手・求人票・求人の要点・今回使う実績の選択・語り口・面接シート・キーワード版・事実確認チェック", en:"Removed: company, position, interviewer, job posting, JD digest, selected achievements, angles, interview sheet, keyword version, fact-check." },
+  "prep.clear.c3": { ja:"残るもの：プロフィール・職歴・スキル・資格・実績の内容・職務要約・自己PR・グラフ", en:"Kept: profile, work history, skills, certifications, achievement content, summary, about-you, charts." },
+  "prep.clear.c4": { ja:"よろしいですか？", en:"Continue?" },
+
+  "prep.jd.secnote": { ja:"求人票があると、シートの精度が大きく変わります。なければ空欄でも進めます。", en:"A job posting greatly improves the sheet's accuracy. If you don't have one, you can leave it blank and continue." },
+  "prep.jd.position":    { ja:"ポジション名", en:"Position title" },
+  "prep.jd.position.ph": { ja:"例：カスタマーサポート", en:"e.g. Customer Support" },
+  "prep.jd.company.ph":  { ja:"◯◯株式会社", en:"e.g. ABC Inc." },
+  "prep.jd.audience":      { ja:"面談相手", en:"Who you'll meet" },
+  "prep.jd.audience.hint": { ja:"相手によって、話す深さを変えます。人事なら業務の細部より全体像、現場マネージャーなら仕組みと数字が効きます。", en:"Adjust your depth to the audience. For HR, the big picture beats fine detail; for a line manager, systems and numbers land best." },
+  "prep.jd.raw":    { ja:"募集要項（そのまま貼り付けてください）", en:"Job posting (paste it as-is)" },
+  "prep.jd.raw.ph": { ja:"求人ページの本文を、要約せずそのまま貼り付けてください。「必須要件」「歓迎要件」などの言い回しが、そのまま重要な手がかりになります。", en:"Paste the body of the job page as-is, without summarizing. Phrases like 'required' and 'preferred' are themselves important clues." },
+  "prep.jd.extract": { ja:"求人の要点を読み取る", en:"Extract the key points" },
+
+  "prep.dg.head":    { ja:"求人の要点（違っていれば直してください）", en:"Key points of the job (edit if anything is off)" },
+  "prep.dg.role":    { ja:"求める役割", en:"Role sought" },
+  "prep.dg.must":    { ja:"必須要件", en:"Required" },
+  "prep.dg.want":    { ja:"歓迎要件（あれば尚可）", en:"Preferred (nice to have)" },
+  "prep.dg.culture": { ja:"求める人物像・カルチャー", en:"Ideal candidate / culture" },
+  "prep.dg.hint":    { ja:"「必須」と「歓迎」の区別が、あなたの立ち位置を決めます。ここだけは正確にしておいてください。", en:"The distinction between 'required' and 'preferred' sets your positioning. Keep at least this part accurate." },
+
+  "prep.msg.needraw":  { ja:"先に募集要項を貼り付けてください。", en:"Please paste the job posting first." },
+  "prep.msg.reading":  { ja:"読み取り中…", en:"Reading…" },
+  "prep.msg.badformat":{ ja:"求人情報の形式を正しく読み取れませんでした。もう一度お試しいただくか、募集要項の本文部分だけを貼り付けてみてください。", en:"The job posting's format couldn't be read correctly. Try again, or paste just the body text of the posting." },
+  "prep.msg.toolong.pre": { ja:"求人情報が", en:"The job posting exceeds " },
+  "prep.msg.toolong.suf": { ja:"文字を超えています。後半は読み取りに含まれていません。必須要件・歓迎要件を含む重要部分が残るよう、貼り付け内容をご確認ください。", en:" characters. The latter part wasn't included. Please make sure the important parts (required / preferred) remain in what you pasted." }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
+function audLabel(v){ const e=T["aud."+v]; return e ? (e[S.ui]||e.ja) : v; }
 
 const STEP_KEYS = ["set","profile","skills","jobs","achvlib","summary","pr","resume","prep","sheet"];
 function stepName(i){ return t("step."+STEP_KEYS[i]); }
@@ -1323,16 +1367,16 @@ function jdDigestBox(){
   if(!d) return "";
   return `
   <div class="digest">
-    <div class="dgh">求人の要点（違っていれば直してください）</div>
-    <label class="f"><span>求める役割</span>
+    <div class="dgh">${t("prep.dg.head")}</div>
+    <label class="f"><span>${t("prep.dg.role")}</span>
       <textarea oninput="S.story.jd.digest.role=this.value;grow(this);scheduleSave()">${esc(d.role||"")}</textarea></label>
-    <label class="f"><span>必須要件</span>
+    <label class="f"><span>${t("prep.dg.must")}</span>
       <textarea oninput="S.story.jd.digest.must=this.value;grow(this);scheduleSave()">${esc(d.must||"")}</textarea></label>
-    <label class="f"><span>歓迎要件（あれば尚可）</span>
+    <label class="f"><span>${t("prep.dg.want")}</span>
       <textarea oninput="S.story.jd.digest.want=this.value;grow(this);scheduleSave()">${esc(d.want||"")}</textarea></label>
-    <label class="f"><span>求める人物像・カルチャー</span>
+    <label class="f"><span>${t("prep.dg.culture")}</span>
       <textarea oninput="S.story.jd.digest.culture=this.value;grow(this);scheduleSave()">${esc(d.culture||"")}</textarea></label>
-    <div class="hint">「必須」と「歓迎」の区別が、あなたの立ち位置を決めます。ここだけは正確にしておいてください。</div>
+    <div class="hint">${t("prep.dg.hint")}</div>
   </div>`;
 }
 
@@ -1342,25 +1386,25 @@ function setPrepTab(t){ S.prepTab=t; render(); window.scrollTo(0,0); saveNow(); 
 function prepJD(){
   const st=S.story;
   return `  ${(st.jd.company||st.jd.position||st.jd.raw||st.jd.digest||st.patterns.length||Object.keys(st.sheet||{}).length)?`
-    <button class="clearapp" onclick="clearApplication()">別の応募先に切り替える（この応募先の情報を消す）</button>
-    <div class="hint" style="margin-bottom:12px">職務経歴書・実績・グラフは残ります。消えるのは応募先情報・語り口・面接シートだけです。</div>`:""}
-  <div class="secnote">求人票があると、シートの精度が大きく変わります。なければ空欄でも進めます。</div>
+    <button class="clearapp" onclick="clearApplication()">${t("prep.clear.btn")}</button>
+    <div class="hint" style="margin-bottom:12px">${t("prep.clear.hint")}</div>`:""}
+  <div class="secnote">${t("prep.jd.secnote")}</div>
   <div class="row2">
-    <label class="f"><span>会社名</span>
-      <input value="${esc(st.jd.company)}" oninput="S.story.jd.company=this.value" placeholder="◯◯株式会社"></label>
-    <label class="f"><span>ポジション名</span>
-      <input value="${esc(st.jd.position)}" oninput="S.story.jd.position=this.value" placeholder="例：カスタマーサポート"></label>
+    <label class="f"><span>${t("j.company")}</span>
+      <input value="${esc(st.jd.company)}" oninput="S.story.jd.company=this.value" placeholder="${t("prep.jd.company.ph")}"></label>
+    <label class="f"><span>${t("prep.jd.position")}</span>
+      <input value="${esc(st.jd.position)}" oninput="S.story.jd.position=this.value" placeholder="${t("prep.jd.position.ph")}"></label>
   </div>
-  <label class="f"><span>面談相手</span>
+  <label class="f"><span>${t("prep.jd.audience")}</span>
     <select onchange="S.story.jd.audience=this.value;scheduleSave()">
-      ${AUDIENCES.map(a=>`<option value="${a}" ${st.jd.audience===a?"selected":""}>${a}</option>`).join("")}
+      ${AUDIENCES.map(a=>`<option value="${a}" ${st.jd.audience===a?"selected":""}>${esc(audLabel(a))}</option>`).join("")}
     </select>
-    <div class="hint">相手によって、話す深さを変えます。人事なら業務の細部より全体像、現場マネージャーなら仕組みと数字が効きます。</div></label>
-  <label class="f"><span>募集要項（そのまま貼り付けてください）</span>
+    <div class="hint">${t("prep.jd.audience.hint")}</div></label>
+  <label class="f"><span>${t("prep.jd.raw")}</span>
     <textarea class="big" id="jdRaw" oninput="S.story.jd.raw=this.value;grow(this);cnt('jdc',this)"
-      placeholder="求人ページの本文を、要約せずそのまま貼り付けてください。「必須要件」「歓迎要件」などの言い回しが、そのまま重要な手がかりになります。">${esc(st.jd.raw)}</textarea>
+      placeholder="${t("prep.jd.raw.ph")}">${esc(st.jd.raw)}</textarea>
     <div class="count" id="jdc"></div></label>
-  <button class="ai" onclick="extractJD(this)">求人の要点を読み取る</button>
+  <button class="ai" onclick="extractJD(this)">${t("prep.jd.extract")}</button>
   <div id="jdMsg"></div>
   ${jdDigestBox()}
 
@@ -1443,7 +1487,7 @@ function prepAngle(){
 
 /* 応募先だけを切り替える。職務経歴書側のデータは絶対に消さない。 */
 function clearApplication(){
-  if(!confirm("この応募先の情報を消して、別の応募先に切り替えます。\n\n消えるもの：会社名・ポジション・面談相手・求人票・求人の要点・今回使う実績の選択・語り口・面接シート・キーワード版・事実確認チェック\n\n残るもの：プロフィール・職歴・スキル・資格・実績の内容・職務要約・自己PR・グラフ\n\nよろしいですか？")) return;
+  if(!confirm(t("prep.clear.c1")+"\n\n"+t("prep.clear.c2")+"\n\n"+t("prep.clear.c3")+"\n\n"+t("prep.clear.c4"))) return;
   S.story.jd={ company:"", position:"", audience:"不明 / 未定", raw:"", digest:null };
   S.story.patterns=[]; S.story.chosen=-1; S.story.ranked=[];
   S.story.sheet={}; S.story.sheetSig=""; S.story.sheetKey=""; S.story.cheatMode="full"; S.story.checks=[];
@@ -1464,15 +1508,15 @@ function viewPrep(){
   const body = tab==="jd" ? prepJD() : (tab==="ach" ? prepAch() : prepAngle());
   return `
   <div class="slabor">
-    <div class="stitle">職務経歴書、完成しました。</div>
-    <div class="stext">おつかれさまでした。ここからは、面接で話す準備を一緒にします。全部を読み上げる必要はありません。あなたが一番語りたい経験を、相手が思わず聞きたくなる形に整えます。</div>
+    <div class="stitle">${t("prep.title")}</div>
+    <div class="stext">${t("prep.lede")}</div>
   </div>
-  <div class="ssafe">ここで入力された内容は、運営者には一切届かず、運営者のサーバーに保存されることもありません。AI機能を使った部分だけは、あなた自身のAPIキーでAnthropicへ送信されます。安心して、正直に教えてください。</div>
+  <div class="ssafe">${t("prep.safe")}</div>
 
   <div class="tabs prep">
-    <button class="tab ${tab==="jd"?"on":""}" onclick="setPrepTab('jd')">①応募先${(st.jd.company||st.jd.digest)?" ✓":""}</button>
-    <button class="tab ${tab==="ach"?"on":""}" onclick="setPrepTab('ach')">②使う実績${nAch?`（${nAch}）`:""}</button>
-    <button class="tab ${tab==="angle"?"on":""}" onclick="setPrepTab('angle')">③語り口${nAngle?`（${nAngle}）`:""}</button>
+    <button class="tab ${tab==="jd"?"on":""}" onclick="setPrepTab('jd')">${t("prep.tab.jd")}${(st.jd.company||st.jd.digest)?" ✓":""}</button>
+    <button class="tab ${tab==="ach"?"on":""}" onclick="setPrepTab('ach')">${t("prep.tab.ach")}${nAch?`（${nAch}）`:""}</button>
+    <button class="tab ${tab==="angle"?"on":""}" onclick="setPrepTab('angle')">${t("prep.tab.angle")}${nAngle?`（${nAngle}）`:""}</button>
   </div>
   ${body}`;
 }
@@ -1521,10 +1565,10 @@ function pickPattern(i){
 async function extractJD(btn){
   const zone=document.getElementById("jdMsg");
   const raw=(S.story.jd.raw||"").trim();
-  if(!raw){ zone.innerHTML=`<div class="ng">先に募集要項を貼り付けてください。</div>`; return; }
+  if(!raw){ zone.innerHTML=`<div class="ng">${esc(t("prep.msg.needraw"))}</div>`; return; }
   const LIMIT=6000;
   const cut = raw.length>LIMIT;
-  setLoading(btn,true,"読み取り中…");
+  setLoading(btn,true,t("prep.msg.reading"));
   try{
     const out=await callAI(`次の求人情報から、要点だけを短く抜き出してください。
 
@@ -1553,14 +1597,14 @@ ${raw.slice(0,LIMIT)}
     const d={ role:grab("役割"), must:grab("必須"), want:grab("歓迎"), culture:grab("カルチャー") };
     /* 最低限（役割 or 必須）が取れなければ、不完全なまま保存しない */
     if(!d.role && !d.must){
-      zone.innerHTML=`<div class="ng">求人情報の形式を正しく読み取れませんでした。もう一度お試しいただくか、募集要項の本文部分だけを貼り付けてみてください。</div>`;
+      zone.innerHTML=`<div class="ng">${esc(t("prep.msg.badformat"))}</div>`;
       setLoading(btn,false); return;
     }
     S.story.jd.digest=d;
     render(); saveNow();
     if(cut){
       const z=document.getElementById("jdMsg");
-      if(z) z.innerHTML=`<div class="ng">求人情報が${LIMIT}文字を超えています。後半は読み取りに含まれていません。必須要件・歓迎要件を含む重要部分が残るよう、貼り付け内容をご確認ください。</div>`;
+      if(z) z.innerHTML=`<div class="ng">${esc(t("prep.msg.toolong.pre")+LIMIT+t("prep.msg.toolong.suf"))}</div>`;
     }
   }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
 }
