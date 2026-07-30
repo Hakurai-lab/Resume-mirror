@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v36</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v37</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -878,7 +878,49 @@ const T = {
   "prep.msg.reading":  { ja:"読み取り中…", en:"Reading…" },
   "prep.msg.badformat":{ ja:"求人情報の形式を正しく読み取れませんでした。もう一度お試しいただくか、募集要項の本文部分だけを貼り付けてみてください。", en:"The job posting's format couldn't be read correctly. Try again, or paste just the body text of the posting." },
   "prep.msg.toolong.pre": { ja:"求人情報が", en:"The job posting exceeds " },
-  "prep.msg.toolong.suf": { ja:"文字を超えています。後半は読み取りに含まれていません。必須要件・歓迎要件を含む重要部分が残るよう、貼り付け内容をご確認ください。", en:" characters. The latter part wasn't included. Please make sure the important parts (required / preferred) remain in what you pasted." }
+  "prep.msg.toolong.suf": { ja:"文字を超えています。後半は読み取りに含まれていません。必須要件・歓迎要件を含む重要部分が残るよう、貼り付け内容をご確認ください。", en:" characters. The latter part wasn't included. Please make sure the important parts (required / preferred) remain in what you pasted." },
+
+  "pa.secnote": { ja:"STEP4 の実績ライブラリから選ぶだけです。同じことを書き直す必要はありません。<b>2〜3件</b>が目安です。内容を直したいときは STEP4 で直すと、職務経歴書・グラフ・面接シートのすべてに反映されます。", en:"Just pick from the Achievements library in STEP 4 — no need to rewrite anything. <b>2–3</b> is a good number. If you want to edit content, editing it in STEP 4 updates your resume, charts, and interview sheet all at once." },
+  "pa.selected": { ja:"選択：", en:"Selected: " },
+  "pa.items":    { ja:"件", en:"" },
+  "pa.over4":    { ja:"　※4件以内が目安です", en:"  (aim for 4 or fewer)" },
+  "pa.nolib":    { ja:"STEP4「実績ライブラリ」に実績がまだありません。<br>先にそちらで登録するか、これまでどおり下の欄に直接書くこともできます。", en:"There are no achievements in the STEP 4 Achievements library yet.<br>Register them there first, or write directly in the fields below as before." },
+  "pa.use.on":  { ja:"今回使う", en:"Use this time" },
+  "pa.use.off": { ja:"使わない", en:"Don't use" },
+  "pa.what":    { ja:"実績として実行したこと", en:"What you did as an achievement" },
+  "pa.what.ph": { ja:"例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した。", en:"e.g. Created a customer-service manual for new hires and rolled it out store-wide to unify operations." },
+  "pa.num":    { ja:"数字（分かる範囲で）", en:"Numbers (as far as you know)" },
+  "pa.num.ph": { ja:"例：対象スタッフ15名／新人が独り立ちするまで 2か月→3週間", en:"e.g. 15 staff / time to independence 2 months → 3 weeks" },
+  "pa.findnum": { ja:"この経験で数字にできる点を探す", en:"Find points in this experience that can be quantified" },
+  "pa.chips.lbl": { ja:"これらは数字にできそうな観点です。心当たりのあるものをタップすると、下の数字欄に項目が入ります。", en:"These are angles that could be quantified. Tap any that ring a bell to add them to the numbers field below." },
+  "pa.msg.needwhat": { ja:"先に「何をしたか」を書いてください。", en:"Please write 'what you did' first." },
+  "pa.msg.searching":{ ja:"探しています…", en:"Searching…" },
+  "pa.msg.notfound": { ja:"うまく見つけられませんでした。もう少し具体的に書くと精度が上がります。", en:"Couldn't find much. Writing a bit more specifically improves the results." },
+
+  "pg.secnote": { ja:"面接での語り方の候補を作ります。<b>複数選んでも構いません。</b>タップした順に優先順位がつき、1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。<b>推奨は1〜2件</b>（多く選ぶほど、シートの情報量が増えます）。順位を変えたいときは、一度タップして解除してから選び直してください。", en:"Generate candidate angles for the interview. <b>You can select several.</b> They're prioritized in the order you tap: #1 is your opening line, #2 and below are backup to bring out when pressed. <b>1–2 is recommended</b> (the more you pick, the denser the sheet). To reorder, tap once to deselect, then pick again." },
+  "pg.make":   { ja:"語り口を作る", en:"Generate angles" },
+  "pg.remake": { ja:"語り口を作り直す", en:"Regenerate angles" },
+  "pg.rank1":     { ja:"1位・入り口の一本", en:"#1 · opening line" },
+  "pg.rankn.pre": { ja:"", en:"#" },
+  "pg.rankn.suf": { ja:"位・弾薬", en:" · backup" },
+  "pg.evidence":  { ja:"根拠：実績", en:"Basis: achievements " },
+  "pg.ranklist.head": { ja:"選んだ語り口（上から優先順位）", en:"Selected angles (priority, top first)" },
+  "pg.deselect":      { ja:"解除", en:"Deselect" },
+  "pg.ranklist.hint": { ja:"1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。▲▼で並べ替えられます。", en:"#1 is your opening line; #2 and below are backup to bring out when pressed. Reorder with ▲▼." },
+  "pg.msg.needach":     { ja:"先に、実績を1件以上書いてください。", en:"Please write at least one achievement first." },
+  "pg.confirm.remake":  { ja:"語り口を作り直すと、すでに作成した面接シートと内容が一致しなくなります。シートは残りますが、あとで作り直しが必要です。続けますか？", en:"Regenerating angles will make them no longer match the interview sheet you already created. The sheet is kept, but you'll need to rebuild it later. Continue?" },
+  "pg.msg.thinking":    { ja:"考えています…", en:"Thinking…" },
+  "pg.msg.fail":        { ja:"うまく作れませんでした。実績をもう少し具体的に書いてから、もう一度お試しください。", en:"Couldn't generate them. Write your achievements a bit more specifically and try again." },
+
+  "as.head.pre": { ja:"今回使う実績（", en:"Achievements to use this time (" },
+  "as.head.mid": { ja:"件 / 登録", en:" / " },
+  "as.head.suf": { ja:"件）", en:" registered)" },
+  "as.over4":    { ja:" ※4件以内が目安です", en:"  (aim for 4 or fewer)" },
+  "as.none.pre": { ja:"※1件も選ばれていないので、登録済みの全", en:"None selected, so all " },
+  "as.none.suf": { ja:"件を対象にします", en:" registered will be used." },
+  "as.item":     { ja:"実績", en:"Achievement " },
+  "as.f.none.pre": { ja:"「今回使う」が1件も選ばれていません（全", en:"None marked 'use this time' (all " },
+  "as.f.none.suf": { ja:"件を対象にします）", en:" will be used)." }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1413,64 +1455,64 @@ function prepJD(){
 function prepAch(){
   const st=S.story;
   return `  ${(S.achievements||[]).length?`
-  <div class="secnote">STEP4 の実績ライブラリから選ぶだけです。同じことを書き直す必要はありません。<b>2〜3件</b>が目安です。内容を直したいときは STEP4 で直すと、職務経歴書・グラフ・面接シートのすべてに反映されます。</div>
+  <div class="secnote">${t("pa.secnote")}</div>
   ${(S.achievements||[]).map(a=>{
     const on=(S.story.useAch||[]).includes(a.id);
     const ms=metricSummary(a);
     return `<div class="pickach ${on?"on":""}" onclick="toggleUseAch('${esc(a.id)}')">
       <div class="pkchk">${on?"✓":""}</div>
       <div class="pkbody">
-        <div class="pktitle">${esc(a.title||(a.action||"").slice(0,24)||"（名称未設定）")}</div>
+        <div class="pktitle">${esc(a.title||(a.action||"").slice(0,24)||t("lib.title.unset"))}</div>
         ${a.jobId?`<div class="pkmeta">${esc(jobName(a.jobId))}</div>`:""}
         ${ms?`<div class="pknum">${esc(ms)}</div>`:""}
       </div>
     </div>`;}).join("")}
-  <div class="hint" style="margin-top:8px">選択：${(S.story.useAch||[]).length}件${(S.story.useAch||[]).length>4?"　※4件以内が目安です":""}</div>
+  <div class="hint" style="margin-top:8px">${t("pa.selected")}${(S.story.useAch||[]).length}${t("pa.items")}${(S.story.useAch||[]).length>4?t("pa.over4"):""}</div>
   `:`
-  <div class="impdone">STEP4「実績ライブラリ」に実績がまだありません。<br>先にそちらで登録するか、これまでどおり下の欄に直接書くこともできます。</div>
+  <div class="impdone">${t("pa.nolib")}</div>
   ${st.achv.map((a,i)=>`
     <div class="card">
       <div class="cardhead">
         <label class="usechk"><input type="checkbox" ${a.use!==false?"checked":""}
-          onchange="S.story.achv[${i}].use=this.checked;render(true);saveNow()"><b>実績 ${i+1}</b><span class="usetag">${a.use!==false?"今回使う":"使わない"}</span></label>
-        ${st.achv.length>1?`<button class="del" onclick="delAchv(${i})">削除</button>`:""}
+          onchange="S.story.achv[${i}].use=this.checked;render(true);saveNow()"><b>${t("lib.card")} ${i+1}</b><span class="usetag">${a.use!==false?t("pa.use.on"):t("pa.use.off")}</span></label>
+        ${st.achv.length>1?`<button class="del" onclick="delAchv(${i})">${t("del")}</button>`:""}
       </div>
-      <label class="f"><span>実績として実行したこと</span>
+      <label class="f"><span>${t("pa.what")}</span>
         <textarea oninput="S.story.achv[${i}].what=this.value;grow(this);scheduleSave()"
-          placeholder="例：新人向けの接客マニュアルを作成し、店舗全体に配布して運用を統一した。">${esc(a.what)}</textarea></label>
-      <label class="f"><span>数字（分かる範囲で）</span>
+          placeholder="${t("pa.what.ph")}">${esc(a.what)}</textarea></label>
+      <label class="f"><span>${t("pa.num")}</span>
         <textarea id="anum${i}" oninput="S.story.achv[${i}].num=this.value;grow(this);scheduleSave()"
-          placeholder="例：対象スタッフ15名／新人が独り立ちするまで 2か月→3週間">${esc(a.num)}</textarea></label>
-      <button class="ai sub" onclick="findNumbers(${i},this)">この経験で数字にできる点を探す</button>
+          placeholder="${t("pa.num.ph")}">${esc(a.num)}</textarea></label>
+      <button class="ai sub" onclick="findNumbers(${i},this)">${t("pa.findnum")}</button>
       <div id="hint${i}">${(a.hints&&a.hints.length)?`
         <div class="chips">
-          <div class="chiplbl">これらは数字にできそうな観点です。心当たりのあるものをタップすると、下の数字欄に項目が入ります。</div>
+          <div class="chiplbl">${t("pa.chips.lbl")}</div>
           ${a.hints.map((h,hi)=>`<span class="chip" onclick="addHintByIndex(${i},${hi})">${esc(h)}</span>`).join("")}
         </div>`:""}</div>
     </div>`).join("")}
-  ${st.achv.length<MAX_ACHV?`<button class="addbtn" onclick="addAchv()">＋ 実績を追加（${st.achv.length} / ${MAX_ACHV}）</button>`:""}
+  ${st.achv.length<MAX_ACHV?`<button class="addbtn" onclick="addAchv()">${t("lib.add")}（${st.achv.length} / ${MAX_ACHV}）</button>`:""}
   `}
 
 `;
 }
 function prepAngle(){
   const st=S.story;
-  return `  <div class="secnote">面接での語り方の候補を作ります。<b>複数選んでも構いません。</b>タップした順に優先順位がつき、1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。<b>推奨は1〜2件</b>（多く選ぶほど、シートの情報量が増えます）。順位を変えたいときは、一度タップして解除してから選び直してください。</div>
+  return `  <div class="secnote">${t("pg.secnote")}</div>
   ${achvSummary()}
-  <button class="ai" onclick="makePatterns(this)">${st.patterns.length?"語り口を作り直す":"語り口を作る"}</button>
+  <button class="ai" onclick="makePatterns(this)">${st.patterns.length?t("pg.remake"):t("pg.make")}</button>
   <div id="patMsg"></div>
   ${st.patterns.map((p,i)=>{
     const rank=(Array.isArray(st.ranked)?st.ranked.indexOf(i):-1);
     return `
     <div class="lens ${rank>=0?"picked":""}" onclick="pickPattern(${i})">
-      ${rank>=0?`<div class="rank">${rank===0?"1位・入り口の一本":(rank+1)+"位・弾薬"}</div>`:""}
+      ${rank>=0?`<div class="rank">${rank===0?t("pg.rank1"):`${t("pg.rankn.pre")}${rank+1}${t("pg.rankn.suf")}`}</div>`:""}
       <div class="lt">${esc(p.title||"")}</div>
       <div class="ld">${esc(p.desc||"")}</div>
-      ${(p.evidence&&p.evidence.length)?`<div class="ev">根拠：実績${esc(p.evidence.join("、"))}</div>`:""}
+      ${(p.evidence&&p.evidence.length)?`<div class="ev">${t("pg.evidence")}${esc(p.evidence.join("、"))}</div>`:""}
     </div>`;}).join("")}
   ${(Array.isArray(st.ranked)&&st.ranked.length)?`
   <div class="ranklist">
-    <div class="rlh">選んだ語り口（上から優先順位）</div>
+    <div class="rlh">${t("pg.ranklist.head")}</div>
     ${st.ranked.map((pi,pos)=>`
       <div class="rli">
         <span class="rlno">${pos+1}</span>
@@ -1478,10 +1520,10 @@ function prepAngle(){
         <span class="rlbtns">
           <button ${pos===0?"disabled":""} onclick="moveRank(${pos},-1)">▲</button>
           <button ${pos===st.ranked.length-1?"disabled":""} onclick="moveRank(${pos},1)">▼</button>
-          <button class="rlx" onclick="pickPattern(${pi})">解除</button>
+          <button class="rlx" onclick="pickPattern(${pi})">${t("pg.deselect")}</button>
         </span>
       </div>`).join("")}
-    <div class="hint" style="margin-top:8px">1位が「入り口の一本」、2位以下が「掘られたときに出す弾薬」になります。▲▼で並べ替えられます。</div>
+    <div class="hint" style="margin-top:8px">${t("pg.ranklist.hint")}</div>
   </div>`:""}`;
 }
 
@@ -1612,8 +1654,8 @@ ${raw.slice(0,LIMIT)}
 async function findNumbers(i,btn){
   const zone=document.getElementById("hint"+i);
   const what=(S.story.achv[i].what||"").trim();
-  if(!what){ zone.innerHTML=`<div class="ng">先に「何をしたか」を書いてください。</div>`; return; }
-  setLoading(btn,true,"探しています…");
+  if(!what){ zone.innerHTML=`<div class="ng">${esc(t("pa.msg.needwhat"))}</div>`; return; }
+  setLoading(btn,true,t("pa.msg.searching"));
   try{
     const list=await askShortList(`次の職務経験について、面接で使える「数字にできる観点」を3つだけ挙げてください。
 
@@ -1628,7 +1670,7 @@ async function findNumbers(i,btn){
 
 【経験】
 ${what}`,1000);
-    if(!list || !list.length){ zone.innerHTML=`<div class="ng">うまく見つけられませんでした。もう少し具体的に書くと精度が上がります。</div>`; setLoading(btn,false); return; }
+    if(!list || !list.length){ zone.innerHTML=`<div class="ng">${esc(t("pa.msg.notfound"))}</div>`; setLoading(btn,false); return; }
     S.story.achv[i].hints=list.slice(0,4);
     render(); saveNow();
   }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
@@ -1684,16 +1726,16 @@ function achvSummary(){
   if(lib){
     const total=(S.achievements||[]).length;
     const picked=(S.story.useAch||[]).length;
-    return `<div class="asum"><div class="asumh">今回使う実績（${lib.length}件 / 登録${total}件）${lib.length>4?" ※4件以内が目安です":""}</div>
-      ${!picked?`<div class="asumi">※1件も選ばれていないので、登録済みの全${total}件を対象にします</div>`:""}
-      ${lib.map((a,i)=>`<div class="asumi"><b>実績${i+1}</b>${esc((a.title||a.action||"").trim().slice(0,60))}</div>`).join("")}</div>`;
+    return `<div class="asum"><div class="asumh">${t("as.head.pre")}${lib.length}${t("as.head.mid")}${total}${t("as.head.suf")}${lib.length>4?t("as.over4"):""}</div>
+      ${!picked?`<div class="asumi">${t("as.none.pre")}${total}${t("as.none.suf")}</div>`:""}
+      ${lib.map((a,i)=>`<div class="asumi"><b>${t("as.item")}${i+1}</b>${esc((a.title||a.action||"").trim().slice(0,60))}</div>`).join("")}</div>`;
   }
   const all=S.story.achv.map((a,i)=>({i,a})).filter(x=>(x.a.what||"").trim());
   const items=all.filter(x=>x.a.use!==false);
   if(!all.length) return "";
-  if(!items.length) return `<div class="asum"><div class="asumh">「今回使う」が1件も選ばれていません（全${all.length}件を対象にします）</div></div>`;
-  return `<div class="asum"><div class="asumh">今回使う実績（${items.length}件 / 登録${all.length}件）${items.length>4?" ※4件以内が目安です":""}</div>
-    ${items.map(x=>`<div class="asumi"><b>実績${x.i+1}</b>${esc((x.a.what||"").trim().slice(0,60))}${(x.a.what||"").trim().length>60?"…":""}</div>`).join("")}</div>`;
+  if(!items.length) return `<div class="asum"><div class="asumh">${t("as.f.none.pre")}${all.length}${t("as.f.none.suf")}</div></div>`;
+  return `<div class="asum"><div class="asumh">${t("as.head.pre")}${items.length}${t("as.head.mid")}${all.length}${t("as.head.suf")}${items.length>4?t("as.over4"):""}</div>
+    ${items.map(x=>`<div class="asumi"><b>${t("as.item")}${x.i+1}</b>${esc((x.a.what||"").trim().slice(0,60))}${(x.a.what||"").trim().length>60?"…":""}</div>`).join("")}</div>`;
 }
 function jdText(){
   const d=S.story.jd.digest;
@@ -1728,11 +1770,11 @@ function normalizePatterns(arr){
 
 async function makePatterns(btn){
   const zone=document.getElementById("patMsg");
-  if(!S.story.achv.some(a=>(a.what||"").trim())){ zone.innerHTML=`<div class="ng">先に、実績を1件以上書いてください。</div>`; return; }
+  if(!S.story.achv.some(a=>(a.what||"").trim())){ zone.innerHTML=`<div class="ng">${esc(t("pg.msg.needach"))}</div>`; return; }
   if(Object.keys(S.story.sheet||{}).length){
-    if(!confirm("語り口を作り直すと、すでに作成した面接シートと内容が一致しなくなります。シートは残りますが、あとで作り直しが必要です。続けますか？")) return;
+    if(!confirm(t("pg.confirm.remake"))) return;
   }
-  setLoading(btn,true,"考えています…");
+  setLoading(btn,true,t("pg.msg.thinking"));
   try{
     const out=await callAI(`あなたは採用のプロであり、面接コーチです。以下の実績と応募先情報から、面接での「語り方の切り口」を3つ提案してください。
 
@@ -1769,7 +1811,7 @@ ${achvText()}`,3000);
       }catch(e){}
     }
     parsed=normalizePatterns(parsed);
-    if(!parsed.length){ zone.innerHTML=`<div class="ng">うまく作れませんでした。実績をもう少し具体的に書いてから、もう一度お試しください。</div>`; setLoading(btn,false); return; }
+    if(!parsed.length){ zone.innerHTML=`<div class="ng">${esc(t("pg.msg.fail"))}</div>`; setLoading(btn,false); return; }
     S.story.patterns=parsed.slice(0,3); S.story.chosen=-1; S.story.ranked=[];
     render(); saveNow();
   }catch(err){ zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; setLoading(btn,false); }
