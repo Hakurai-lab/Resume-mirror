@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v37</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v38</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -920,11 +920,60 @@ const T = {
   "as.none.suf": { ja:"件を対象にします", en:" registered will be used." },
   "as.item":     { ja:"実績", en:"Achievement " },
   "as.f.none.pre": { ja:"「今回使う」が1件も選ばれていません（全", en:"None marked 'use this time' (all " },
-  "as.f.none.suf": { ja:"件を対象にします）", en:" will be used)." }
+  "as.f.none.suf": { ja:"件を対象にします）", en:" will be used)." },
+
+  "sheet.h2":   { ja:"面接シート", en:"Interview Sheet" },
+  "sheet.lede": { ja:"面接当日、手元で見るためのシートです。読み上げる台本ではなく、確認するカンペとして使ってください。", en:"A sheet to keep at hand on interview day. Use it as a cheat sheet to check, not a script to read aloud." },
+  "sheet.tab.cheat": { ja:"カンペ", en:"Cheat sheet" },
+  "sheet.resume.hint": { ja:"面接中、経歴を確認したいときはこちら。", en:"For checking your background during the interview." },
+  "sheet.resume.pdf":  { ja:"職務経歴書をPDFで保存", en:"Save resume as PDF" },
+  "sheet.mainangle": { ja:"主軸の語り口：", en:"Main angle: " },
+  "sheet.backup.pre": { ja:"補強の弾薬 ", en:"" },
+  "sheet.backup.suf": { ja:"件", en:" backup angle(s)" },
+  "sheet.noangle":   { ja:"先にSTEP 7で語り口を選んでください。", en:"Choose an angle in STEP 7 first." },
+  "sheet.stale.title": { ja:"この面接シートは、変更前の内容で作られています。", en:"This interview sheet was built from earlier content." },
+  "sheet.stale.body":  { ja:"求人情報・実績・語り口のいずれかが、シート作成後に変更されました。今の内容に合わせるには、作り直してください。", en:"The job info, achievements, or angle changed after the sheet was built. Rebuild it to match the current content." },
+  "sheet.build":      { ja:"シートを作成する", en:"Build the sheet" },
+  "sheet.build.more": { ja:"未作成の項目を作成", en:"Build the remaining items" },
+  "sheet.rebuild":    { ja:"すべて作り直す", en:"Rebuild everything" },
+  "sheet.build.hint": { ja:"項目ごとに1回ずつAIを呼び出します。1つ失敗しても、作成済みの内容は消えません。", en:"The AI is called once per item. If one fails, what's already generated is kept." },
+  "sheet.view":      { ja:"表示：", en:"View: " },
+  "sheet.view.full": { ja:"フル（文章）", en:"Full (prose)" },
+  "sheet.view.key":  { ja:"キーワード", en:"Keywords" },
+  "sheet.kw.make":   { ja:"キーワード版を作る", en:"Make keyword version" },
+  "sheet.kw.remake": { ja:"キーワード版を作り直す", en:"Rebuild keyword version" },
+  "sheet.redo": { ja:"作り直す", en:"Regenerate" },
+  "sheet.fchk.head": { ja:"出す前の事実確認（AIではなく、あなたが確認してください）", en:"Fact-check before you submit (you, not the AI, must confirm)" },
+  "sheet.fchk.hint": { ja:"このツールは事実を作りません。最後に守るのは、あなた自身の確認です。", en:"This tool doesn't invent facts. The final safeguard is your own check." },
+
+  "sheet.kw.needsheet":   { ja:"先にシートを作成してください。", en:"Build the sheet first." },
+  "sheet.kw.progress":    { ja:"キーワード版を作成中…", en:"Building keyword version…" },
+  "sheet.kw.partial.pre": { ja:"一部を作成できませんでした", en:"Some parts couldn't be generated" },
+  "sheet.kw.partial.suf": { ja:"。「キーワード版を作り直す」でもう一度お試しください。", en:". Try again with 'Rebuild keyword version'." },
+  "sheet.kw.done":        { ja:"✓ キーワード版ができました。", en:"✓ Keyword version is ready." },
+  "sheet.build.nomissing": { ja:"未作成の項目はありません。", en:"There are no items left to build." },
+  "sheet.build.progress":  { ja:" を作成中…", en:" — generating…" },
+  "sheet.build.partial":   { ja:"次の項目は作成できませんでした。既に作成済みの内容はそのまま残っています。各項目の「作り直す」で個別にやり直せます。", en:"The following items couldn't be generated. What was already generated is kept. You can redo each one individually with its 'Regenerate' button." },
+  "sheet.build.done":      { ja:"✓ シートができました。PDFで保存して、当日手元に置いてください。", en:"✓ The sheet is ready. Save it as a PDF and keep it at hand on the day." },
+  "sheet.msg.needach":     { ja:"先に実績を入力してください。", en:"Please enter an achievement first." },
+
+  "io.export.fail":     { ja:"書き出しに失敗しました。時間をおいて、もう一度お試しください。", en:"Export failed. Please wait a moment and try again." },
+  "io.import.c1":       { ja:"読み込むと、今この端末に入っている内容は置き換わります。", en:"Importing will replace the content currently on this device." },
+  "io.import.c2":       { ja:"先に「データを書き出す」でバックアップを取っておくことをおすすめします。", en:"We recommend backing up first with Export." },
+  "io.import.c3":       { ja:"続けますか？", en:"Continue?" },
+  "io.import.done":     { ja:"読み込みました。STEP 0 で接続テストを行うと、AI機能が使えるようになります。", en:"Imported. Run the connection test in STEP 0 to enable the AI features." },
+  "io.import.badfile":  { ja:"このファイルは読み込めませんでした。Resume Mirror で書き出したファイルを選んでください。", en:"Couldn't read this file. Please choose a file exported by Resume Mirror." },
+  "io.import.readfail": { ja:"ファイルを読めませんでした。", en:"Couldn't read the file." },
+  "io.clear.confirm":   { ja:"この端末に保存された入力内容を、すべて消去します。よろしいですか？", en:"This erases all input saved on this device. Continue?" },
+  "chart.link.nomets":    { ja:"実績ライブラリに数字が登録されていません。先に STEP4 で登録してください。", en:"No numbers are registered in the Achievements library. Register them in STEP 4 first." },
+  "sheet.rebuild.confirm": { ja:"すでに作成済みの内容を、すべて作り直します。よろしいですか？", en:"This rebuilds all already-generated content. Continue?" }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
 function audLabel(v){ const e=T["aud."+v]; return e ? (e[S.ui]||e.ja) : v; }
+function sheetChecks(){ return S.ui==="en"
+  ? ["Are the numbers correct?","Was this actually your scope of responsibility?","Are you writing a team-wide result as if it were yours alone?","Can you explain it in your own words in the interview?","Is it OK to discuss given confidentiality obligations?","Have you added anything not written in the job posting?"]
+  : ["数字は正しいか","自分が実際に担当した範囲か","チーム全体の成果を、自分だけの成果として書いていないか","面接で、自分の言葉として説明できるか","守秘義務上、話して問題ない内容か","求人票に書かれていない内容を勝手に足していないか"]; }
 
 const STEP_KEYS = ["set","profile","skills","jobs","achvlib","summary","pr","resume","prep","sheet"];
 function stepName(i){ return t("step."+STEP_KEYS[i]); }
@@ -2027,7 +2076,7 @@ function chartsAt(section, position, jobId){
 function linkChartToLibrary(i){
   const c=S.charts[i]; if(!c) return;
   const mets=allMetrics();
-  if(!mets.length){ alert("実績ライブラリに数字が登録されていません。先に STEP4 で登録してください。"); return; }
+  if(!mets.length){ alert(t("chart.link.nomets")); return; }
   let hit=0;
   (c.series||[]).forEach(sr=>{
     if(sr.metricId) return;
@@ -2949,13 +2998,13 @@ async function buildKeywords(btn){
   const zone=document.getElementById("sheetMsg");
   const sh=S.story.sheet||{};
   const filled=SHEET_BLOCKS.filter(b=>sh[b.key]);
-  if(!filled.length){ if(zone) zone.innerHTML=`<div class="ng">先にシートを作成してください。</div>`; return; }
-  setLoading(btn,true,"作成中…");
+  if(!filled.length){ if(zone) zone.innerHTML=`<div class="ng">${esc(t("sheet.kw.needsheet"))}</div>`; return; }
+  setLoading(btn,true,t("ld.creating"));
   const parts=[]; const fail=[];
   for(let i=0;i<filled.length;i+=KEY_CHUNK){
     const group=filled.slice(i,i+KEY_CHUNK);
     const body=group.map(b=>`【${b.label}】\n${(sh[b.key]||"").slice(0,1200)}`).join("\n\n");
-    if(zone) zone.innerHTML=`<div class="ok">キーワード版を作成中…（${Math.min(i+KEY_CHUNK,filled.length)} / ${filled.length}）</div>`;
+    if(zone) zone.innerHTML=`<div class="ok">${t("sheet.kw.progress")}（${Math.min(i+KEY_CHUNK,filled.length)} / ${filled.length}）</div>`;
     try{
       const out=await callAI(`次の面接シートの一部を、面接中にちらっと見るための「キーワード版」に変換してください。
 
@@ -2980,8 +3029,8 @@ ${body}`, 1800);
   render(true); saveNow();
   const z=document.getElementById("sheetMsg");
   if(z) z.innerHTML = fail.length
-    ? `<div class="ng">一部を作成できませんでした（${esc(fail.join(" ／ "))}）。「キーワード版を作り直す」でもう一度お試しください。</div>`
-    : `<div class="ok">✓ キーワード版ができました。</div>`;
+    ? `<div class="ng">${t("sheet.kw.partial.pre")}（${esc(fail.join(" ／ "))}）${t("sheet.kw.partial.suf")}</div>`
+    : `<div class="ok">${esc(t("sheet.kw.done"))}</div>`;
 }
 
 function viewSheet(){
@@ -2993,44 +3042,43 @@ function viewSheet(){
   const pat=S.story.patterns[r[0]];
   const subCount=Math.max(0,r.length-1);
   return `
-  <div class="h2">面接シート</div>
-  <div class="lede">面接当日、手元で見るためのシートです。読み上げる台本ではなく、確認するカンペとして使ってください。</div>
+  <div class="h2">${t("sheet.h2")}</div>
+  <div class="lede">${t("sheet.lede")}</div>
   <div class="tabs">
-    <button class="tab ${tab==="sheet"?"on":""}" onclick="setTab('sheet')">カンペ</button>
-    <button class="tab ${tab==="resume"?"on":""}" onclick="setTab('resume')">職務経歴書</button>
-    <button class="tab ${tab==="trans"?"on":""}" onclick="setTab('trans')">翻訳版${sst.done?`（${sst.done}）`:""}</button>
+    <button class="tab ${tab==="sheet"?"on":""}" onclick="setTab('sheet')">${t("sheet.tab.cheat")}</button>
+    <button class="tab ${tab==="resume"?"on":""}" onclick="setTab('resume')">${t("doc.h2")}</button>
+    <button class="tab ${tab==="trans"?"on":""}" onclick="setTab('trans')">${t("doc.tab.trans")}${sst.done?`（${sst.done}）`:""}</button>
   </div>
   ${tab==="trans"?viewTrans("sheet"):(tab==="resume"?`
-    <div class="hint" style="margin-bottom:12px">面接中、経歴を確認したいときはこちら。</div>
-    <div class="toolbar"><button class="primary" onclick="printDoc()">職務経歴書をPDFで保存</button></div>
+    <div class="hint" style="margin-bottom:12px">${t("sheet.resume.hint")}</div>
+    <div class="toolbar"><button class="primary" onclick="printDoc()">${t("sheet.resume.pdf")}</button></div>
     <div id="docWrap">${docHTML()}</div>`:`
-  ${pat?`<div class="note"><b>主軸の語り口：</b>${esc(pat.title)}${subCount?`　／　補強の弾薬 ${subCount}件`:""}</div>`:`<div class="ng">先にSTEP 7で語り口を選んでください。</div>`}
+  ${pat?`<div class="note"><b>${t("sheet.mainangle")}</b>${esc(pat.title)}${subCount?`　／　${t("sheet.backup.pre")}${subCount}${t("sheet.backup.suf")}`:""}</div>`:`<div class="ng">${esc(t("sheet.noangle"))}</div>`}
   ${sheetIsStale()?`<div class="stale">
-    <b>この面接シートは、変更前の内容で作られています。</b>
-    求人情報・実績・語り口のいずれかが、シート作成後に変更されました。今の内容に合わせるには、作り直してください。
+    <b>${t("sheet.stale.title")}</b>
+    ${t("sheet.stale.body")}
   </div>`:""}
   <div class="toolbar" style="margin-top:14px">
-    <button class="primary" onclick="buildSheet(this,true)">${done?"未作成の項目を作成":"シートを作成する"}</button>
-    ${done?`<button onclick="buildSheet(this,false)">すべて作り直す</button>`:""}
-    ${done?`<button onclick="printSheet()">PDFで保存・印刷</button>`:""}
+    <button class="primary" onclick="buildSheet(this,true)">${done?t("sheet.build.more"):t("sheet.build")}</button>
+    ${done?`<button onclick="buildSheet(this,false)">${t("sheet.rebuild")}</button>`:""}
+    ${done?`<button onclick="printSheet()">${t("doc.print")}</button>`:""}
   </div>
-  <div class="hint" style="margin-bottom:14px">項目ごとに1回ずつAIを呼び出します。1つ失敗しても、作成済みの内容は消えません。</div>
+  <div class="hint" style="margin-bottom:14px">${t("sheet.build.hint")}</div>
   <div id="sheetMsg"></div>
   ${done?`<div class="styleswitch">
-    <span>表示：</span>
-    <button class="sw ${S.story.cheatMode!=="key"?"on":""}" onclick="setCheat('full')">フル（文章）</button>
-    <button class="sw ${S.story.cheatMode==="key"?"on":""}" onclick="setCheat('key')">キーワード</button>
-    ${S.story.cheatMode==="key"?`<button class="ai sub" style="margin-left:8px" onclick="buildKeywords(this)">${S.story.sheetKey?"キーワード版を作り直す":"キーワード版を作る"}</button>`:""}
+    <span>${t("sheet.view")}</span>
+    <button class="sw ${S.story.cheatMode!=="key"?"on":""}" onclick="setCheat('full')">${t("sheet.view.full")}</button>
+    <button class="sw ${S.story.cheatMode==="key"?"on":""}" onclick="setCheat('key')">${t("sheet.view.key")}</button>
+    ${S.story.cheatMode==="key"?`<button class="ai sub" style="margin-left:8px" onclick="buildKeywords(this)">${S.story.sheetKey?t("sheet.kw.remake"):t("sheet.kw.make")}</button>`:""}
   </div>`:""}
   <div id="sheetWrap">${(S.story.cheatMode==="key"&&S.story.sheetKey)?keySheetHTML():sheetHTML()}</div>
   ${done?`
   <div class="fchk">
-    <div class="fchkh">出す前の事実確認（AIではなく、あなたが確認してください）</div>
-    ${["数字は正しいか","自分が実際に担当した範囲か","チーム全体の成果を、自分だけの成果として書いていないか",
-       "面接で、自分の言葉として説明できるか","守秘義務上、話して問題ない内容か","求人票に書かれていない内容を勝手に足していないか"]
+    <div class="fchkh">${t("sheet.fchk.head")}</div>
+    ${sheetChecks()
       .map((t,i)=>`<label class="fchkitem"><input type="checkbox" ${S.story.checks&&S.story.checks[i]?"checked":""}
         onchange="S.story.checks=S.story.checks||[];S.story.checks[${i}]=this.checked;saveNow()"><span>${t}</span></label>`).join("")}
-    <div class="hint" style="margin-top:8px">このツールは事実を作りません。最後に守るのは、あなた自身の確認です。</div>
+    <div class="hint" style="margin-top:8px">${t("sheet.fchk.hint")}</div>
   </div>`:""}`)}`;
 }
 
@@ -3045,7 +3093,7 @@ function sheetHTML(){
     <div class="smeta">${esc(head||"応募先未入力")}${nm?`　／　${esc(nm)}`:""}<br>${fmtDate(S.story.jd.audience?S.date:S.date)} 作成</div>
     ${SHEET_BLOCKS.map(b=>sh[b.key]?`
       <div class="sblock">
-        <div class="sbh">${esc(b.label)}<button class="redo" onclick="buildOne('${b.key}',this)">作り直す</button></div>
+        <div class="sbh">${esc(b.label)}<button class="redo" onclick="buildOne('${b.key}',this)">${t("sheet.redo")}</button></div>
         <div class="sbody">${renderSheetText(sh[b.key])}</div>
       </div>`:"").join("")}
   </div>`;
@@ -3108,7 +3156,7 @@ ${SPEAK_RULE}
 }
 
 async function buildOne(key,btn){
-  if(btn) setLoading(btn,true,"作成中…");
+  if(btn) setLoading(btn,true,t("ld.creating"));
   try{
     const out=await callAI(blockPrompt(key), blockMax(key));
     S.story.sheet=S.story.sheet||{};
@@ -3127,18 +3175,18 @@ async function buildOne(key,btn){
 async function buildSheet(btn, onlyMissing){
   const zone=document.getElementById("sheetMsg");
   const rk=Array.isArray(S.story.ranked)&&S.story.ranked.length ? S.story.ranked : (S.story.chosen>=0?[S.story.chosen]:[]);
-  if(!rk.length){ zone.innerHTML=`<div class="ng">先にSTEP 7で語り口を選んでください。</div>`; return; }
+  if(!rk.length){ zone.innerHTML=`<div class="ng">${esc(t("sheet.noangle"))}</div>`; return; }
   const prev=Object.assign({}, S.story.sheet||{});
   if(!onlyMissing && Object.keys(prev).length){
-    if(!confirm("すでに作成済みの内容を、すべて作り直します。よろしいですか？")) return;
+    if(!confirm(t("sheet.rebuild.confirm"))) return;
   }
-  setLoading(btn,true,"作成中…");
+  setLoading(btn,true,t("ld.creating"));
   const next=Object.assign({}, prev);   /* 失敗しても既存は消さない */
   const targets = onlyMissing ? SHEET_BLOCKS.filter(b=>!prev[b.key]) : SHEET_BLOCKS;
-  if(!targets.length){ zone.innerHTML=`<div class="ok">未作成の項目はありません。</div>`; setLoading(btn,false); return; }
+  if(!targets.length){ zone.innerHTML=`<div class="ok">${esc(t("sheet.build.nomissing"))}</div>`; setLoading(btn,false); return; }
   let done=0; const fail=[];
   for(const b of targets){
-    zone.innerHTML=`<div class="ok">${esc(b.label)} を作成中…（${done+fail.length+1} / ${targets.length}）</div>`;
+    zone.innerHTML=`<div class="ok">${esc(b.label)}${t("sheet.build.progress")}（${done+fail.length+1} / ${targets.length}）</div>`;
     try{
       next[b.key]=await callAI(blockPrompt(b.key), b.max||1200);
       done++;
@@ -3153,8 +3201,8 @@ async function buildSheet(btn, onlyMissing){
   const z=document.getElementById("sheetMsg");
   if(z){
     z.innerHTML = fail.length
-      ? `<div class="ng">次の項目は作成できませんでした。既に作成済みの内容はそのまま残っています。各項目の「作り直す」で個別にやり直せます。<br>${esc(fail.join(" ／ "))}</div>`
-      : `<div class="ok">✓ シートができました。PDFで保存して、当日手元に置いてください。</div>`;
+      ? `<div class="ng">${t("sheet.build.partial")}<br>${esc(fail.join(" ／ "))}</div>`
+      : `<div class="ok">${esc(t("sheet.build.done"))}</div>`;
   }
 }
 
@@ -3191,7 +3239,7 @@ function cmpHTML(before, after, undoFn){
 async function brushAchv(i,btn){
   const zone=document.getElementById("aiz"+i);
   const raw=(S.jobs[i].achv||"").trim();
-  if(!raw){ zone.innerHTML=`<div class="ng">先に実績を入力してください。</div>`; return; }
+  if(!raw){ zone.innerHTML=`<div class="ng">${esc(t("sheet.msg.needach"))}</div>`; return; }
   setLoading(btn,true);
   try{
     const out=await callAI(`あなたは日本語の職務経歴書の編集者です。次の「実績」を整えてください。\n${RULE}\n・箇条書きが適切なら箇条書きに。\n・元の情報を一つも削らないこと。\n\n【実績】\n${raw}`,3000);
@@ -3433,7 +3481,7 @@ function exportData(){
     a.href=url; a.download=`ResumeMirror_${nm}_${stamp}.json`;
     document.body.appendChild(a); a.click();
     setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
-  }catch(e){ alert("書き出しに失敗しました。時間をおいて、もう一度お試しください。"); }
+  }catch(e){ alert(t("io.export.fail")); }
 }
 
 function importData(input){
@@ -3445,24 +3493,24 @@ function importData(input){
       const pack=JSON.parse(String(rd.result||""));
       const d = (pack && pack.app==="ResumeMirror" && pack.data) ? pack.data : pack;
       if(!d || typeof d!=="object") throw new Error("形式が違います");
-      if(!confirm("読み込むと、今この端末に入っている内容は置き換わります。\n\n先に「データを書き出す」でバックアップを取っておくことをおすすめします。\n\n続けますか？")) { input.value=""; return; }
+      if(!confirm(t("io.import.c1")+"\n\n"+t("io.import.c2")+"\n\n"+t("io.import.c3"))) { input.value=""; return; }
       const keepKey=S.apiKey, keepSave=S.saveKey, keepAgreed=S.agreed;
       Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
       S.apiKey=keepKey; S.saveKey=keepSave; S.agreed=keepAgreed||!!S.agreed; S.keyVerified=false;
       migrateState();               /* 古い版のファイルでも、今の形に揃える */
       step=1; render(); window.scrollTo(0,0); saveNow();
-      alert("読み込みました。STEP 0 で接続テストを行うと、AI機能が使えるようになります。");
+      alert(t("io.import.done"));
     }catch(e){
-      alert("このファイルは読み込めませんでした。Resume Mirror で書き出したファイルを選んでください。");
+      alert(t("io.import.badfile"));
     }
     input.value="";
   };
-  rd.onerror=()=>{ alert("ファイルを読めませんでした。"); input.value=""; };
+  rd.onerror=()=>{ alert(t("io.import.readfail")); input.value=""; };
   rd.readAsText(f);
 }
 
 function clearAll(){
-  if(!confirm("この端末に保存された入力内容を、すべて消去します。よろしいですか？")) return;
+  if(!confirm(t("io.clear.confirm"))) return;
   try{ localStorage.removeItem(STORE_KEY); }catch(e){}
   location.reload();
 }
