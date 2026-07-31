@@ -439,13 +439,14 @@
 <div class="app">
   <header>
     <div class="brand"><span class="mk"></span>Resume Mirror</div>
-    <div class="steplabel"><b id="stepName">はじめの設定</b><span id="stepCount">STEP 0 / 6</span></div>
-    <div class="bar"><i id="barFill" style="width:8%"></i></div>
+    <div class="steplabel" id="stepLabel"><b id="stepName">はじめの設定</b><span id="stepCount">STEP 0 / 6</span></div>
+    <div class="bar" id="stepBar"><i id="barFill" style="width:8%"></i></div>
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v40</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v41</span></span>
     <div class="sbbtns">
+      <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
       <button id="btnImport" onclick="document.getElementById('importFile').click()">読み込み</button>
@@ -456,7 +457,7 @@
   </div>
   <main id="main"></main>
   <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importData(this)">
-  <nav class="nav">
+  <nav class="nav" id="mainNav">
     <button class="back" id="backBtn" onclick="go(-1)">もどる</button>
     <button class="next" id="nextBtn" onclick="go(1)">次へ</button>
   </nav>
@@ -966,7 +967,61 @@ const T = {
   "io.import.readfail": { ja:"ファイルを読めませんでした。", en:"Couldn't read the file." },
   "io.clear.confirm":   { ja:"この端末に保存された入力内容を、すべて消去します。よろしいですか？", en:"This erases all input saved on this device. Continue?" },
   "chart.link.nomets":    { ja:"実績ライブラリに数字が登録されていません。先に STEP4 で登録してください。", en:"No numbers are registered in the Achievements library. Register them in STEP 4 first." },
-  "sheet.rebuild.confirm": { ja:"すでに作成済みの内容を、すべて作り直します。よろしいですか？", en:"This rebuilds all already-generated content. Continue?" }
+  "sheet.rebuild.confirm": { ja:"すでに作成済みの内容を、すべて作り直します。よろしいですか？", en:"This rebuilds all already-generated content. Continue?" },
+
+  "home.btn": { ja:"ホーム", en:"Home" },
+  "home.rec.head": { ja:"今日の仕事を記録", en:"Record today's work" },
+  "home.rec.lede": { ja:"進行中の仕事や気づきを残し、実績に育てます。", en:"Capture ongoing work and grow it into achievements." },
+  "home.rec.new": { ja:"＋ 新しい記録", en:"＋ New record" },
+  "home.rec.empty": { ja:"まだ記録がありません。今日の仕事を、将来の実績として残しましょう。", en:"No records yet. Start turning today's work into future achievements." },
+  "home.docs.head": { ja:"書類を作る", en:"Create documents" },
+  "home.docs.lede": { ja:"これまでの職務経歴書・面接シートの作成フロー。", en:"Your resume and interview-sheet flow." },
+  "home.docs.open": { ja:"書類作成を開く（STEP）", en:"Open the document flow (STEP)" },
+  "home.settings": { ja:"設定", en:"Settings" },
+  "home.intro.title": { ja:"ホームが新しくなりました", en:"Your home screen is new" },
+  "home.intro.body": { ja:"上段：日々の仕事と実績を記録／下段：これまでの職務経歴書作成STEP。既存のデータと設定はそのまま保存されています。", en:"Top: record daily work and achievements. Bottom: your existing resume-building STEPs. All your data and settings are kept." },
+  "home.intro.ok": { ja:"わかりました", en:"Got it" },
+  "wl.total": { ja:"記録", en:"records" },
+  "wl.untitled": { ja:"（無題の記録）", en:"(untitled record)" },
+  "wl.notfound": { ja:"記録が見つかりません。", en:"Record not found." },
+  "wl.back": { ja:"← ホームへ", en:"← Home" },
+  "wl.edit.title": { ja:"記録の編集", en:"Edit record" },
+  "wl.f.title": { ja:"タイトル", en:"Title" },
+  "wl.f.title.ph": { ja:"例：新人研修の仕組み化", en:"e.g. Systematizing new-hire training" },
+  "wl.f.job": { ja:"どの職歴か", en:"Which job" },
+  "wl.f.job.none": { ja:"（未選択）", en:"(none)" },
+  "wl.f.status": { ja:"状態", en:"Status" },
+  "wl.f.visibility": { ja:"公開区分", en:"Visibility" },
+  "wl.f.contrib": { ja:"担当範囲", en:"Your role" },
+  "wl.contrib.none": { ja:"（未選択）", en:"(not set)" },
+  "wl.f.situation": { ja:"状況・課題", en:"Situation / problem" },
+  "wl.f.situation.ph": { ja:"何が起きていたか。", en:"What was going on." },
+  "wl.f.contribDetail": { ja:"担当範囲の補足", en:"Role details" },
+  "wl.f.contribDetail.ph": { ja:"自分はどこを担当したか。", en:"Which part was yours." },
+  "wl.f.action": { ja:"実行したこと", en:"What you did" },
+  "wl.f.action.ph": { ja:"何をしたか。", en:"What you did." },
+  "wl.f.result": { ja:"結果・変化", en:"Result / change" },
+  "wl.f.result.ph": { ja:"どうなったか。", en:"What changed." },
+  "wl.f.fact": { ja:"内容を自分で事実確認した", en:"I've fact-checked this myself" },
+  "wl.f.factnote": { ja:"主要項目を編集すると、事実確認は自動で外れます。", en:"Editing key fields automatically clears the fact-check." },
+  "wl.del": { ja:"この記録を削除", en:"Delete this record" },
+  "wl.del.confirm": { ja:"この記録を削除します。よろしいですか？", en:"Delete this record. Continue?" },
+  "wl.status.draft": { ja:"メモ", en:"Draft" },
+  "wl.status.active": { ja:"実行中", en:"In progress" },
+  "wl.status.waiting_result": { ja:"結果待ち", en:"Waiting for result" },
+  "wl.status.needs_review": { ja:"要確認", en:"Needs review" },
+  "wl.status.candidate": { ja:"実績候補", en:"Candidate" },
+  "wl.status.completed": { ja:"完成", en:"Completed" },
+  "wl.status.archived": { ja:"アーカイブ", en:"Archived" },
+  "wl.vis.private": { ja:"非公開", en:"Private" },
+  "wl.vis.resume_only": { ja:"職務経歴書のみ", en:"Resume only" },
+  "wl.vis.public_safe": { ja:"公開OK", en:"Public-safe" },
+  "wl.contrib.individual": { ja:"単独", en:"Individual" },
+  "wl.contrib.lead": { ja:"主導", en:"Lead" },
+  "wl.contrib.contributor": { ja:"一員として担当", en:"Contributor" },
+  "wl.contrib.support": { ja:"支援", en:"Support" },
+  "wl.contrib.proposal": { ja:"提案のみ", en:"Proposal only" },
+  "wl.contrib.manager": { ja:"承認・管理", en:"Manager" }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -987,6 +1042,7 @@ function applyChrome(){
   set("btnTips",   t("sb.cost"));
   set("btnTerms",  t("sb.terms"));
   set("btnClear",  t("sb.clear"));
+  set("homeBtn",   t("home.btn"));
   const lb=document.getElementById("langBtn"); if(lb) lb.textContent = UI_LANGS[S.ui==="en"?"ja":"en"];
   if(lastSavedAt) showSaved(lastSavedAt); else set("savedAt", t("sb.saved"));
 }
@@ -1005,6 +1061,7 @@ const S = {
   importSkipped:[],
   charts:[],
   workLogs:[], applications:[], documents:[],
+  screen:"home", editingWorkLogId:null,
   meta:{ createdAt:null, updatedAt:null, lastExportedAt:null, revision:0 },
   settings:{},
   docTab:"preview",
@@ -3814,7 +3871,120 @@ function jumpStep(i){
 }
 /* keepScroll=true のとき、再描画してもスクロール位置を保つ。
    画面を作り直すと一瞬ページ高さが縮み、ブラウザが位置を巻き戻すため。 */
+/* ===== BLOCK 15: 現職記録（workLog）UI と ホーム ===== */
+const WL_STATUSES=["draft","active","waiting_result","needs_review","candidate","completed","archived"];
+const WL_VIS=["private","resume_only","public_safe"];
+const WL_CONTRIB=["individual","lead","contributor","support","proposal","manager"];
+const WL_MAJOR=["situation","contributionType","contributionDetail","actions","result"];
+function wlStatusLabel(c){ return t("wl.status."+c); }
+function wlFind(id){ return (S.workLogs||[]).find(w=>w&&w.id===id)||null; }
+function jobLabel(jid){ const j=(S.jobs||[]).find(x=>x&&x.id===jid); return j ? (j.company || (S.ui==="en"?"(untitled job)":"（無題の職歴）")) : ""; }
+
+function goHome(){ S.screen="home"; S.editingWorkLogId=null; scheduleSave(); render(); }
+function goApp(){ S.screen="app"; scheduleSave(); render(); }
+function goSettings(){ S.screen="app"; step=0; scheduleSave(); render(); }
+function openWorkLog(id){ S.editingWorkLogId=id; S.screen="worklog"; scheduleSave(); render(); }
+function createWorkLog(){ const wl=newWorkLog(); repository.addEntity("workLogs",wl); openWorkLog(wl.id); }
+function dismissHomeIntro(){ if(!S.settings||typeof S.settings!=="object") S.settings={}; S.settings.homeIntroSeen=true; scheduleSave(); render(); }
+
+function editWorkLogField(id,field,value){
+  const wl=wlFind(id); if(!wl) return;
+  wl[field]=value; wl.updatedAt=nowISO();
+  if(WL_MAJOR.indexOf(field)>=0 && wl.factConfirmed){ wl.factConfirmed=false; wl.factConfirmedAt=null; }
+  scheduleSave();
+}
+function setWorkLogStatus(id,val){ repository.updateEntity("workLogs",id,{status:val}); render(true); }
+function setWorkLogVis(id,val){ repository.updateEntity("workLogs",id,{visibility:val}); render(true); }
+function setWorkLogContrib(id,val){ editWorkLogField(id,"contributionType", val||null); }
+function setWorkLogJob(id,val){ editWorkLogField(id,"jobId", val||null); }
+function setWorkLogFact(id,checked){ repository.updateEntity("workLogs",id,{ factConfirmed:!!checked, factConfirmedAt: checked?nowISO():null }); render(true); }
+function deleteWorkLog(id){ if(!confirm(t("wl.del.confirm"))) return; repository.deleteEntity("workLogs",id); goHome(); }
+
+function optionsHTML(codes, cur, labelFn, noneKey){
+  let o = noneKey ? `<option value="" ${!cur?"selected":""}>${t(noneKey)}</option>` : "";
+  o += codes.map(c=>`<option value="${c}" ${cur===c?"selected":""}>${labelFn(c)}</option>`).join("");
+  return o;
+}
+function wlSummaryHTML(){
+  const list=S.workLogs||[]; if(!list.length) return "";
+  const c={}; WL_STATUSES.forEach(s=>c[s]=0); list.forEach(w=>{ if(c[w.status]!==undefined) c[w.status]++; });
+  const parts=["active","waiting_result","candidate"].filter(s=>c[s]>0).map(s=>`${wlStatusLabel(s)} ${c[s]}`);
+  return `<div class="hint" style="margin-top:6px">${parts.length?parts.join("　・　"):`${t("wl.total")} ${list.length}`}</div>`;
+}
+function viewHome(){
+  const list=(S.workLogs||[]).slice().sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  const intro = (S.settings&&S.settings.homeIntroSeen) ? "" : `
+    <div class="card" style="border:1px solid #D7DEF6;background:linear-gradient(160deg,rgba(30,64,175,.06),rgba(5,150,105,.05));margin-bottom:14px">
+      <b>${t("home.intro.title")}</b>
+      <div class="hint" style="margin-top:4px">${t("home.intro.body")}</div>
+      <button class="ai" style="margin-top:10px" onclick="dismissHomeIntro()">${t("home.intro.ok")}</button>
+    </div>`;
+  const rec = list.length ? list.map(w=>`
+    <button onclick="openWorkLog('${esc(w.id)}')" style="display:flex;width:100%;text-align:left;justify-content:space-between;align-items:center;gap:10px;border:1px solid #E3E7EE;background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px">
+      <span style="min-width:0">
+        <b style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.title|| (w.situation||"").slice(0,24) || t("wl.untitled"))}</b>
+        <span class="hint">${esc(jobLabel(w.jobId))}</span>
+      </span>
+      <span style="flex:none;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#F5F7FB;border:1px solid #E3E7EE">${wlStatusLabel(w.status)}</span>
+    </button>`).join("") : `<div class="hint">${t("home.rec.empty")}</div>`;
+  return `
+    ${intro}
+    <div class="h2">${t("home.rec.head")}</div>
+    <div class="lede">${t("home.rec.lede")}</div>
+    ${wlSummaryHTML()}
+    <div style="margin:12px 0">${rec}</div>
+    <button class="addbtn" onclick="createWorkLog()">${t("home.rec.new")}</button>
+
+    <div class="sechead" style="margin-top:26px">${t("home.docs.head")}</div>
+    <div class="secnote">${t("home.docs.lede")}</div>
+    <button class="ai" onclick="goApp()">${t("home.docs.open")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="goSettings()">${t("home.settings")}</button>`;
+}
+function viewWorkLogEdit(){
+  const w=wlFind(S.editingWorkLogId);
+  if(!w) return `<div class="hint">${t("wl.notfound")}</div><button class="ai" onclick="goHome()">${t("wl.back")}</button>`;
+  const id=w.id;
+  return `
+    <button class="ai sub" onclick="goHome()" style="margin-bottom:12px">${t("wl.back")}</button>
+    <div class="h2">${t("wl.edit.title")}</div>
+    <label class="f"><span>${t("wl.f.title")}</span>
+      <input value="${esc(w.title)}" oninput="editWorkLogField('${esc(id)}','title',this.value)" placeholder="${t("wl.f.title.ph")}"></label>
+    <div class="row2">
+      <label class="f"><span>${t("wl.f.job")}</span>
+        <select onchange="setWorkLogJob('${esc(id)}',this.value)">${optionsHTML((S.jobs||[]).map(j=>j.id).filter(Boolean), w.jobId, jid=>esc(jobLabel(jid)), "wl.f.job.none")}</select></label>
+      <label class="f"><span>${t("wl.f.status")}</span>
+        <select onchange="setWorkLogStatus('${esc(id)}',this.value)">${optionsHTML(WL_STATUSES, w.status, wlStatusLabel, null)}</select></label>
+    </div>
+    <label class="f"><span>${t("wl.f.situation")}</span>
+      <textarea oninput="editWorkLogField('${esc(id)}','situation',this.value);grow(this)" placeholder="${t("wl.f.situation.ph")}">${esc(w.situation)}</textarea></label>
+    <div class="row2">
+      <label class="f"><span>${t("wl.f.contrib")}</span>
+        <select onchange="setWorkLogContrib('${esc(id)}',this.value)">${optionsHTML(WL_CONTRIB, w.contributionType, c=>t("wl.contrib."+c), "wl.contrib.none")}</select></label>
+      <label class="f"><span>${t("wl.f.visibility")}</span>
+        <select onchange="setWorkLogVis('${esc(id)}',this.value)">${optionsHTML(WL_VIS, w.visibility, c=>t("wl.vis."+c), null)}</select></label>
+    </div>
+    <label class="f"><span>${t("wl.f.contribDetail")}</span>
+      <input value="${esc(w.contributionDetail)}" oninput="editWorkLogField('${esc(id)}','contributionDetail',this.value)" placeholder="${t("wl.f.contribDetail.ph")}"></label>
+    <label class="f"><span>${t("wl.f.action")}</span>
+      <textarea oninput="editWorkLogField('${esc(id)}','actions',this.value);grow(this)" placeholder="${t("wl.f.action.ph")}">${esc(w.actions)}</textarea></label>
+    <label class="f"><span>${t("wl.f.result")}</span>
+      <textarea oninput="editWorkLogField('${esc(id)}','result',this.value);grow(this)" placeholder="${t("wl.f.result.ph")}">${esc(w.result)}</textarea></label>
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:6px">
+      <input type="checkbox" style="width:auto" ${w.factConfirmed?"checked":""} onchange="setWorkLogFact('${esc(id)}',this.checked)">
+      <span>${t("wl.f.fact")}<span class="hint" style="display:block">${t("wl.f.factnote")}</span></span></label>
+    <button class="del" style="margin-top:18px" onclick="deleteWorkLog('${esc(id)}')">${t("wl.del")}</button>`;
+}
+
 function render(keepScroll){
+  if(migrationFailed) return;
+  const setDisp=(id,show)=>{ const el=document.getElementById(id); if(el) el.style.display = show?"":"none"; };
+  if(S.screen==="home" || S.screen==="worklog"){
+    setDisp("stepLabel",false); setDisp("stepBar",false); setDisp("stepJump",false); setDisp("mainNav",false);
+    main.innerHTML = (S.screen==="worklog") ? viewWorkLogEdit() : viewHome();
+    growAll(); window.scrollTo(0,0);
+    return;
+  }
+  setDisp("stepLabel",true); setDisp("stepBar",true); setDisp("stepJump",true); setDisp("mainNav",true);
   const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : null;
   document.getElementById("stepName").textContent=stepName(step);
   document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
