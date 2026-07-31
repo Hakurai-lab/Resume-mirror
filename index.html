@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v39</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v40</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -3413,14 +3413,80 @@ const STORE_KEY = "resume_mirror_v1";
 let saveTimer=null;
 let migrationFailed=false;
 
-function saveNow(){
+/* ===== BLOCK 9b: 保存層（Adapter / Repository） =====
+   目的：localStorage 直叩きを1か所に集約し、将来 Supabase へは Adapter 差し替えで
+   変更範囲を閉じ込める。UI は localStorage を直接触らない（saveNow / repository 経由）。
+   localStorage は同期だが、Supabase 移行時に呼び出し側を変えずに済むよう async で定義。 */
+const storageAdapter = {
+  async read(){ try{ return localStorage.getItem(STORE_KEY); }catch(e){ return null; } },
+  async write(raw){ try{ localStorage.setItem(STORE_KEY, raw); return true; }catch(e){ return false; } },
+  async clear(){ try{ localStorage.removeItem(STORE_KEY); return true; }catch(e){ return false; } },
+  async getRevision(){ try{ const r=localStorage.getItem(STORE_KEY); if(!r) return -1;
+    const d=JSON.parse(r); return (d.meta&&typeof d.meta.revision==="number")?d.meta.revision:0; }catch(e){ return -1; } }
+};
+
+/* 複数タブ検出：別タブが保存すると storage イベント／ディスク revision で気づく（非ブロッキング通知） */
+let otherTabDetected=false;
+function tabConflictNotice(){
+  if(otherTabDetected) return; otherTabDetected=true;
+  try{
+    const en=S.ui==="en";
+    const bar=document.createElement("div");
+    bar.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#FEF6E7;border-top:1px solid #F4D9A6;color:#7c4a12;font-size:13px;padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:center";
+    bar.innerHTML=(en?"Data was changed in another tab.":"別のタブでデータが変更されました。")+
+      ' <button onclick="location.reload()" style="width:auto;padding:4px 12px">'+(en?"Reload":"再読み込み")+'</button>';
+    document.body.appendChild(bar);
+  }catch(e){}
+}
+if(typeof window!=="undefined" && window.addEventListener){
+  window.addEventListener("storage", e=>{ if(e && e.key===STORE_KEY) tabConflictNotice(); });
+}
+
+/* Repository：エンティティ操作の唯一の口。id / createdAt は不変、updatedAt / version は Repository が管理。
+   永続化は実績ある saveNow に委譲（S を単一の in-memory state として扱う）。 */
+const repository = {
+  getState(){ return S; },
+  async save(){ await saveNow(); return (S.meta&&S.meta.revision)||0; },
+  async replaceState(next, opts){
+    opts=opts||{};
+    const v=validateState(next);
+    if(!v.ok) throw new Error("invalid state: "+v.errors.join("; "));
+    if(opts.expectedRevision!=null){
+      const disk=await storageAdapter.getRevision();
+      if(disk>=0 && disk!==opts.expectedRevision){ tabConflictNotice(); throw new Error("revision conflict"); }
+    }
+    Object.keys(next).forEach(k=>{ S[k]=next[k]; });   /* 参照は保ちつつ内容を置換 */
+    await saveNow();
+    return (S.meta&&S.meta.revision)||0;
+  },
+  getEntity(coll,id){ return (S[coll]||[]).find(x=>x&&x.id===id)||null; },
+  listEntities(coll){ return (S[coll]||[]).slice(); },
+  async addEntity(coll,entity){ if(!Array.isArray(S[coll])) S[coll]=[]; S[coll].push(entity); await saveNow(); return entity; },
+  async updateEntity(coll,id,patch){
+    const arr=S[coll]||[]; const i=arr.findIndex(x=>x&&x.id===id); if(i<0) return null;
+    const cur=arr[i];
+    const p=Object.assign({}, patch); delete p.id; delete p.createdAt;   /* 不変フィールド */
+    Object.assign(cur, p);
+    cur.updatedAt=nowISO(); cur.version=(cur.version||1)+1;              /* Repository が管理 */
+    await saveNow(); return cur;
+  },
+  async deleteEntity(coll,id){ const arr=S[coll]||[]; const i=arr.findIndex(x=>x&&x.id===id); if(i<0) return false; arr.splice(i,1); await saveNow(); return true; }
+};
+
+async function saveNow(){
   if(migrationFailed) return;
   try{
+    if(!validateState(S).ok) return;                 /* 不整合な state はそもそも書かない(§8.6) */
+    const disk=await storageAdapter.getRevision();
+    if(disk>=0 && disk>((S.meta&&S.meta.revision)||0)) tabConflictNotice();   /* 別タブが先行 */
+    if(!S.meta||typeof S.meta!=="object") S.meta={ createdAt:nowISO(), updatedAt:null, lastExportedAt:null, revision:0 };
+    S.meta.revision=(S.meta.revision||0)+1;
+    S.meta.updatedAt=nowISO();
     const d=JSON.parse(JSON.stringify(S));
     if(!S.saveKey) d.apiKey="";      /* 既定ではAPIキーを保存しない */
     d.keyVerified=false;             /* 起動時は必ず接続テストからやり直す */
     d._at=Date.now();
-    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+    await storageAdapter.write(JSON.stringify(d));
     showSaved(d._at);
   }catch(e){ /* 保存不可（プライベートモード等）でも動作は継続 */ }
 }
@@ -3502,9 +3568,9 @@ function migrateState(){
     if(!S.story.sheet || typeof S.story.sheet!=="object") S.story.sheet={};
 }
 
-function restore(){
+async function restore(){
   let raw=null;
-  try{ raw=localStorage.getItem(STORE_KEY); }catch(e){}
+  try{ raw=await storageAdapter.read(); }catch(e){}
   if(!raw) return;                 /* 新規利用者：既定Sのまま */
   try{
     const d=JSON.parse(raw);
@@ -3571,9 +3637,9 @@ function importData(input){
   rd.readAsText(f);
 }
 
-function clearAll(){
+async function clearAll(){
   if(!confirm(t("io.clear.confirm"))) return;
-  try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+  await storageAdapter.clear();
   location.reload();
 }
 
@@ -3794,8 +3860,7 @@ main.addEventListener("input", scheduleSave);
 main.addEventListener("change", scheduleSave);
 window.addEventListener("beforeunload", saveNow);
 
-restore();
-if(!migrationFailed){ applyChrome(); render(); }
+(async ()=>{ await restore(); if(!migrationFailed){ applyChrome(); render(); } })();
 </script>
 </body>
 </html>
