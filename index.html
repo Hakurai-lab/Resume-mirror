@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v38</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v39</span></span>
     <div class="sbbtns">
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
@@ -476,7 +476,7 @@ const MODELS = {
 };
 const API_URL = "https://api.anthropic.com/v1/messages";
 /* 保存データの版。実績ライブラリ導入で 2。※ S の定義より前で宣言すること */
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const BACKUP_KEY = "resume_mirror_backup_v1";
 const ANTHROPIC_VERSION = "2023-06-01";
 const NOW_Y = new Date().getFullYear();
@@ -1004,6 +1004,9 @@ const S = {
   achievements:[],
   importSkipped:[],
   charts:[],
+  workLogs:[], applications:[], documents:[],
+  meta:{ createdAt:null, updatedAt:null, lastExportedAt:null, revision:0 },
+  settings:{},
   docTab:"preview",
   lang:{ doc:"ja", target:"en" },
   tr:{},
@@ -2224,8 +2227,48 @@ function newMetric(){
 }
 function newAchievement(jobId){
   return { id:newId("ach"), jobId:jobId||"", title:"", action:"", result:"",
-    metrics:[], usage:{ resume:true, chart:false },
+    metrics:[], usage:{ resume:true, chart:false }, sourceWorkLogIds:[],
     source:{ type:"manual", from:"" }, open:true };
+}
+
+/* ===== BLOCK 0d: Phase0 データ基盤ヘルパー =====
+   新エンティティは UUID。既存 id（newId 形式）は据え置き（参照を壊さないため）。 */
+function uuid(){ return (typeof crypto!=="undefined" && crypto.randomUUID) ? crypto.randomUUID() : newId("id"); }
+function nowISO(){ return new Date().toISOString(); }
+function newWorkLog(jobId){
+  return { id:uuid(), createdAt:nowISO(), updatedAt:nowISO(), version:1,
+    jobId:jobId||null, title:"", status:"draft",
+    situation:"", contributionType:null, contributionDetail:"",
+    actions:"", result:"", metrics:[],
+    factConfirmed:false, factConfirmedAt:null,
+    visibility:"private", aiProcessingAllowed:false, aiConsentAt:null,
+    promotedAchievementIds:[], tags:[], notes:"", aiReview:null, archivedAt:null };
+}
+/* 保存前ゲート：不整合な state はそもそも書かない、を保つための検証。 */
+function validateState(st){
+  const errs=[];
+  if(!st || typeof st!=="object") return { ok:false, errors:["state is not an object"] };
+  ["profile","settings","meta","story","lang"].forEach(k=>{ if(st[k]!==undefined && (typeof st[k]!=="object"||st[k]===null)) errs.push(k+" must be object"); });
+  ["skills","certs","jobs","achievements","charts","workLogs","applications","documents"].forEach(k=>{ if(st[k]!==undefined && !Array.isArray(st[k])) errs.push(k+" must be array"); });
+  const dup=(arr,name)=>{ if(!Array.isArray(arr)) return; const seen=new Set(); arr.forEach(x=>{ const id=x&&x.id; if(id==null) return; if(typeof id!=="string"||!id){ errs.push(name+" invalid id"); return; } if(seen.has(id)) errs.push(name+" dup id "+id); else seen.add(id); }); };
+  dup(st.jobs,"jobs"); dup(st.achievements,"achievements"); dup(st.workLogs,"workLogs");
+  if(st.ui!=="ja" && st.ui!=="en") errs.push("ui invalid");
+  return { ok:errs.length===0, errors:errs };
+}
+/* 移行失敗時：アプリを止めず、UI上で復旧を選べるようにする（モバイルはコンソール不可） */
+function showMigrationError(errs){
+  const m=document.getElementById("main"); if(!m) return;
+  const en=S.ui==="en";
+  m.innerHTML=`<div class="card" style="border:1px solid #F4D9A6;background:#FEF6E7;margin-top:16px">
+    <div class="h2">${en?"Couldn't update your data":"データの更新に失敗しました"}</div>
+    <p class="lede">${en?"Your original data has not been changed. Choose one:":"元のデータは変更されていません。以下から選んでください。"}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">
+      <button class="ai" onclick="exportData()">${en?"Export a backup":"バックアップを書き出す"}</button>
+      <button onclick="restoreBackup()">${en?"Start with previous data":"旧データで起動する"}</button>
+      <button onclick="location.reload()">${en?"Retry":"再試行する"}</button>
+    </div>
+    <div class="hint" style="margin-top:10px">${esc((errs||[]).join(" / "))}</div>
+  </div>`;
 }
 
 /* 移行前のデータを、別の場所に丸ごと控えておく（取り込みで壊れても戻せるように） */
@@ -3368,8 +3411,10 @@ function printDoc(){
 /* ============ BLOCK 9: 保存・復元（この端末のブラウザ内のみ） ============ */
 const STORE_KEY = "resume_mirror_v1";
 let saveTimer=null;
+let migrationFailed=false;
 
 function saveNow(){
+  if(migrationFailed) return;
   try{
     const d=JSON.parse(JSON.stringify(S));
     if(!S.saveKey) d.apiKey="";      /* 既定ではAPIキーを保存しない */
@@ -3407,9 +3452,20 @@ function migrateState(){
       d.source=Object.assign({type:"manual",from:""}, (a&&a.source)||{});
       d.metrics=(Array.isArray(a&&a.metrics)?a.metrics:[]).map(m=>Object.assign(newMetric(), m||{}));
       if(!d.id) d.id=newId("ach");
+      if(!Array.isArray(d.sourceWorkLogIds)) d.sourceWorkLogIds=[];
       d.open=false;
       return d;
     });
+    /* Phase 0（schema3）：新エンティティと共通メタ。既存データは壊さない。 */
+    if(!Array.isArray(S.workLogs)) S.workLogs=[];
+    if(!Array.isArray(S.applications)) S.applications=[];
+    if(!Array.isArray(S.documents)) S.documents=[];
+    (S.skills||[]).forEach(x=>{ if(x && !x.id) x.id=uuid(); });
+    (S.certs||[]).forEach(x=>{ if(x && !x.id) x.id=uuid(); });
+    if(!S.meta || typeof S.meta!=="object") S.meta={};
+    S.meta=Object.assign({ createdAt:null, updatedAt:null, lastExportedAt:null, revision:0 }, S.meta);
+    if(!S.meta.createdAt) S.meta.createdAt=nowISO();
+    if(!S.settings || typeof S.settings!=="object") S.settings={};
     if(!Array.isArray(S.importSkipped)) S.importSkipped=[];
     if(!["charts","trans"].includes(S.docTab)) S.docTab="preview";
     if(S.ui!=="ja" && S.ui!=="en") S.ui=detectUI();
@@ -3447,14 +3503,20 @@ function migrateState(){
 }
 
 function restore(){
+  let raw=null;
+  try{ raw=localStorage.getItem(STORE_KEY); }catch(e){}
+  if(!raw) return;                 /* 新規利用者：既定Sのまま */
   try{
-    const raw=localStorage.getItem(STORE_KEY); if(!raw) return;
     const d=JSON.parse(raw);
     Object.keys(S).forEach(k=>{ if(d[k]!==undefined) S[k]=d[k]; });
     S.keyVerified=false;
     migrateState();
+    const v=validateState(S);
+    if(!v.ok){ migrationFailed=true; showMigrationError(v.errors); return; }
     if(d._at) showSaved(d._at);
-  }catch(e){}
+  }catch(e){
+    migrationFailed=true; showMigrationError([String((e&&e.message)||e)]);
+  }
 }
 function showSaved(ts){
   lastSavedAt = ts;
@@ -3733,8 +3795,7 @@ main.addEventListener("change", scheduleSave);
 window.addEventListener("beforeunload", saveNow);
 
 restore();
-applyChrome();
-render();
+if(!migrationFailed){ applyChrome(); render(); }
 </script>
 </body>
 </html>
