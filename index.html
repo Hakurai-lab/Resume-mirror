@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v41</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v42</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -1021,7 +1021,21 @@ const T = {
   "wl.contrib.contributor": { ja:"一員として担当", en:"Contributor" },
   "wl.contrib.support": { ja:"支援", en:"Support" },
   "wl.contrib.proposal": { ja:"提案のみ", en:"Proposal only" },
-  "wl.contrib.manager": { ja:"承認・管理", en:"Manager" }
+  "wl.contrib.manager": { ja:"承認・管理", en:"Manager" },
+
+  "wl.promote.head": { ja:"完成実績として登録", en:"Register as a completed achievement" },
+  "wl.promote.lede": { ja:"下の条件を満たすと、実績ライブラリに新しい実績として登録できます。元の記録は残ります。", en:"When the conditions below are met, you can register this as a new achievement in the library. The original record is kept." },
+  "wl.promote.cond.situation": { ja:"状況・課題が書かれている", en:"Situation is filled in" },
+  "wl.promote.cond.contrib": { ja:"担当範囲が選ばれている", en:"Your role is selected" },
+  "wl.promote.cond.action": { ja:"実行したことが書かれている", en:"What you did is filled in" },
+  "wl.promote.cond.result": { ja:"結果・変化が書かれている", en:"Result is filled in" },
+  "wl.promote.cond.fact": { ja:"自分で事実確認した", en:"You've fact-checked it" },
+  "wl.promote.cond.metrics": { ja:"数字は根拠が確認済み（数字がある場合）", en:"Numbers have verified sources (if any)" },
+  "wl.promote.btn": { ja:"完成実績として登録する", en:"Register as a completed achievement" },
+  "wl.promote.done": { ja:"この記録は実績ライブラリに登録済みです。", en:"This record has been registered in the Achievements library." },
+  "wl.promote.done.view": { ja:"実績ライブラリで見る", en:"View in the Achievements library" },
+  "wl.promote.conflict": { ja:"保存が競合しました。画面を再読み込みしてから、もう一度お試しください。", en:"A save conflict occurred. Reload the screen and try again." },
+  "wl.promote.fail": { ja:"登録できませんでした。", en:"Couldn't register." }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -3900,6 +3914,55 @@ function setWorkLogJob(id,val){ editWorkLogField(id,"jobId", val||null); }
 function setWorkLogFact(id,checked){ repository.updateEntity("workLogs",id,{ factConfirmed:!!checked, factConfirmedAt: checked?nowISO():null }); render(true); }
 function deleteWorkLog(id){ if(!confirm(t("wl.del.confirm"))) return; repository.deleteEntity("workLogs",id); goHome(); }
 
+/* ===== 昇格（現職記録 → 実績ライブラリ） ===== */
+let promoting=false;
+function promoteChecklist(w){
+  const withValue=(w.metrics||[]).filter(m=>m && String(m.value==null?"":m.value).trim());
+  const metricsOK=withValue.every(m=>(m.sourceNote||"").trim() && m.verified===true);   /* 数字が無ければ true */
+  return {
+    situation: !!(w.situation||"").trim(),
+    contrib:   !!w.contributionType,
+    action:    !!(w.actions||"").trim(),
+    result:    !!(w.result||"").trim(),
+    fact:      w.factConfirmed===true,
+    metrics:   metricsOK
+  };
+}
+function canPromote(w){ const c=promoteChecklist(w); return c.situation&&c.contrib&&c.action&&c.result&&c.fact&&c.metrics; }
+function isPromoted(w){ return ((w.promotedAchievementIds||[]).length>0); }
+function openLibrary(){ S.screen="app"; step=4; S.editingWorkLogId=null; scheduleSave(); render(); }
+async function promoteWorkLog(id){
+  if(promoting) return; promoting=true;
+  try{
+    const current=repository.getState();
+    const next=structuredClone(current);
+    const wl=(next.workLogs||[]).find(w=>w&&w.id===id);
+    if(!wl) return;
+    if(isPromoted(wl)) return;        /* 二重昇格防止 */
+    if(!canPromote(wl)) return;       /* 条件未達 */
+    const achId=uuid();
+    const ach=Object.assign(newAchievement(wl.jobId), {
+      id:achId,
+      title: wl.title || (wl.actions||"").slice(0,24),
+      action: wl.actions||"",
+      result: wl.result||"",
+      metrics:[],
+      sourceWorkLogIds:[wl.id],
+      source:{ type:"worklog", from:wl.id }
+    });
+    next.achievements.push(ach);
+    wl.promotedAchievementIds.push(achId);   /* 記録側リンク */
+    wl.status="completed";
+    try{
+      await repository.replaceState(next, { expectedRevision:(current.meta&&current.meta.revision) });
+    }catch(e){
+      alert(/conflict/.test(String((e&&e.message)||""))? t("wl.promote.conflict") : t("wl.promote.fail"));
+      return;   /* 保存成功前：S は変更されない */
+    }
+    render();
+  } finally { promoting=false; }
+}
+
 function optionsHTML(codes, cur, labelFn, noneKey){
   let o = noneKey ? `<option value="" ${!cur?"selected":""}>${t(noneKey)}</option>` : "";
   o += codes.map(c=>`<option value="${c}" ${cur===c?"selected":""}>${labelFn(c)}</option>`).join("");
@@ -3972,6 +4035,25 @@ function viewWorkLogEdit(){
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:6px">
       <input type="checkbox" style="width:auto" ${w.factConfirmed?"checked":""} onchange="setWorkLogFact('${esc(id)}',this.checked)">
       <span>${t("wl.f.fact")}<span class="hint" style="display:block">${t("wl.f.factnote")}</span></span></label>
+    ${(function(){
+      if(isPromoted(w)) return `
+        <div class="card" style="border:1px solid #BBF0D8;background:#F2FBF7;margin-top:20px">
+          <b>${t("wl.promote.done")}</b>
+          <button class="ai sub" style="margin-top:8px" onclick="openLibrary()">${t("wl.promote.done.view")}</button>
+        </div>`;
+      const c=promoteChecklist(w);
+      const row=(okk,key)=>`<div style="display:flex;gap:8px;align-items:center;padding:3px 0"><span style="flex:none;width:18px;height:18px;border-radius:6px;display:grid;place-items:center;font-size:11px;font-weight:900;background:${okk?"rgba(5,150,105,.12)":"#F5F7FB"};color:${okk?"#059669":"#94A3B8"};border:1px solid ${okk?"#BBF0D8":"#E3E7EE"}">${okk?"\u2713":"\u30fb"}</span><span style="font-size:13px;color:${okk?"#0F172A":"#94A3B8"}">${t(key)}</span></div>`;
+      return `
+        <div class="sechead" style="margin-top:24px">${t("wl.promote.head")}</div>
+        <div class="secnote">${t("wl.promote.lede")}</div>
+        ${row(c.situation,"wl.promote.cond.situation")}
+        ${row(c.contrib,"wl.promote.cond.contrib")}
+        ${row(c.action,"wl.promote.cond.action")}
+        ${row(c.result,"wl.promote.cond.result")}
+        ${row(c.fact,"wl.promote.cond.fact")}
+        ${row(c.metrics,"wl.promote.cond.metrics")}
+        <button class="ai" style="margin-top:12px" ${canPromote(w)?"":"disabled"} onclick="promoteWorkLog('${esc(w.id)}')">${t("wl.promote.btn")}</button>`;
+    })()}
     <button class="del" style="margin-top:18px" onclick="deleteWorkLog('${esc(id)}')">${t("wl.del")}</button>`;
 }
 
