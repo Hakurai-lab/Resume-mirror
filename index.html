@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v42</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v43</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -1035,7 +1035,25 @@ const T = {
   "wl.promote.done": { ja:"この記録は実績ライブラリに登録済みです。", en:"This record has been registered in the Achievements library." },
   "wl.promote.done.view": { ja:"実績ライブラリで見る", en:"View in the Achievements library" },
   "wl.promote.conflict": { ja:"保存が競合しました。画面を再読み込みしてから、もう一度お試しください。", en:"A save conflict occurred. Reload the screen and try again." },
-  "wl.promote.fail": { ja:"登録できませんでした。", en:"Couldn't register." }
+  "wl.promote.fail": { ja:"登録できませんでした。", en:"Couldn't register." },
+
+  "wl.metrics.head": { ja:"数字（任意）", en:"Numbers (optional)" },
+  "wl.metrics.note": { ja:"実測できた数字だけを、出典とともに。推定は推定と分かるように書いてください。", en:"Only numbers you actually measured, with their source. Mark estimates as estimates." },
+  "wl.metric.label": { ja:"指標名", en:"Metric" },
+  "wl.metric.label.ph": { ja:"例：問い合わせ件数", en:"e.g. Inquiries" },
+  "wl.metric.value": { ja:"数値", en:"Value" },
+  "wl.metric.value.ph": { ja:"例：20121", en:"e.g. 20121" },
+  "wl.metric.unit": { ja:"単位", en:"Unit" },
+  "wl.metric.unit.ph": { ja:"例：件", en:"e.g. cases" },
+  "wl.metric.context": { ja:"文脈（いつ・対象）", en:"Context (when / scope)" },
+  "wl.metric.context.ph": { ja:"例：2025年・年間", en:"e.g. 2025, annual" },
+  "wl.metric.source": { ja:"出典・確認方法", en:"Source / how verified" },
+  "wl.metric.source.ph": { ja:"例：ServiceNowデータ", en:"e.g. ServiceNow data" },
+  "wl.metric.verified": { ja:"この数字の根拠を確認した", en:"I've verified the basis for this number" },
+  "wl.filter.status": { ja:"状態で絞る", en:"Filter by status" },
+  "wl.filter.job": { ja:"職歴で絞る", en:"Filter by job" },
+  "wl.filter.all": { ja:"すべて", en:"All" },
+  "wl.filter.none": { ja:"条件に合う記録がありません。", en:"No records match the filter." }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1075,7 +1093,7 @@ const S = {
   importSkipped:[],
   charts:[],
   workLogs:[], applications:[], documents:[],
-  screen:"home", editingWorkLogId:null,
+  screen:"home", editingWorkLogId:null, wlFilter:{status:"",job:""},
   meta:{ createdAt:null, updatedAt:null, lastExportedAt:null, revision:0 },
   settings:{},
   docTab:"preview",
@@ -3900,6 +3918,7 @@ function goSettings(){ S.screen="app"; step=0; scheduleSave(); render(); }
 function openWorkLog(id){ S.editingWorkLogId=id; S.screen="worklog"; scheduleSave(); render(); }
 function createWorkLog(){ const wl=newWorkLog(); repository.addEntity("workLogs",wl); openWorkLog(wl.id); }
 function dismissHomeIntro(){ if(!S.settings||typeof S.settings!=="object") S.settings={}; S.settings.homeIntroSeen=true; scheduleSave(); render(); }
+function setWlFilter(kind,val){ if(!S.wlFilter||typeof S.wlFilter!=="object") S.wlFilter={status:"",job:""}; S.wlFilter[kind]=val; scheduleSave(); render(); }
 
 function editWorkLogField(id,field,value){
   const wl=wlFind(id); if(!wl) return;
@@ -3912,6 +3931,18 @@ function setWorkLogVis(id,val){ repository.updateEntity("workLogs",id,{visibilit
 function setWorkLogContrib(id,val){ editWorkLogField(id,"contributionType", val||null); }
 function setWorkLogJob(id,val){ editWorkLogField(id,"jobId", val||null); }
 function setWorkLogFact(id,checked){ repository.updateEntity("workLogs",id,{ factConfirmed:!!checked, factConfirmedAt: checked?nowISO():null }); render(true); }
+
+/* ===== 指標（数字）エディタ：編集すると事実確認は外れる（§9.4） ===== */
+function wlClearFact(w){ if(w && w.factConfirmed){ w.factConfirmed=false; w.factConfirmedAt=null; } }
+function addWorkLogMetric(id){ const w=wlFind(id); if(!w) return; if(!Array.isArray(w.metrics)) w.metrics=[];
+  w.metrics.push({ id:uuid(), label:"", value:"", unit:"", context:"", sourceNote:"", verified:false });
+  w.updatedAt=nowISO(); wlClearFact(w); scheduleSave(); render(true); }
+function editWorkLogMetric(id,mid,field,value){ const w=wlFind(id); if(!w) return; const m=(w.metrics||[]).find(x=>x&&x.id===mid); if(!m) return;
+  m[field]=value; w.updatedAt=nowISO(); wlClearFact(w); scheduleSave(); }
+function setWorkLogMetricVerified(id,mid,checked){ const w=wlFind(id); if(!w) return; const m=(w.metrics||[]).find(x=>x&&x.id===mid); if(!m) return;
+  m.verified=!!checked; w.updatedAt=nowISO(); wlClearFact(w); scheduleSave(); render(true); }
+function delWorkLogMetric(id,mid){ const w=wlFind(id); if(!w) return; w.metrics=(w.metrics||[]).filter(x=>x&&x.id!==mid);
+  w.updatedAt=nowISO(); wlClearFact(w); scheduleSave(); render(true); }
 function deleteWorkLog(id){ if(!confirm(t("wl.del.confirm"))) return; repository.deleteEntity("workLogs",id); goHome(); }
 
 /* ===== 昇格（現職記録 → 実績ライブラリ） ===== */
@@ -3975,7 +4006,26 @@ function wlSummaryHTML(){
   return `<div class="hint" style="margin-top:6px">${parts.length?parts.join("　・　"):`${t("wl.total")} ${list.length}`}</div>`;
 }
 function viewHome(){
-  const list=(S.workLogs||[]).slice().sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  const all=(S.workLogs||[]);
+  const f=S.wlFilter||{status:"",job:""};
+  let list=all.slice();
+  if(f.status) list=list.filter(w=>w.status===f.status);
+  else list=list.filter(w=>w.status!=="archived");     /* 既定はアーカイブを隠す */
+  if(f.job) list=list.filter(w=>w.jobId===f.job);
+  list.sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  const filters = all.length ? `
+    <div class="row2" style="margin-top:10px">
+      <label class="f"><span>${t("wl.filter.status")}</span>
+        <select onchange="setWlFilter('status',this.value)">
+          <option value="" ${!f.status?"selected":""}>${t("wl.filter.all")}</option>
+          ${WL_STATUSES.map(s=>`<option value="${s}" ${f.status===s?"selected":""}>${wlStatusLabel(s)}</option>`).join("")}
+        </select></label>
+      ${(S.jobs||[]).filter(j=>j&&j.id).length?`<label class="f"><span>${t("wl.filter.job")}</span>
+        <select onchange="setWlFilter('job',this.value)">
+          <option value="" ${!f.job?"selected":""}>${t("wl.filter.all")}</option>
+          ${(S.jobs||[]).filter(j=>j&&j.id).map(j=>`<option value="${j.id}" ${f.job===j.id?"selected":""}>${esc(jobLabel(j.id))}</option>`).join("")}
+        </select></label>`:""}
+    </div>` : "";
   const intro = (S.settings&&S.settings.homeIntroSeen) ? "" : `
     <div class="card" style="border:1px solid #D7DEF6;background:linear-gradient(160deg,rgba(30,64,175,.06),rgba(5,150,105,.05));margin-bottom:14px">
       <b>${t("home.intro.title")}</b>
@@ -3989,12 +4039,13 @@ function viewHome(){
         <span class="hint">${esc(jobLabel(w.jobId))}</span>
       </span>
       <span style="flex:none;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;background:#F5F7FB;border:1px solid #E3E7EE">${wlStatusLabel(w.status)}</span>
-    </button>`).join("") : `<div class="hint">${t("home.rec.empty")}</div>`;
+    </button>`).join("") : (all.length ? `<div class="hint">${t("wl.filter.none")}</div>` : `<div class="hint">${t("home.rec.empty")}</div>`);
   return `
     ${intro}
     <div class="h2">${t("home.rec.head")}</div>
     <div class="lede">${t("home.rec.lede")}</div>
     ${wlSummaryHTML()}
+    ${filters}
     <div style="margin:12px 0">${rec}</div>
     <button class="addbtn" onclick="createWorkLog()">${t("home.rec.new")}</button>
 
@@ -4035,6 +4086,31 @@ function viewWorkLogEdit(){
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:6px">
       <input type="checkbox" style="width:auto" ${w.factConfirmed?"checked":""} onchange="setWorkLogFact('${esc(id)}',this.checked)">
       <span>${t("wl.f.fact")}<span class="hint" style="display:block">${t("wl.f.factnote")}</span></span></label>
+    <div class="sechead" style="margin-top:22px">${t("wl.metrics.head")}</div>
+    <div class="secnote">${t("wl.metrics.note")}</div>
+    ${(w.metrics||[]).map(m=>`
+      <div class="card" style="padding:12px 13px">
+        <div class="row2">
+          <label class="f"><span>${t("wl.metric.label")}</span>
+            <input value="${esc(m.label)}" oninput="editWorkLogMetric('${esc(id)}','${esc(m.id)}','label',this.value)" placeholder="${t("wl.metric.label.ph")}"></label>
+          <label class="f"><span>${t("wl.metric.value")}</span>
+            <input value="${esc(m.value)}" oninput="editWorkLogMetric('${esc(id)}','${esc(m.id)}','value',this.value)" placeholder="${t("wl.metric.value.ph")}"></label>
+        </div>
+        <div class="row2">
+          <label class="f"><span>${t("wl.metric.unit")}</span>
+            <input value="${esc(m.unit)}" oninput="editWorkLogMetric('${esc(id)}','${esc(m.id)}','unit',this.value)" placeholder="${t("wl.metric.unit.ph")}"></label>
+          <label class="f"><span>${t("wl.metric.context")}</span>
+            <input value="${esc(m.context)}" oninput="editWorkLogMetric('${esc(id)}','${esc(m.id)}','context',this.value)" placeholder="${t("wl.metric.context.ph")}"></label>
+        </div>
+        <label class="f"><span>${t("wl.metric.source")}</span>
+          <input value="${esc(m.sourceNote)}" oninput="editWorkLogMetric('${esc(id)}','${esc(m.id)}','sourceNote',this.value)" placeholder="${t("wl.metric.source.ph")}"></label>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <input type="checkbox" style="width:auto" ${m.verified?"checked":""} onchange="setWorkLogMetricVerified('${esc(id)}','${esc(m.id)}',this.checked)">
+          <span style="font-size:13px">${t("wl.metric.verified")}</span></label>
+        <button class="del" style="margin-top:8px" onclick="delWorkLogMetric('${esc(id)}','${esc(m.id)}')">${t("del")}</button>
+      </div>`).join("")}
+    <button class="addbtn" onclick="addWorkLogMetric('${esc(id)}')">${t("lib.metric.add")}</button>
+
     ${(function(){
       if(isPromoted(w)) return `
         <div class="card" style="border:1px solid #BBF0D8;background:#F2FBF7;margin-top:20px">
