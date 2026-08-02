@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v43</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v44</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -4137,9 +4137,12 @@ function render(keepScroll){
   if(migrationFailed) return;
   const setDisp=(id,show)=>{ const el=document.getElementById(id); if(el) el.style.display = show?"":"none"; };
   if(S.screen==="home" || S.screen==="worklog"){
+    const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : 0;
     setDisp("stepLabel",false); setDisp("stepBar",false); setDisp("stepJump",false); setDisp("mainNav",false);
     main.innerHTML = (S.screen==="worklog") ? viewWorkLogEdit() : viewHome();
-    growAll(); window.scrollTo(0,0);
+    growAll();
+    if(keepScroll){ window.scrollTo(0,y); requestAnimationFrame(()=>window.scrollTo(0,y)); }
+    else window.scrollTo(0,0);
     return;
   }
   setDisp("stepLabel",true); setDisp("stepBar",true); setDisp("stepJump",true); setDisp("mainNav",true);
