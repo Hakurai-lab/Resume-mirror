@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v44</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v45</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -1053,7 +1053,24 @@ const T = {
   "wl.filter.status": { ja:"状態で絞る", en:"Filter by status" },
   "wl.filter.job": { ja:"職歴で絞る", en:"Filter by job" },
   "wl.filter.all": { ja:"すべて", en:"All" },
-  "wl.filter.none": { ja:"条件に合う記録がありません。", en:"No records match the filter." }
+  "wl.filter.none": { ja:"条件に合う記録がありません。", en:"No records match the filter." },
+
+  "data.head": { ja:"データとバックアップ", en:"Data & backup" },
+  "data.usage": { ja:"使用量", en:"Storage used" },
+  "data.of": { ja:"約5MBの上限", en:"of ~5MB" },
+  "data.count.rec": { ja:"記録", en:"Records" },
+  "data.count.ach": { ja:"実績", en:"Achievements" },
+  "data.count.app": { ja:"応募先", en:"Applications" },
+  "data.lastexport": { ja:"最終バックアップ", en:"Last backup" },
+  "data.never": { ja:"まだ書き出していません", en:"Not exported yet" },
+  "data.export": { ja:"バックアップを書き出す", en:"Export a backup" },
+  "data.import": { ja:"バックアップを読み込む", en:"Import a backup" },
+  "data.warn70": { ja:"使用量が増えています。バックアップを書き出しておくことをおすすめします。", en:"Storage is filling up. Consider exporting a backup." },
+  "data.warn85": { ja:"容量が上限に近づいています。古い記録の整理と書き出しをおすすめします。", en:"Nearing the limit. Consider archiving old records and exporting." },
+  "data.remind": { ja:"しばらくバックアップを書き出していません。念のため書き出しをおすすめします。", en:"You haven't backed up in a while. Consider exporting one." },
+  "data.backup.exists": { ja:"取り込み前などの旧バックアップが残っています。", en:"An older backup (e.g. pre-import) is kept." },
+  "data.backup.del": { ja:"バックアップを削除", en:"Delete backup" },
+  "data.backup.del.confirm": { ja:"旧バックアップを削除します。よろしいですか？（先に現在のデータを書き出しておくと安全です）", en:"Delete the old backup. Continue? (Export current data first to be safe.)" }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -3697,6 +3714,8 @@ function exportData(){
     const a=document.createElement("a");
     a.href=url; a.download=`ResumeMirror_${nm}_${stamp}.json`;
     document.body.appendChild(a); a.click();
+    if(S.meta&&typeof S.meta==="object") S.meta.lastExportedAt=nowISO();
+    scheduleSave();
     setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
   }catch(e){ alert(t("io.export.fail")); }
 }
@@ -4005,6 +4024,31 @@ function wlSummaryHTML(){
   const parts=["active","waiting_result","candidate"].filter(s=>c[s]>0).map(s=>`${wlStatusLabel(s)} ${c[s]}`);
   return `<div class="hint" style="margin-top:6px">${parts.length?parts.join("　・　"):`${t("wl.total")} ${list.length}`}</div>`;
 }
+function storageBytes(){ try{ return JSON.stringify(S).length; }catch(e){ return 0; } }
+function backupExists(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; } }
+function deleteBackup(){ if(!confirm(t("data.backup.del.confirm"))) return; try{ localStorage.removeItem(BACKUP_KEY); }catch(e){} render(true); }
+function importPick(){ const el=document.getElementById("importFile"); if(el) el.click(); }
+function fmtWhen(iso){ if(!iso) return t("data.never"); try{ return new Date(iso).toLocaleDateString(S.ui==="en"?"en-US":"ja-JP"); }catch(e){ return iso; } }
+function dataPanelHTML(){
+  const bytes=storageBytes(); const budget=5*1024*1024;
+  const pct=Math.min(100, bytes/budget*100); const kb=(bytes/1024).toFixed(0);
+  const barColor = pct>=70 ? "#B45309" : "#059669";
+  const nRec=(S.workLogs||[]).length, nAch=(S.achievements||[]).length, nApp=(S.applications||[]).length;
+  const last=S.meta&&S.meta.lastExportedAt;
+  let stale=false; if(!last) stale=true; else { const days=(Date.now()-new Date(last).getTime())/86400000; if(days>=30) stale=true; }
+  const warn = pct>=85 ? `<div class="note">${t("data.warn85")}</div>` : (pct>=70 ? `<div class="note">${t("data.warn70")}</div>` : "");
+  const remind = (stale && !warn) ? `<div class="hint" style="color:#B45309">${t("data.remind")}</div>` : "";
+  return `
+    <div class="sechead" style="margin-top:26px">${t("data.head")}</div>
+    <div style="font-size:13px;margin-bottom:6px">${t("data.usage")}：<b>${kb} KB</b>（${pct.toFixed(1)}% ${t("data.of")}）</div>
+    <div style="height:8px;border-radius:5px;background:#EEF2F7;overflow:hidden;margin-bottom:8px"><i style="display:block;height:100%;width:${pct.toFixed(1)}%;background:${barColor}"></i></div>
+    <div class="hint">${t("data.count.rec")} ${nRec}　・　${t("data.count.ach")} ${nAch}　・　${t("data.count.app")} ${nApp}</div>
+    <div class="hint">${t("data.lastexport")}：${fmtWhen(last)}</div>
+    ${warn}${remind}
+    <button class="ai" style="margin-top:10px" onclick="exportData()">${t("data.export")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="importPick()">${t("data.import")}</button>
+    ${backupExists()?`<div class="hint" style="margin-top:12px">${t("data.backup.exists")} <button onclick="deleteBackup()" style="width:auto;padding:4px 10px;margin-left:6px">${t("data.backup.del")}</button></div>`:""}`;
+}
 function viewHome(){
   const all=(S.workLogs||[]);
   const f=S.wlFilter||{status:"",job:""};
@@ -4052,7 +4096,9 @@ function viewHome(){
     <div class="sechead" style="margin-top:26px">${t("home.docs.head")}</div>
     <div class="secnote">${t("home.docs.lede")}</div>
     <button class="ai" onclick="goApp()">${t("home.docs.open")}</button>
-    <button class="ai sub" style="margin-top:8px" onclick="goSettings()">${t("home.settings")}</button>`;
+    <button class="ai sub" style="margin-top:8px" onclick="goSettings()">${t("home.settings")}</button>
+
+    ${dataPanelHTML()}`;
 }
 function viewWorkLogEdit(){
   const w=wlFind(S.editingWorkLogId);
