@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v44</span></span>
+    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v48</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -534,8 +534,8 @@ const T = {
   "emp.出向":                 { ja:"出向", en:"Secondment" },
   "emp.その他":               { ja:"その他", en:"Other" },
 
-  "err.nokey":     { ja:"APIキーが設定されていません。STEP 0 に戻って設定してください。",
-                     en:"No API key is set. Go back to STEP 0 to set one." },
+  "err.nokey":     { ja:"この機能はAIを使います。設定でAPIキーを追加すると使えます。",
+                     en:"This feature uses AI. Add an API key in settings to enable it." },
   "err.truncated": { ja:"分量が多く、一度で書き切れませんでした。入力を少し減らすか、もう一度お試しください。",
                      en:"The response was too long to finish in one pass. Try shortening your input or run it again." },
   "err.refusal":   { ja:"AIがこの内容への回答を生成できませんでした。入力内容をご確認ください。",
@@ -962,7 +962,7 @@ const T = {
   "io.import.c1":       { ja:"読み込むと、今この端末に入っている内容は置き換わります。", en:"Importing will replace the content currently on this device." },
   "io.import.c2":       { ja:"先に「データを書き出す」でバックアップを取っておくことをおすすめします。", en:"We recommend backing up first with Export." },
   "io.import.c3":       { ja:"続けますか？", en:"Continue?" },
-  "io.import.done":     { ja:"読み込みました。STEP 0 で接続テストを行うと、AI機能が使えるようになります。", en:"Imported. Run the connection test in STEP 0 to enable the AI features." },
+  "io.import.done":     { ja:"読み込みました。AI設定でAPIキーを入れると、AI機能が使えます。", en:"Imported. Add an API key in AI settings to enable the AI features." },
   "io.import.badfile":  { ja:"このファイルは読み込めませんでした。Resume Mirror で書き出したファイルを選んでください。", en:"Couldn't read this file. Please choose a file exported by Resume Mirror." },
   "io.import.readfail": { ja:"ファイルを読めませんでした。", en:"Couldn't read the file." },
   "io.clear.confirm":   { ja:"この端末に保存された入力内容を、すべて消去します。よろしいですか？", en:"This erases all input saved on this device. Continue?" },
@@ -974,10 +974,14 @@ const T = {
   "home.rec.lede": { ja:"進行中の仕事や気づきを残し、実績に育てます。", en:"Capture ongoing work and grow it into achievements." },
   "home.rec.new": { ja:"＋ 新しい記録", en:"＋ New record" },
   "home.rec.empty": { ja:"まだ記録がありません。今日の仕事を、将来の実績として残しましょう。", en:"No records yet. Start turning today's work into future achievements." },
-  "home.docs.head": { ja:"書類を作る", en:"Create documents" },
-  "home.docs.lede": { ja:"これまでの職務経歴書・面接シートの作成フロー。", en:"Your resume and interview-sheet flow." },
-  "home.docs.open": { ja:"書類作成を開く（STEP）", en:"Open the document flow (STEP)" },
-  "home.settings": { ja:"設定", en:"Settings" },
+  "home.docs.head": { ja:"職務経歴書をつくる", en:"Create your resume" },
+  "home.docs.lede": { ja:"応募に使う書類を、順番に仕上げていきます。", en:"Build the documents you'll use to apply, step by step." },
+  "home.docs.open": { ja:"職務経歴書・面接シートをつくる →", en:"Create resume & interview sheet →" },
+  "home.settings": { ja:"AI設定（任意）", en:"AI settings (optional)" },
+  "consent.title": { ja:"はじめる前に", en:"Before you start" },
+  "consent.body": { ja:"このツールは無料で、入力内容はあなたの端末内だけに保存されます（運営者には届きません）。AIの利用は任意で、あとから設定できます。", en:"This tool is free, and what you enter is stored only on your device (never sent to the operator). Using AI is optional and can be set up later." },
+  "consent.terms": { ja:"利用規約・プライバシーポリシー", en:"Terms of Service & Privacy Policy" },
+  "consent.continue": { ja:"同意して、つくりはじめる →", en:"Agree and start →" },
   "home.intro.title": { ja:"ホームが新しくなりました", en:"Your home screen is new" },
   "home.intro.body": { ja:"上段：日々の仕事と実績を記録／下段：これまでの職務経歴書作成STEP。既存のデータと設定はそのまま保存されています。", en:"Top: record daily work and achievements. Bottom: your existing resume-building STEPs. All your data and settings are kept." },
   "home.intro.ok": { ja:"わかりました", en:"Got it" },
@@ -1053,7 +1057,24 @@ const T = {
   "wl.filter.status": { ja:"状態で絞る", en:"Filter by status" },
   "wl.filter.job": { ja:"職歴で絞る", en:"Filter by job" },
   "wl.filter.all": { ja:"すべて", en:"All" },
-  "wl.filter.none": { ja:"条件に合う記録がありません。", en:"No records match the filter." }
+  "wl.filter.none": { ja:"条件に合う記録がありません。", en:"No records match the filter." },
+
+  "data.head": { ja:"データとバックアップ", en:"Data & backup" },
+  "data.usage": { ja:"使用量", en:"Storage used" },
+  "data.of": { ja:"約5MBの上限", en:"of ~5MB" },
+  "data.count.rec": { ja:"記録", en:"Records" },
+  "data.count.ach": { ja:"実績", en:"Achievements" },
+  "data.count.app": { ja:"応募先", en:"Applications" },
+  "data.lastexport": { ja:"最終バックアップ", en:"Last backup" },
+  "data.never": { ja:"まだ書き出していません", en:"Not exported yet" },
+  "data.export": { ja:"バックアップを書き出す", en:"Export a backup" },
+  "data.import": { ja:"バックアップを読み込む", en:"Import a backup" },
+  "data.warn70": { ja:"使用量が増えています。バックアップを書き出しておくことをおすすめします。", en:"Storage is filling up. Consider exporting a backup." },
+  "data.warn85": { ja:"容量が上限に近づいています。古い記録の整理と書き出しをおすすめします。", en:"Nearing the limit. Consider archiving old records and exporting." },
+  "data.remind": { ja:"しばらくバックアップを書き出していません。念のため書き出しをおすすめします。", en:"You haven't backed up in a while. Consider exporting one." },
+  "data.backup.exists": { ja:"取り込み前などの旧バックアップが残っています。", en:"An older backup (e.g. pre-import) is kept." },
+  "data.backup.del": { ja:"バックアップを削除", en:"Delete backup" },
+  "data.backup.del.confirm": { ja:"旧バックアップを削除します。よろしいですか？（先に現在のデータを書き出しておくと安全です）", en:"Delete the old backup. Continue? (Export current data first to be safe.)" }
 };
 function t(key){ const e=T[key]; if(!e) return key; const v=e[S.ui]; return (v!=null)?v:(e.ja!=null?e.ja:key); }
 function empLabel(v){ const e=T["emp."+v]; return e ? (e[S.ui]||e.ja) : v; }
@@ -1165,11 +1186,20 @@ function humanError(err){
   return t("err.generic");
 }
 
+function startNoKey(){
+  S.aiSkipped=true; saveNow();
+  if(S.agreed){ S.screen="app"; step=1; render(); window.scrollTo(0,0); }
+  else {
+    render();
+    try{ const a=document.querySelector(".agree"); if(a&&a.scrollIntoView) a.scrollIntoView({behavior:"smooth",block:"center"}); }catch(e){}
+  }
+}
+
 /* ============ BLOCK 3: APIキー設定画面（STEP 0） ============ */
 function viewKey(){ return S.ui==="en" ? viewKeyEN() : viewKeyJA(); }
 function viewKeyJA(){ return `
-  <div class="h2">はじめに、AIの設定をします</div>
-  <div class="lede">このツールは、あなた自身のAIアカウント（Anthropic）を使って動きます。5分ほどで準備できます。</div>
+  <div class="h2">始め方を選べます</div>
+  <div class="lede">鍵なしでも、記録と職務経歴書は作れます。AIに下書きや翻訳を任せたい人は、あとからAPIキーを足せます。</div>
 
   <div class="safe">
     <b>あなたのキーは、運営者には送られません</b>
@@ -1211,7 +1241,7 @@ function viewKeyJA(){ return `
     </div>
   </details>
 
-  <label class="f"><span>APIキー<i class="req">必須</i></span>
+  <label class="f"><span>APIキー<span style="font-weight:600;color:#64748B;margin-left:8px;font-size:12px">AIを使う場合に必要</span></span>
     <input id="keyInput" type="password" autocomplete="off" spellcheck="false"
       value="${esc(S.apiKey)}" oninput="S.apiKey=this.value.trim();S.keyVerified=false;clearMsg('keyMsg')"
       placeholder="sk-ant-... で始まる文字列を貼り付け">
@@ -1232,12 +1262,13 @@ function viewKeyJA(){ return `
   <button class="ai" onclick="testKey(this)">接続テスト</button>
   <div id="keyMsg">${S.keyVerified?'<div class="ok">✓ 接続できました。</div>':""}</div>
 
-  <div class="noai">
-    <b>AIを使わずに進めることもできます</b>
-    職務経歴書の入力・編集・PDF出力は、AIなしで利用できます。以前保存した内容を取り出したいだけの場合や、Anthropic側が使えない場合にお使いください。<br>
+  <div class="noai" style="border-color:#BBF0D8;background:#F2FBF7">
+    <b>鍵なしで、今すぐ始められます</b>
+    記録・実績・グラフ・職務経歴書・PDFは、AIなしで使えます。AIに下書きや翻訳を任せたくなったら、下でAPIキーをあとから足せます。<br>
+    <button class="ai" style="margin-top:10px" onclick="startNoKey()">鍵なしで始める →</button>
     <label class="fchkitem" style="margin-top:9px">
       <input type="checkbox" ${S.aiSkipped?"checked":""} onchange="S.aiSkipped=this.checked;saveNow();updateNav()">
-      <span>AIを使わずに進む（AIボタンは押しても動きません）</span>
+      <span>AIはあとで使う（AIボタンは、鍵を入れるまで待機します）</span>
     </label>
   </div>
 
@@ -1248,8 +1279,8 @@ function viewKeyJA(){ return `
 `;}
 
 function viewKeyEN(){ return `
-  <div class="h2">First, set up the AI</div>
-  <div class="lede">This tool runs on your own AI account (Anthropic). Setup takes about five minutes.</div>
+  <div class="h2">Choose how to start</div>
+  <div class="lede">You can record your work and build a resume without a key. If you'd like AI to draft or translate for you, add an API key anytime.</div>
 
   <div class="safe">
     <b>Your key is never sent to us</b>
@@ -1291,7 +1322,7 @@ function viewKeyEN(){ return `
     </div>
   </details>
 
-  <label class="f"><span>API key<i class="req">required</i></span>
+  <label class="f"><span>API key<span style="font-weight:600;color:#64748B;margin-left:8px;font-size:12px">for AI features</span></span>
     <input id="keyInput" type="password" autocomplete="off" spellcheck="false"
       value="${esc(S.apiKey)}" oninput="S.apiKey=this.value.trim();S.keyVerified=false;clearMsg('keyMsg')"
       placeholder="Paste the string starting with sk-ant-...">
@@ -1312,12 +1343,13 @@ function viewKeyEN(){ return `
   <button class="ai" onclick="testKey(this)">Test connection</button>
   <div id="keyMsg">${S.keyVerified?'<div class="ok">'+t("key.ok")+'</div>':""}</div>
 
-  <div class="noai">
-    <b>You can also proceed without the AI</b>
-    Entering, editing, and exporting a resume to PDF all work without the AI. Use this if you just want to retrieve something you saved earlier, or if Anthropic is unavailable.<br>
+  <div class="noai" style="border-color:#BBF0D8;background:#F2FBF7">
+    <b>Start now, without a key</b>
+    Records, achievements, charts, resume, and PDF export all work without the AI. When you'd like AI to draft or translate for you, add an API key below anytime.<br>
+    <button class="ai" style="margin-top:10px" onclick="startNoKey()">Start without a key →</button>
     <label class="fchkitem" style="margin-top:9px">
       <input type="checkbox" ${S.aiSkipped?"checked":""} onchange="S.aiSkipped=this.checked;saveNow();updateNav()">
-      <span>Proceed without the AI (AI buttons won't do anything)</span>
+      <span>Use AI later (AI buttons wait until you add a key)</span>
     </label>
   </div>
 
@@ -3697,6 +3729,8 @@ function exportData(){
     const a=document.createElement("a");
     a.href=url; a.download=`ResumeMirror_${nm}_${stamp}.json`;
     document.body.appendChild(a); a.click();
+    if(S.meta&&typeof S.meta==="object") S.meta.lastExportedAt=nowISO();
+    scheduleSave();
     setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
   }catch(e){ alert(t("io.export.fail")); }
 }
@@ -3890,15 +3924,15 @@ function drawStepJump(){
   const el=document.getElementById("stepJump"); if(!el) return;
   const unlocked = S.agreed && (S.keyVerified || S.aiSkipped);
   el.innerHTML = STEP_KEYS.map((_,i)=>{
+    if(i===0) return "";
     const cur = i===step ? " cur":"";
-    if(i===0) return `<button class="sj set${cur}" onclick="jumpStep(0)" title="${esc(stepName(0))}">${esc(t("sj.set.short"))}</button>`;
     const dis = unlocked ? "" : " dis";
     return `<button class="sj${cur}${dis}" ${unlocked?`onclick="jumpStep(${i})"`:"disabled"} title="${esc(stepName(i))}">${i}</button>`;
   }).join("");
 }
 function jumpStep(i){
-  if(i<0 || i>TOTAL-1) return;
-  if(i>0 && !(S.agreed && (S.keyVerified || S.aiSkipped))) return;   /* 設定(0)へはいつでも戻れる */
+  if(i<1 || i>TOTAL-1) return;
+  if(!(S.agreed && (S.keyVerified || S.aiSkipped))) return;
   step=i; render(); window.scrollTo(0,0);
 }
 /* keepScroll=true のとき、再描画してもスクロール位置を保つ。
@@ -3915,8 +3949,35 @@ function jobLabel(jid){ const j=(S.jobs||[]).find(x=>x&&x.id===jid); return j ? 
 function goHome(){ S.screen="home"; S.editingWorkLogId=null; scheduleSave(); render(); }
 function goApp(){ S.screen="app"; scheduleSave(); render(); }
 function goSettings(){ S.screen="app"; step=0; scheduleSave(); render(); }
+let pendingAction="resume";
+function goStart(){
+  if(!S.agreed){ pendingAction="resume"; S.screen="consent"; render(); window.scrollTo(0,0); return; }
+  if(!S.keyVerified) S.aiSkipped=true;          /* 鍵がなければ、そのまま作り始められる */
+  S.screen="app"; if(!(step>=1)) step=1; saveNow(); render(); window.scrollTo(0,0);
+}
+function consentProceed(){
+  if(!S.agreed) return;
+  saveNow();
+  if(pendingAction==="record"){ const wl=newWorkLog(); repository.addEntity("workLogs",wl); openWorkLog(wl.id); }
+  else goStart();
+}
+function viewConsent(){
+  const en=S.ui==="en";
+  const agreeLine = en
+    ? `I agree to the <a onclick="openTerms()">${t("consent.terms")}</a>`
+    : `<a onclick="openTerms()">${t("consent.terms")}</a>に同意します`;
+  return `
+    <div class="h2">${t("consent.title")}</div>
+    <div class="lede">${t("consent.body")}</div>
+    <label class="agree" style="margin-top:8px">
+      <input type="checkbox" ${S.agreed?"checked":""} onchange="S.agreed=this.checked;saveNow();render()">
+      <span>${agreeLine}</span>
+    </label>
+    <button class="ai" style="margin-top:14px" ${S.agreed?"":"disabled"} onclick="consentProceed()">${t("consent.continue")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="goHome()">${t("wl.back")}</button>`;
+}
 function openWorkLog(id){ S.editingWorkLogId=id; S.screen="worklog"; scheduleSave(); render(); }
-function createWorkLog(){ const wl=newWorkLog(); repository.addEntity("workLogs",wl); openWorkLog(wl.id); }
+function createWorkLog(){ if(!S.agreed){ pendingAction="record"; S.screen="consent"; render(); window.scrollTo(0,0); return; } const wl=newWorkLog(); repository.addEntity("workLogs",wl); openWorkLog(wl.id); }
 function dismissHomeIntro(){ if(!S.settings||typeof S.settings!=="object") S.settings={}; S.settings.homeIntroSeen=true; scheduleSave(); render(); }
 function setWlFilter(kind,val){ if(!S.wlFilter||typeof S.wlFilter!=="object") S.wlFilter={status:"",job:""}; S.wlFilter[kind]=val; scheduleSave(); render(); }
 
@@ -4005,6 +4066,31 @@ function wlSummaryHTML(){
   const parts=["active","waiting_result","candidate"].filter(s=>c[s]>0).map(s=>`${wlStatusLabel(s)} ${c[s]}`);
   return `<div class="hint" style="margin-top:6px">${parts.length?parts.join("　・　"):`${t("wl.total")} ${list.length}`}</div>`;
 }
+function storageBytes(){ try{ return JSON.stringify(S).length; }catch(e){ return 0; } }
+function backupExists(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; } }
+function deleteBackup(){ if(!confirm(t("data.backup.del.confirm"))) return; try{ localStorage.removeItem(BACKUP_KEY); }catch(e){} render(true); }
+function importPick(){ const el=document.getElementById("importFile"); if(el) el.click(); }
+function fmtWhen(iso){ if(!iso) return t("data.never"); try{ return new Date(iso).toLocaleDateString(S.ui==="en"?"en-US":"ja-JP"); }catch(e){ return iso; } }
+function dataPanelHTML(){
+  const bytes=storageBytes(); const budget=5*1024*1024;
+  const pct=Math.min(100, bytes/budget*100); const kb=(bytes/1024).toFixed(0);
+  const barColor = pct>=70 ? "#B45309" : "#059669";
+  const nRec=(S.workLogs||[]).length, nAch=(S.achievements||[]).length, nApp=(S.applications||[]).length;
+  const last=S.meta&&S.meta.lastExportedAt;
+  let stale=false; if(!last) stale=true; else { const days=(Date.now()-new Date(last).getTime())/86400000; if(days>=30) stale=true; }
+  const warn = pct>=85 ? `<div class="note">${t("data.warn85")}</div>` : (pct>=70 ? `<div class="note">${t("data.warn70")}</div>` : "");
+  const remind = (stale && !warn) ? `<div class="hint" style="color:#B45309">${t("data.remind")}</div>` : "";
+  return `
+    <div class="sechead" style="margin-top:26px">${t("data.head")}</div>
+    <div style="font-size:13px;margin-bottom:6px">${t("data.usage")}：<b>${kb} KB</b>（${pct.toFixed(1)}% ${t("data.of")}）</div>
+    <div style="height:8px;border-radius:5px;background:#EEF2F7;overflow:hidden;margin-bottom:8px"><i style="display:block;height:100%;width:${pct.toFixed(1)}%;background:${barColor}"></i></div>
+    <div class="hint">${t("data.count.rec")} ${nRec}　・　${t("data.count.ach")} ${nAch}　・　${t("data.count.app")} ${nApp}</div>
+    <div class="hint">${t("data.lastexport")}：${fmtWhen(last)}</div>
+    ${warn}${remind}
+    <button class="ai" style="margin-top:10px" onclick="exportData()">${t("data.export")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="importPick()">${t("data.import")}</button>
+    ${backupExists()?`<div class="hint" style="margin-top:12px">${t("data.backup.exists")} <button onclick="deleteBackup()" style="width:auto;padding:4px 10px;margin-left:6px">${t("data.backup.del")}</button></div>`:""}`;
+}
 function viewHome(){
   const all=(S.workLogs||[]);
   const f=S.wlFilter||{status:"",job:""};
@@ -4051,8 +4137,10 @@ function viewHome(){
 
     <div class="sechead" style="margin-top:26px">${t("home.docs.head")}</div>
     <div class="secnote">${t("home.docs.lede")}</div>
-    <button class="ai" onclick="goApp()">${t("home.docs.open")}</button>
-    <button class="ai sub" style="margin-top:8px" onclick="goSettings()">${t("home.settings")}</button>`;
+    <button class="ai" onclick="goStart()">${t("home.docs.open")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="goSettings()">${t("home.settings")}</button>
+
+    ${dataPanelHTML()}`;
 }
 function viewWorkLogEdit(){
   const w=wlFind(S.editingWorkLogId);
@@ -4136,10 +4224,14 @@ function viewWorkLogEdit(){
 function render(keepScroll){
   if(migrationFailed) return;
   const setDisp=(id,show)=>{ const el=document.getElementById(id); if(el) el.style.display = show?"":"none"; };
-  if(S.screen==="home" || S.screen==="worklog"){
+  const settingsMode = (S.screen==="app" && step===0);
+  if(S.screen==="home" || S.screen==="worklog" || S.screen==="consent" || settingsMode){
     const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : 0;
     setDisp("stepLabel",false); setDisp("stepBar",false); setDisp("stepJump",false); setDisp("mainNav",false);
-    main.innerHTML = (S.screen==="worklog") ? viewWorkLogEdit() : viewHome();
+    main.innerHTML = S.screen==="worklog" ? viewWorkLogEdit()
+                   : S.screen==="consent" ? viewConsent()
+                   : settingsMode ? VIEWS[0]()
+                   : viewHome();
     growAll();
     if(keepScroll){ window.scrollTo(0,y); requestAnimationFrame(()=>window.scrollTo(0,y)); }
     else window.scrollTo(0,0);
@@ -4149,7 +4241,7 @@ function render(keepScroll){
   const y = keepScroll ? (window.scrollY || window.pageYOffset || 0) : null;
   document.getElementById("stepName").textContent=stepName(step);
   document.getElementById("stepCount").textContent=`STEP ${step} / ${TOTAL-1}`;
-  document.getElementById("barFill").style.width=`${((step+1)/TOTAL)*100}%`;
+  document.getElementById("barFill").style.width=`${(step/(TOTAL-1))*100}%`;
   main.innerHTML=VIEWS[step]();
   growAll(); updateNav(); drawStepJump();
   if(y!==null){
@@ -4159,16 +4251,16 @@ function render(keepScroll){
 }
 function updateNav(){
   const back=document.getElementById("backBtn"), next=document.getElementById("nextBtn");
-  back.style.visibility = step===0 ? "hidden":"visible";
+  back.style.visibility = step<=1 ? "hidden":"visible";
   back.textContent = t("nav.back");
   if(step===TOTAL-1){ next.style.display="none"; }
   else { next.style.display=""; next.textContent = step===7 ? t("nav.next.prep") : (step===8 ? t("nav.next.sheet") : t("nav.next")); }
-  next.disabled = (step===0 && !(S.agreed && (S.keyVerified || S.aiSkipped)));
+  next.disabled = false;
 }
 function go(dir){
   if(dir>0 && step>=TOTAL-1) return;
   if(dir>0) step++;
-  else if(dir<0 && step>0) step--;
+  else if(dir<0 && step>1) step--;
   render(); window.scrollTo(0,0);
 }
 function setLoading(btn,on,label){
