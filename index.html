@@ -444,13 +444,13 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span id="savedAt">この端末に自動保存されます</span><span class="ver" id="verTag">v48</span></span>
+    <span class="st"><span class="stinfo"><span id="savedAt">この端末に自動保存されます</span><span id="modeBadge" style="margin-left:6px;font-weight:700"></span></span><span class="ver" id="verTag">v49</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
       <button id="btnExport" onclick="exportData()">書き出し</button>
       <button id="btnImport" onclick="document.getElementById('importFile').click()">読み込み</button>
-      <button id="btnTips" onclick="openTips()">利用料</button>
+      <button id="btnTips" onclick="goSettings()">AI設定</button>
       <button id="btnTerms" onclick="openTerms()">規約</button>
       <button id="btnClear" class="danger" onclick="clearAll()">保存を消去</button>
     </div>
@@ -503,6 +503,7 @@ const T = {
   "sb.export":  { ja:"書き出し", en:"Export" },
   "sb.import":  { ja:"読み込み", en:"Import" },
   "sb.cost":    { ja:"利用料",   en:"Cost" },
+  "sb.aiset":   { ja:"AI設定",   en:"AI settings" },
   "sb.terms":   { ja:"規約",     en:"Terms" },
   "sb.clear":   { ja:"保存を消去", en:"Clear data" },
   "sj.set.short": { ja:"設定", en:"Setup" },
@@ -1092,7 +1093,7 @@ function applyChrome(){
   const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
   set("btnExport", t("sb.export"));
   set("btnImport", t("sb.import"));
-  set("btnTips",   t("sb.cost"));
+  set("btnTips",   t("sb.aiset"));
   set("btnTerms",  t("sb.terms"));
   set("btnClear",  t("sb.clear"));
   set("homeBtn",   t("home.btn"));
@@ -1230,6 +1231,7 @@ function viewKeyJA(){ return `
         <small>成功すれば準備完了です。</small>
       </div></div>
       <div class="note"><b>費用の目安</b><br>文章の生成1回につき、おおよそ数円程度です（モデルと文量によります）。職務経歴書を1通仕上げても、数十円に収まるのが一般的です。正確な料金は Anthropic Console でご確認ください。残高を使い切ればそれ以上は課金されません。</div>
+      <div class="hint" style="margin-top:6px"><a onclick="openTips()">利用料と残高の確認方法 ›</a></div>
       <dl class="faq">
         <dt>Claudeの月額プランに入っていれば使えますか？</dt>
         <dd>いいえ。月額プラン（Claude Pro等）とAPIの残高は別会計です。Console側で残高の追加が必要です。</dd>
@@ -1311,6 +1313,7 @@ function viewKeyEN(){ return `
         <small>If it succeeds, you're ready.</small>
       </div></div>
       <div class="note"><b>Cost guide</b><br>Each text generation costs roughly a few cents (depending on model and length). Finishing a full resume usually stays within a few tens of cents. For exact pricing, check the Anthropic Console. Once your balance runs out, nothing more is charged.</div>
+      <div class="hint" style="margin-top:6px"><a onclick="openTips()">How to check cost &amp; balance ›</a></div>
       <dl class="faq">
         <dt>If I have a monthly Claude plan, can I use that?</dt>
         <dd>No. A monthly plan (such as Claude Pro) and API credit are billed separately. You need to add credit on the Console side.</dd>
@@ -1368,7 +1371,7 @@ async function testKey(btn){
     S.keyVerified=true;
     zone.innerHTML=`<div class="ok">${esc(t("key.ok"))}</div>`;
   }catch(err){ S.keyVerified=false; zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
-  setLoading(btn,false); updateNav();
+  setLoading(btn,false); updateNav(); updateModeBadge();
 }
 
 /* ============ BLOCK 5: 入力ステップの画面 ============ */
@@ -3705,12 +3708,21 @@ async function restore(){
     migrationFailed=true; showMigrationError([String((e&&e.message)||e)]);
   }
 }
+function modeBadgeHTML(){
+  const en=S.ui==="en";
+  if(S.keyVerified) return `<span style="color:#059669">・${en?"AI on":"AI接続済み"}</span>`;
+  if(S.apiKey) return `<span onclick="goSettings()" style="cursor:pointer;text-decoration:underline">・${en?"key saved — test to enable":"キー保存済み（接続テストで有効化）"}</span>`;
+  return `<span onclick="goSettings()" style="cursor:pointer;text-decoration:underline">・${en?"No AI — add key":"AIなし（鍵を追加）"}</span>`;
+}
+function updateModeBadge(){ const el=document.getElementById("modeBadge"); if(el) el.innerHTML=modeBadgeHTML(); }
+
 function showSaved(ts){
   lastSavedAt = ts;
   const el=document.getElementById("savedAt"); if(!el) return;
   const d=new Date(ts);
   const hhmm = `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
   el.textContent = t("saved.pre") + hhmm + t("saved.suf");
+  updateModeBadge();
 }
 /* ---- データの書き出し／読み込み ----
    PDFを解析して読み戻すのは高くつき精度も出ないため、最初から読み戻せる形（JSON）で書き出す。
@@ -4223,6 +4235,7 @@ function viewWorkLogEdit(){
 
 function render(keepScroll){
   if(migrationFailed) return;
+  updateModeBadge();
   const setDisp=(id,show)=>{ const el=document.getElementById(id); if(el) el.style.display = show?"":"none"; };
   const settingsMode = (S.screen==="app" && step===0);
   if(S.screen==="home" || S.screen==="worklog" || S.screen==="consent" || settingsMode){
