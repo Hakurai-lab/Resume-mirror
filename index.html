@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span class="stinfo"><span id="savedAt">この端末に自動保存されます</span><span id="modeBadge" style="margin-left:6px;font-weight:700"></span></span><span class="ver" id="verTag">v49</span></span>
+    <span class="st"><span class="stinfo"><span id="savedAt">この端末に自動保存されます</span><span id="modeBadge" style="margin-left:6px;font-weight:700"></span></span><span class="ver" id="verTag">v51</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -504,6 +504,13 @@ const T = {
   "sb.import":  { ja:"読み込み", en:"Import" },
   "sb.cost":    { ja:"利用料",   en:"Cost" },
   "sb.aiset":   { ja:"AI設定",   en:"AI settings" },
+  "aiclose.head": { ja:"ここまでの実績、AIでさらに伝わる形にできます。", en:"Your achievements are ready — AI can make them land even better." },
+  "aiclose.body": { ja:"職務要約・自己PRの下書き、実績の整え、日英翻訳をAIに任せられます。いま作った実績は、そのまま活かせます。", en:"Let AI draft your summary and self-PR, polish achievements, and translate — building on what you've already made." },
+  "aiclose.point1": { ja:"最初の1回は数円ほど。残高の上限は自分で決められます。", en:"The first run costs about a few yen. You set your own spending cap." },
+  "aiclose.point2": { ja:"APIキーはあなたの端末にだけ保存され、運営には届きません。", en:"Your API key is stored only on your device — never sent to us." },
+  "aiclose.point3": { ja:"登録はGoogleアカウントで数十秒。あとから設定しても構いません。", en:"Sign up with Google in under a minute — or set it up later." },
+  "aiclose.cta": { ja:"この実績を、伝わる強みに変える →", en:"Turn these into stronger points →" },
+  "aiclose.skip": { ja:"このままAIなしで続ける", en:"Keep going without AI" },
   "sb.terms":   { ja:"規約",     en:"Terms" },
   "sb.clear":   { ja:"保存を消去", en:"Clear data" },
   "sj.set.short": { ja:"設定", en:"Setup" },
@@ -932,7 +939,7 @@ const T = {
   "sheet.mainangle": { ja:"主軸の語り口：", en:"Main angle: " },
   "sheet.backup.pre": { ja:"補強の弾薬 ", en:"" },
   "sheet.backup.suf": { ja:"件", en:" backup angle(s)" },
-  "sheet.noangle":   { ja:"先にSTEP 7で語り口を選んでください。", en:"Choose an angle in STEP 7 first." },
+  "sheet.noangle":   { ja:"先にSTEP 8で語り口を選んでください。", en:"Choose an angle in STEP 8 first." },
   "sheet.stale.title": { ja:"この面接シートは、変更前の内容で作られています。", en:"This interview sheet was built from earlier content." },
   "sheet.stale.body":  { ja:"求人情報・実績・語り口のいずれかが、シート作成後に変更されました。今の内容に合わせるには、作り直してください。", en:"The job info, achievements, or angle changed after the sheet was built. Rebuild it to match the current content." },
   "sheet.build":      { ja:"シートを作成する", en:"Build the sheet" },
@@ -1946,7 +1953,8 @@ function normalizePatterns(arr){
 
 async function makePatterns(btn){
   const zone=document.getElementById("patMsg");
-  if(!S.story.achv.some(a=>(a.what||"").trim())){ zone.innerHTML=`<div class="ng">${esc(t("pg.msg.needach"))}</div>`; return; }
+  const _ach=selectedAch();
+  if(!((_ach&&_ach.length) || S.story.achv.some(a=>(a.what||"").trim()))){ zone.innerHTML=`<div class="ng">${esc(t("pg.msg.needach"))}</div>`; return; }
   if(Object.keys(S.story.sheet||{}).length){
     if(!confirm(t("pg.confirm.remake"))) return;
   }
@@ -2239,6 +2247,7 @@ function viewDoc(){
   return `
   <div class="h2">${t("doc.h2")}</div>
   <div class="lede">${t("doc.lede")}</div>
+  ${aiCloseCardHTML()}
   <div class="tabs">
     <button class="tab ${tab==="preview"?"on":""}" onclick="setDocTab('preview')">${t("doc.tab.preview")}</button>
     <button class="tab ${tab==="charts"?"on":""}" onclick="setDocTab('charts')">${t("doc.tab.charts")}${n?`（${n}）`:""}</button>
@@ -2630,6 +2639,7 @@ function viewLibrary(){
   <div class="h2">${t("lib.h2")}</div>
   <div class="lede">${t("lib.lede")}</div>
   <div class="note">${t("lib.note")}</div>
+  ${aiCloseCardHTML()}
 
   ${cands.length?`
   <div class="impbox">
@@ -4078,6 +4088,25 @@ function wlSummaryHTML(){
   const parts=["active","waiting_result","candidate"].filter(s=>c[s]>0).map(s=>`${wlStatusLabel(s)} ${c[s]}`);
   return `<div class="hint" style="margin-top:6px">${parts.length?parts.join("　・　"):`${t("wl.total")} ${list.length}`}</div>`;
 }
+function aiCloseCardHTML(){
+  if(S.keyVerified) return "";                          /* 既にAI接続済み */
+  if(!((S.achievements||[]).length)) return "";         /* 実績がまだ無い＝勧めない（空では出さない） */
+  if(S.settings && S.settings.aiCloseDismissed) return "";
+  return `
+  <div class="card" style="border:1px solid #C9B8F0;background:linear-gradient(160deg,rgba(124,58,237,.06),rgba(5,150,105,.05));margin-bottom:16px">
+    <b style="font-size:14.5px">${t("aiclose.head")}</b>
+    <div class="hint" style="margin:6px 0 2px">${t("aiclose.body")}</div>
+    <ul style="margin:8px 0 0;padding-left:18px;font-size:12.5px;color:#475569;line-height:1.75">
+      <li>${t("aiclose.point1")}</li>
+      <li>${t("aiclose.point2")}</li>
+      <li>${t("aiclose.point3")}</li>
+    </ul>
+    <button class="ai" style="margin-top:12px" onclick="goSettings()">${t("aiclose.cta")}</button>
+    <button class="ai sub" style="margin-top:8px" onclick="dismissAiClose()">${t("aiclose.skip")}</button>
+  </div>`;
+}
+function dismissAiClose(){ if(!S.settings||typeof S.settings!=="object") S.settings={}; S.settings.aiCloseDismissed=true; scheduleSave(); render(true); }
+
 function storageBytes(){ try{ return JSON.stringify(S).length; }catch(e){ return 0; } }
 function backupExists(){ try{ return !!localStorage.getItem(BACKUP_KEY); }catch(e){ return false; } }
 function deleteBackup(){ if(!confirm(t("data.backup.del.confirm"))) return; try{ localStorage.removeItem(BACKUP_KEY); }catch(e){} render(true); }
