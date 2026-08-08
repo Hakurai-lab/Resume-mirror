@@ -1,2 +1,2 @@
 # Resume-mirror
-Resume mirrorのMVPです
+Resume mirror_MVP
