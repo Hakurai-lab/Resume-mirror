@@ -444,7 +444,7 @@
     <div class="stepjump" id="stepJump"></div>
   </header>
   <div class="savebar">
-    <span class="st"><span class="stinfo"><span id="savedAt">この端末に自動保存されます</span><span id="modeBadge" style="margin-left:6px;font-weight:700"></span></span><span class="ver" id="verTag">v51</span></span>
+    <span class="st"><span class="stinfo"><span id="savedAt">この端末に自動保存されます</span><span id="modeBadge" style="margin-left:6px;font-weight:700"></span></span><span class="ver" id="verTag">v52</span></span>
     <div class="sbbtns">
       <button id="homeBtn" onclick="goHome()">ホーム</button>
       <button id="langBtn" onclick="toggleUI()">English</button>
@@ -1205,9 +1205,21 @@ function startNoKey(){
 
 /* ============ BLOCK 3: APIキー設定画面（STEP 0） ============ */
 function viewKey(){ return S.ui==="en" ? viewKeyEN() : viewKeyJA(); }
+function keyProgressHTML(){
+  const en=S.ui==="en";
+  const has=!!(S.apiKey||"").trim();
+  const done=[has,has,S.keyVerified];
+  const labs=en?["Sign up","Paste key","Connect"]:["登録","貼る","接続"];
+  const cell=(d,i)=>`<div style="flex:1;text-align:center;min-width:0">
+    <div style="width:26px;height:26px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:12px;background:${d?"rgba(5,150,105,.12)":"#F1F4F9"};color:${d?"#059669":"#94A3B8"};border:1px solid ${d?"#BBF0D8":"#E3E7EE"}">${d?"\u2713":i+1}</div>
+    <div style="font-size:11px;margin-top:5px;color:${d?"#059669":"#94A3B8"};font-weight:700">${labs[i]}</div></div>`;
+  const bar=`<div style="flex:0 0 20px;height:2px;background:#E3E7EE;margin-top:12px"></div>`;
+  return `<div style="display:flex;align-items:flex-start;margin:4px 0 16px">${cell(done[0],0)}${bar}${cell(done[1],1)}${bar}${cell(done[2],2)}</div>`;
+}
 function viewKeyJA(){ return `
-  <div class="h2">始め方を選べます</div>
-  <div class="lede">鍵なしでも、記録と職務経歴書は作れます。AIに下書きや翻訳を任せたい人は、あとからAPIキーを足せます。</div>
+  <div class="h2">AIを設定する</div>
+  <div class="lede">AIに下書きや翻訳を任せるための設定です。3つのステップで完了します。</div>
+  ${keyProgressHTML()}
 
   <div class="safe">
     <b>あなたのキーは、運営者には送られません</b>
@@ -1262,34 +1274,29 @@ function viewKeyJA(){ return `
       <div style="margin-top:4px">保存すると、APIキーはこのブラウザ内に<b>暗号化されずに</b>保存されます。共用端末や業務端末では、チェックを外したままにしてください。</div>
     </div>
   </label>
+  <details class="guide"><summary>詳細設定（モデルの変更）</summary><div class="gbody">
   <label class="f"><span>使用するモデル</span>
     <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
       ${Object.keys(MODELS).map(k=>`<option value="${k}" ${S.model===k?"selected":""}>${t("model."+k)}</option>`).join("")}
     </select>
-    <div class="hint">迷ったら「標準」のままで大丈夫です。</div>
+    <div class="hint">迷ったら「標準」のままで大丈夫です。既定でおすすめのモデルが選ばれています。</div>
   </label>
+  </div></details>
   <button class="ai" onclick="testKey(this)">接続テスト</button>
   <div id="keyMsg">${S.keyVerified?'<div class="ok">✓ 接続できました。</div>':""}</div>
 
-  <div class="noai" style="border-color:#BBF0D8;background:#F2FBF7">
-    <b>鍵なしで、今すぐ始められます</b>
-    記録・実績・グラフ・職務経歴書・PDFは、AIなしで使えます。AIに下書きや翻訳を任せたくなったら、下でAPIキーをあとから足せます。<br>
-    <button class="ai" style="margin-top:10px" onclick="startNoKey()">鍵なしで始める →</button>
-    <label class="fchkitem" style="margin-top:9px">
-      <input type="checkbox" ${S.aiSkipped?"checked":""} onchange="S.aiSkipped=this.checked;saveNow();updateNav()">
-      <span>AIはあとで使う（AIボタンは、鍵を入れるまで待機します）</span>
-    </label>
-  </div>
 
   <label class="agree">
     <input type="checkbox" ${S.agreed?"checked":""} onchange="S.agreed=this.checked;saveNow();updateNav()">
     <span><a onclick="openTerms()">利用規約・プライバシーポリシー</a>を読み、同意します。</span>
   </label>
+  <div class="hint" style="text-align:center;margin-top:20px"><a onclick="goHome()">AIは今はやめておく →</a></div>
 `;}
 
 function viewKeyEN(){ return `
-  <div class="h2">Choose how to start</div>
-  <div class="lede">You can record your work and build a resume without a key. If you'd like AI to draft or translate for you, add an API key anytime.</div>
+  <div class="h2">Set up AI</div>
+  <div class="lede">Set up AI to draft and translate for you — it takes three steps.</div>
+  ${keyProgressHTML()}
 
   <div class="safe">
     <b>Your key is never sent to us</b>
@@ -1344,29 +1351,23 @@ function viewKeyEN(){ return `
       <div style="margin-top:4px">If saved, the API key is stored <b>unencrypted</b> in this browser. On a shared or work device, leave this unchecked.</div>
     </div>
   </label>
+  <details class="guide"><summary>Advanced (change model)</summary><div class="gbody">
   <label class="f"><span>Model to use</span>
     <select onchange="S.model=this.value;S.keyVerified=false;clearMsg('keyMsg')">
       ${Object.keys(MODELS).map(k=>`<option value="${k}" ${S.model===k?"selected":""}>${t("model."+k)}</option>`).join("")}
     </select>
-    <div class="hint">If unsure, "Standard" is fine.</div>
+    <div class="hint">If unsure, "Standard" is fine — the recommended model is selected by default.</div>
   </label>
+  </div></details>
   <button class="ai" onclick="testKey(this)">Test connection</button>
   <div id="keyMsg">${S.keyVerified?'<div class="ok">'+t("key.ok")+'</div>':""}</div>
 
-  <div class="noai" style="border-color:#BBF0D8;background:#F2FBF7">
-    <b>Start now, without a key</b>
-    Records, achievements, charts, resume, and PDF export all work without the AI. When you'd like AI to draft or translate for you, add an API key below anytime.<br>
-    <button class="ai" style="margin-top:10px" onclick="startNoKey()">Start without a key →</button>
-    <label class="fchkitem" style="margin-top:9px">
-      <input type="checkbox" ${S.aiSkipped?"checked":""} onchange="S.aiSkipped=this.checked;saveNow();updateNav()">
-      <span>Use AI later (AI buttons wait until you add a key)</span>
-    </label>
-  </div>
 
   <label class="agree">
     <input type="checkbox" ${S.agreed?"checked":""} onchange="S.agreed=this.checked;saveNow();updateNav()">
     <span>I have read and agree to the <a onclick="openTerms()">Terms of Service and Privacy Policy</a>.</span>
   </label>
+  <div class="hint" style="text-align:center;margin-top:20px"><a onclick="goHome()">Skip AI for now →</a></div>
 `;}
 
 async function testKey(btn){
@@ -1378,7 +1379,7 @@ async function testKey(btn){
     S.keyVerified=true;
     zone.innerHTML=`<div class="ok">${esc(t("key.ok"))}</div>`;
   }catch(err){ S.keyVerified=false; zone.innerHTML=`<div class="ng">${esc(humanError(err))}</div>`; }
-  setLoading(btn,false); updateNav(); updateModeBadge();
+  setLoading(btn,false); updateNav(); updateModeBadge(); if(S.keyVerified) render(true);
 }
 
 /* ============ BLOCK 5: 入力ステップの画面 ============ */
